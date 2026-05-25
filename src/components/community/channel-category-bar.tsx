@@ -1,5 +1,4 @@
-"use client";
-
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = [
@@ -11,19 +10,13 @@ const CATEGORIES = [
   { key: "collab", label: "合作" },
 ] as const;
 
-export function ChannelCategoryBar({
-  active = "all",
-  onChange,
-}: {
-  active?: string;
-  onChange?: (key: string) => void;
-}) {
+export function ChannelCategoryBar({ active = "all" }: { active?: string }) {
   return (
     <nav className="flex gap-1.5 overflow-x-auto px-6 py-3 sm:px-8">
       {CATEGORIES.map((cat) => (
-        <button
+        <Link
           key={cat.key}
-          onClick={() => onChange?.(cat.key)}
+          href={cat.key === "all" ? "/community" : `/community?category=${cat.key}`}
           className={cn(
             "shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
             active === cat.key
@@ -32,7 +25,7 @@ export function ChannelCategoryBar({
           )}
         >
           {cat.label}
-        </button>
+        </Link>
       ))}
     </nav>
   );
