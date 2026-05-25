@@ -1,12 +1,25 @@
 import { prisma } from "@/lib/db";
+import type {
+  CommunityOverviewData,
+  CommunityStats,
+  ChannelOverview,
+  PostOverview,
+  CreatorOverview,
+  TagOverview,
+} from "@/types/community";
 
-export async function getCommunityStats() {
-  const [channelCount, postCount, userCount] = await Promise.all([
-    prisma.channel.count(),
-    prisma.post.count(),
-    prisma.user.count(),
-  ]);
-  return { channelCount, postCount, userCount };
+export async function getCommunityStats(): Promise<CommunityStats> {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const [channelCount, postCount, creatorCount, todayPostCount] =
+    await Promise.all([
+      prisma.channel.count(),
+      prisma.post.count(),
+      prisma.user.count(),
+      prisma.post.count({ where: { createdAt: { gte: todayStart } } }),
+    ]);
+  return { channelCount, postCount, creatorCount, todayPostCount };
 }
 
 export async function getPopularChannels(limit = 8) {
@@ -103,7 +116,7 @@ export async function getActiveCreators(limit = 6) {
   });
 }
 
-export async function getPopularTags(limit = 12) {
+export async function getPopularTags(limit = 12): Promise<TagOverview[]> {
   const collabs = await prisma.collaboration.findMany({
     where: { tags: { isEmpty: false } },
     select: { tags: true },
@@ -120,4 +133,118 @@ export async function getPopularTags(limit = 12) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([tag, count]) => ({ tag, count }));
+}
+
+export async function getAllChannels(): Promise<ChannelOverview[]> {
+  const rows = await prisma.channel.findMany({
+    orderBy: { createdAt: "asc" },
+    include: {
+      _count: { select: { posts: true, members: true } },
+      posts: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: {
+          id: true,
+          title: true,
+          createdAt: true,
+          author: { select: { name: true } },
+        },
+      },
+    },
+  });
+
+  return rows.map((ch) => ({
+    id: ch.id,
+    slug: ch.slug,
+    name: ch.name,
+    description: ch.description,
+    icon: ch.icon,
+    color: ch.color,
+    postCount: ch._count.posts,
+    memberCount: ch._count.members,
+    latestPost: ch.posts[0]
+      ? {
+          id: ch.posts[0].id,
+          title: ch.posts[0].title,
+          createdAt: ch.posts[0].createdAt.toISOString(),
+          authorName: ch.posts[0].author.name,
+        }
+      : null,
+  }));
+}
+
+function toPostOverview(post: Awaited<ReturnType<typeof getLatestPosts>>[number]): PostOverview {
+  return {
+    id: post.id,
+    title: post.title,
+    contentPreview: post.content.length > 120 ? post.content.slice(0, 120) + "…" : post.content,
+    type: post.type,
+    videoUrl: post.videoUrl,
+    imageUrl: post.imageUrl,
+    views: post.views,
+    likeCount: post.likeCount,
+    commentCount: post.commentCount,
+    bookmarkCount: post.bookmarkCount,
+    pinned: post.pinned,
+    createdAt: (post.createdAt instanceof Date ? post.createdAt : new Date(post.createdAt)).toISOString(),
+    author: post.author,
+    channel: post.channel!,
+  };
+}
+
+function toCreatorOverview(user: Awaited<ReturnType<typeof getActiveCreators>>[number]): CreatorOverview {
+  return {
+    id: user.id,
+    name: user.name,
+    username: user.username,
+    avatar: user.avatar,
+    bio: user.bio,
+    industryRole: user.industryRole,
+    postCount: user._count.posts,
+    workCount: user._count.works,
+  };
+}
+
+function toChannelOverview(ch: Awaited<ReturnType<typeof getPopularChannels>>[number]): ChannelOverview {
+  return {
+    id: ch.id,
+    slug: ch.slug,
+    name: ch.name,
+    description: ch.description,
+    icon: ch.icon,
+    color: ch.color,
+    postCount: ch._count.posts,
+    memberCount: ch._count.members,
+    latestPost: ch.posts[0]
+      ? {
+          id: ch.posts[0].id,
+          title: ch.posts[0].title,
+          createdAt: ch.posts[0].createdAt.toISOString(),
+          authorName: ch.posts[0].author.name,
+        }
+      : null,
+  };
+}
+
+export async function getCommunityOverview(): Promise<CommunityOverviewData> {
+  const [stats, channels, hotChannels, latestPosts, hotPosts, creators, tags] =
+    await Promise.all([
+      getCommunityStats(),
+      getAllChannels(),
+      getPopularChannels(),
+      getLatestPosts(),
+      getHotPosts(),
+      getActiveCreators(),
+      getPopularTags(),
+    ]);
+
+  return {
+    stats,
+    channels,
+    hotChannels: hotChannels.map(toChannelOverview),
+    latestPosts: latestPosts.map(toPostOverview),
+    hotPosts: hotPosts.map(toPostOverview),
+    activeCreators: creators.map(toCreatorOverview),
+    tags,
+  };
 }

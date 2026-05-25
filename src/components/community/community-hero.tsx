@@ -1,18 +1,21 @@
-import { Hash, MessageSquare, Users } from "lucide-react";
+import { CalendarPlus, Hash, MessageSquare, Users } from "lucide-react";
 
 export function CommunityHero({
   channelCount,
   postCount,
-  userCount,
+  creatorCount,
+  todayPostCount,
 }: {
   channelCount: number;
   postCount: number;
-  userCount: number;
+  creatorCount: number;
+  todayPostCount: number;
 }) {
   const stats = [
     { icon: Hash, label: "频道", value: channelCount },
     { icon: MessageSquare, label: "帖子", value: postCount },
-    { icon: Users, label: "成员", value: userCount },
+    { icon: Users, label: "创作者", value: creatorCount },
+    { icon: CalendarPlus, label: "今日新帖", value: todayPostCount },
   ];
 
   return (

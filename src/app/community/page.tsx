@@ -40,7 +40,8 @@ export default async function CommunityPage({
       <CommunityHero
         channelCount={stats.channelCount}
         postCount={stats.postCount}
-        userCount={stats.userCount}
+        creatorCount={stats.creatorCount}
+        todayPostCount={stats.todayPostCount}
       />
 
       <ChannelCategoryBar active={activeCategory} />
