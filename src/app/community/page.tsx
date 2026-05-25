@@ -2,7 +2,7 @@ import { CommunityHero } from "@/components/community/community-hero";
 import { ChannelCategoryBar } from "@/components/community/channel-category-bar";
 import { ChannelGrid } from "@/components/community/channel-grid";
 import { PopularChannelGrid } from "@/components/community/popular-channel-grid";
-import { LatestDiscussionList } from "@/components/community/latest-discussion-list";
+import { LatestPostList } from "@/components/community/latest-post-list";
 import { HotPostList } from "@/components/community/hot-post-list";
 import { CommunityStatsCard } from "@/components/community/community-stats-card";
 import { SidebarCreators } from "@/components/community/sidebar-creators";
@@ -51,7 +51,7 @@ export default async function CommunityPage({
         <div className="min-w-0 flex-1 space-y-8">
           <ChannelGrid channels={allChannels} />
           <PopularChannelGrid channels={channels} />
-          <LatestDiscussionList posts={latestPosts} />
+          <LatestPostList posts={latestPosts} />
           <HotPostList posts={hotPosts} />
         </div>
 
