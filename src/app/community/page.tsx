@@ -8,7 +8,7 @@ import { TagCloud } from "@/components/community/tag-cloud";
 import { QuickPublishButton } from "@/components/community/quick-publish-button";
 import {
   getCommunityStats,
-  getPopularChannels,
+  getHotChannels,
   getLatestPosts,
   getHotPosts,
   getActiveCreators,
@@ -28,7 +28,7 @@ export default async function CommunityPage({
   const [stats, channels, latestPosts, hotPosts, creators, tags] =
     await Promise.all([
       getCommunityStats(),
-      getPopularChannels(),
+      getHotChannels(),
       getLatestPosts(),
       getHotPosts(),
       getActiveCreators(),

@@ -22,9 +22,9 @@ export async function getCommunityStats(): Promise<CommunityStats> {
   return { channelCount, postCount, creatorCount, todayPostCount };
 }
 
-export async function getPopularChannels(limit = 8) {
+export async function getHotChannels(limit = 6) {
   return prisma.channel.findMany({
-    orderBy: { members: { _count: "desc" } },
+    orderBy: { posts: { _count: "desc" } },
     take: limit,
     include: {
       _count: { select: { posts: true, members: true } },
@@ -42,7 +42,7 @@ export async function getPopularChannels(limit = 8) {
   });
 }
 
-export async function getLatestPosts(limit = 6) {
+export async function getLatestPosts(limit = 8) {
   return prisma.post.findMany({
     orderBy: { createdAt: "desc" },
     take: limit,
@@ -69,14 +69,13 @@ export async function getLatestPosts(limit = 6) {
   });
 }
 
-export async function getHotPosts(limit = 5, days = 7) {
+export async function getHotPosts(limit = 6, days = 7) {
   const since = new Date();
   since.setDate(since.getDate() - days);
 
-  return prisma.post.findMany({
+  const posts = await prisma.post.findMany({
     where: { createdAt: { gte: since } },
-    orderBy: [{ likeCount: "desc" }, { views: "desc" }],
-    take: limit,
+    take: 50,
     select: {
       id: true,
       title: true,
@@ -98,6 +97,14 @@ export async function getHotPosts(limit = 5, days = 7) {
       },
     },
   });
+
+  return posts
+    .sort((a, b) => {
+      const scoreA = a.likeCount + a.commentCount + a.bookmarkCount;
+      const scoreB = b.likeCount + b.commentCount + b.bookmarkCount;
+      return scoreB - scoreA;
+    })
+    .slice(0, limit);
 }
 
 export async function getActiveCreators(limit = 6) {
@@ -116,6 +123,21 @@ export async function getActiveCreators(limit = 6) {
   });
 }
 
+const DEFAULT_TAGS: TagOverview[] = [
+  { tag: "AI视频", count: 0 },
+  { tag: "Seedance", count: 0 },
+  { tag: "AI漫剧", count: 0 },
+  { tag: "AI短剧", count: 0 },
+  { tag: "数字人", count: 0 },
+  { tag: "ComfyUI", count: 0 },
+  { tag: "提示词", count: 0 },
+  { tag: "Runway", count: 0 },
+  { tag: "电商广告", count: 0 },
+  { tag: "教程", count: 0 },
+  { tag: "合作", count: 0 },
+  { tag: "工作流", count: 0 },
+];
+
 export async function getPopularTags(limit = 12): Promise<TagOverview[]> {
   const collabs = await prisma.collaboration.findMany({
     where: { tags: { isEmpty: false } },
@@ -129,10 +151,12 @@ export async function getPopularTags(limit = 12): Promise<TagOverview[]> {
     }
   }
 
-  return Array.from(tagCount.entries())
+  const dbTags = Array.from(tagCount.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([tag, count]) => ({ tag, count }));
+
+  return dbTags.length > 0 ? dbTags : DEFAULT_TAGS.slice(0, limit);
 }
 
 export async function getAllChannels(): Promise<ChannelOverview[]> {
@@ -205,7 +229,7 @@ function toCreatorOverview(user: Awaited<ReturnType<typeof getActiveCreators>>[n
   };
 }
 
-function toChannelOverview(ch: Awaited<ReturnType<typeof getPopularChannels>>[number]): ChannelOverview {
+function toChannelOverview(ch: Awaited<ReturnType<typeof getHotChannels>>[number]): ChannelOverview {
   return {
     id: ch.id,
     slug: ch.slug,
@@ -231,7 +255,7 @@ export async function getCommunityOverview(): Promise<CommunityOverviewData> {
     await Promise.all([
       getCommunityStats(),
       getAllChannels(),
-      getPopularChannels(),
+      getHotChannels(),
       getLatestPosts(),
       getHotPosts(),
       getActiveCreators(),
