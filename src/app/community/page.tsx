@@ -4,6 +4,7 @@ import { ChannelGrid } from "@/components/community/channel-grid";
 import { PopularChannelGrid } from "@/components/community/popular-channel-grid";
 import { LatestPostList } from "@/components/community/latest-post-list";
 import { HotPostList } from "@/components/community/hot-post-list";
+import { HotChannelList } from "@/components/community/hot-channel-list";
 import { CommunityStatsCard } from "@/components/community/community-stats-card";
 import { SidebarCreators } from "@/components/community/sidebar-creators";
 import { SidebarTags } from "@/components/community/sidebar-tags";
@@ -63,6 +64,7 @@ export default async function CommunityPage({
             creatorCount={stats.creatorCount}
             todayPostCount={stats.todayPostCount}
           />
+          <HotChannelList channels={channels} />
           <SidebarCreators creators={creators} />
           <SidebarTags tags={tags} />
           <BeginnerGuide />

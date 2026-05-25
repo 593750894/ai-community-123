@@ -100,8 +100,8 @@ export async function getHotPosts(limit = 6, days = 7) {
 
   return posts
     .sort((a, b) => {
-      const scoreA = a.likeCount + a.commentCount + a.bookmarkCount;
-      const scoreB = b.likeCount + b.commentCount + b.bookmarkCount;
+      const scoreA = a.likeCount + a.commentCount * 2 + a.bookmarkCount;
+      const scoreB = b.likeCount + b.commentCount * 2 + b.bookmarkCount;
       return scoreB - scoreA;
     })
     .slice(0, limit);
