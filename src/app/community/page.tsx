@@ -9,6 +9,7 @@ import { CommunityStatsCard } from "@/components/community/community-stats-card"
 import { SidebarCreators } from "@/components/community/sidebar-creators";
 import { SidebarTags } from "@/components/community/sidebar-tags";
 import { BeginnerGuide } from "@/components/community/beginner-guide";
+import { PublishGuideCard } from "@/components/community/publish-guide-card";
 import { QuickPublishButton } from "@/components/community/quick-publish-button";
 import {
   getCommunityStats,
@@ -19,6 +20,7 @@ import {
   getActiveCreators,
   getPopularTags,
 } from "@/lib/community/queries";
+import { getSession } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -30,8 +32,9 @@ export default async function CommunityPage({
   const { category } = await searchParams;
   const activeCategory = category ?? "all";
 
-  const [stats, channels, allChannels, latestPosts, hotPosts, creators, tags] =
+  const [session, stats, channels, allChannels, latestPosts, hotPosts, creators, tags] =
     await Promise.all([
+      getSession(),
       getCommunityStats(),
       getHotChannels(),
       getAllChannels(),
@@ -41,9 +44,11 @@ export default async function CommunityPage({
       getPopularTags(),
     ]);
 
+  const signedIn = session !== null;
+
   return (
     <div className="flex flex-1 flex-col">
-      <CommunityHero />
+      <CommunityHero signedIn={signedIn} />
 
       <ChannelCategoryBar active={activeCategory} />
 
@@ -52,7 +57,7 @@ export default async function CommunityPage({
         <div className="min-w-0 flex-1 space-y-8">
           <ChannelGrid channels={allChannels} />
           <PopularChannelGrid channels={channels} />
-          <LatestPostList posts={latestPosts} />
+          <LatestPostList posts={latestPosts} signedIn={signedIn} />
           <HotPostList posts={hotPosts} />
         </div>
 
@@ -64,6 +69,7 @@ export default async function CommunityPage({
             creatorCount={stats.creatorCount}
             todayPostCount={stats.todayPostCount}
           />
+          <PublishGuideCard signedIn={signedIn} />
           <HotChannelList channels={channels} />
           <SidebarCreators creators={creators} />
           <SidebarTags tags={tags} />

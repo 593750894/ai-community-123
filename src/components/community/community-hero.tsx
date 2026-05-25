@@ -1,7 +1,18 @@
 import Link from "next/link";
-import { Hash, MessageSquare, PenLine, Users } from "lucide-react";
+import { Hash, PenLine, Lightbulb, Wrench, HelpCircle, Rocket } from "lucide-react";
 
-export function CommunityHero() {
+const QUICK_TOPICS = [
+  { label: "发起工作流讨论", icon: Lightbulb, color: "text-amber-400" },
+  { label: "发布工具体验", icon: Wrench, color: "text-cyan-400" },
+  { label: "提问求助", icon: HelpCircle, color: "text-blue-400" },
+  { label: "分享项目进展", icon: Rocket, color: "text-emerald-400" },
+] as const;
+
+function publishHref(signedIn: boolean) {
+  return signedIn ? "/create-post" : "/auth/login?next=/create-post";
+}
+
+export function CommunityHero({ signedIn = false }: { signedIn?: boolean }) {
   return (
     <section className="relative overflow-hidden border-b border-border/60 px-6 py-10 sm:px-8 sm:py-14">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-fuchsia-500/5" />
@@ -23,11 +34,11 @@ export function CommunityHero() {
 
         <div className="flex flex-wrap gap-3">
           <Link
-            href="/create-post"
+            href={publishHref(signedIn)}
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <PenLine className="size-4" />
-            发布讨论
+            发起讨论
           </Link>
           <Link
             href="/community"
@@ -36,6 +47,19 @@ export function CommunityHero() {
             <Hash className="size-4" />
             浏览频道
           </Link>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {QUICK_TOPICS.map((t) => (
+            <Link
+              key={t.label}
+              href={publishHref(signedIn)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-card/40 px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+            >
+              <t.icon className={`size-3 ${t.color}`} />
+              {t.label}
+            </Link>
+          ))}
         </div>
       </div>
     </section>
