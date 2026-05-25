@@ -61,9 +61,20 @@ export default async function CommunityPage({
 
       <ChannelCategoryBar active={activeCategory} />
 
-      <div className="flex gap-6 px-4 py-6 sm:px-8">
-        {/* Left main content — 70% */}
-        <div className="min-w-0 flex-1 space-y-8">
+      {/* Mobile-only stats strip */}
+      <div className="px-4 pt-6 lg:hidden">
+        <CommunityStatsCard
+          channelCount={statsResult.data?.channelCount ?? 0}
+          postCount={statsResult.data?.postCount ?? 0}
+          creatorCount={statsResult.data?.creatorCount ?? 0}
+          todayPostCount={statsResult.data?.todayPostCount ?? 0}
+          error={statsResult.error}
+        />
+      </div>
+
+      <div className="flex gap-7 px-4 py-6 sm:px-8 sm:py-8">
+        {/* Left main content */}
+        <div className="min-w-0 flex-1 space-y-10">
           <ChannelGrid
             channels={allChannelsResult.data ?? []}
             error={allChannelsResult.error}
@@ -83,8 +94,8 @@ export default async function CommunityPage({
           />
         </div>
 
-        {/* Right sidebar — 30% */}
-        <aside className="hidden w-72 shrink-0 space-y-4 xl:block">
+        {/* Right sidebar */}
+        <aside className="hidden w-80 shrink-0 space-y-5 lg:block">
           <CommunityStatsCard
             channelCount={statsResult.data?.channelCount ?? 0}
             postCount={statsResult.data?.postCount ?? 0}

@@ -38,11 +38,11 @@ export function HotPostList({
   error?: boolean;
 }) {
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="inline-flex items-center gap-1.5 text-base font-semibold">
           <Flame className="size-4 text-orange-400" />
-          热门帖子
+          热门讨论
         </h2>
         <Link
           href="/community"
@@ -61,11 +61,11 @@ export function HotPostList({
           description="社区正在升温，近 7 天内还没有高互动帖子。"
         />
       ) : (
-        <div className="surface-card divide-y divide-border/40">
+        <div className="surface-card divide-y divide-border/30 overflow-hidden">
           {posts.map((post, i) => (
             <div
               key={post.id}
-              className="group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/30"
+              className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-muted/30"
             >
               <span
                 className={cn(

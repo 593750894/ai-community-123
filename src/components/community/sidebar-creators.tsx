@@ -48,7 +48,7 @@ export function SidebarCreators({
         <ul className="space-y-1">
           {creators.map((user) => (
             <li key={user.id}>
-              <div className="group flex items-center gap-2.5 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50">
+              <div className="group flex items-center gap-2.5 rounded-lg px-2 py-2 transition-colors hover:bg-muted/40">
                 <Link href={`/profile/${user.id}`} className="shrink-0">
                   {user.avatar ? (
                     // eslint-disable-next-line @next/next/no-img-element

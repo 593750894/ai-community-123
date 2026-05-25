@@ -7,13 +7,13 @@ function publishHref(signedIn: boolean) {
 
 export function PublishGuideCard({ signedIn = false }: { signedIn?: boolean }) {
   return (
-    <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-fuchsia-500/5 p-4">
+    <div className="surface-card overflow-hidden border-primary/20 bg-gradient-to-br from-primary/8 via-card/40 to-fuchsia-500/5 p-4">
       <div className="flex items-start gap-3">
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15">
           <Sparkles className="size-4 text-primary" />
         </div>
         <div className="space-y-2">
-          <p className="text-sm leading-relaxed text-foreground/90">
+          <p className="text-sm leading-relaxed text-foreground/85">
             正在研究 Seedance、Kling、ComfyUI 或数字人？发个帖子和同行聊聊。
           </p>
           <Link

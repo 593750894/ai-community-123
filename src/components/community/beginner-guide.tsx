@@ -37,7 +37,7 @@ const GUIDES = [
 export function BeginnerGuide() {
   return (
     <section className="surface-card overflow-hidden">
-      <div className="border-b border-border/40 bg-gradient-to-r from-primary/10 via-transparent to-transparent px-4 py-3">
+      <div className="border-b border-border/30 bg-gradient-to-r from-primary/8 via-transparent to-transparent px-4 py-3">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/90">
           <Compass className="size-3.5 text-primary" />
           新手入口

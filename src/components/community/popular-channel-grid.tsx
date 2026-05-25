@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Hash, MessageSquare, Users } from "lucide-react";
+import { ChevronRight, Flame, Hash, MessageSquare, Users } from "lucide-react";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { InlineError } from "@/components/ui/error-state";
@@ -28,9 +28,12 @@ export function PopularChannelGrid({
   error?: boolean;
 }) {
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold">热门频道</h2>
+        <h2 className="inline-flex items-center gap-1.5 text-base font-semibold">
+          <Flame className="size-4 text-orange-400" />
+          热门频道
+        </h2>
         <Link
           href="/community"
           className="text-xs text-muted-foreground transition-colors hover:text-primary"
@@ -55,15 +58,15 @@ export function PopularChannelGrid({
               <Link
                 key={c.id}
                 href={`/community/${c.id}`}
-                className="group surface-card surface-card-hover relative overflow-hidden p-4 transition-all hover:-translate-y-0.5"
-                style={{ boxShadow: `inset 0 1px 0 ${c.color}25` }}
+                className="group surface-card relative overflow-hidden p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:bg-card/60"
+                style={{ borderTop: `2px solid ${c.color}50` }}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex min-w-0 items-center gap-2.5">
                     <span
                       className="flex size-9 shrink-0 items-center justify-center rounded-lg text-lg"
                       style={{
-                        backgroundColor: `${c.color}20`,
+                        backgroundColor: `${c.color}18`,
                         color: c.color,
                       }}
                     >
@@ -73,7 +76,7 @@ export function PopularChannelGrid({
                       <div className="truncate text-sm font-semibold leading-tight">
                         {c.name}
                       </div>
-                      <div className="truncate text-[11px] text-muted-foreground">
+                      <div className="truncate text-[11px] text-muted-foreground/70">
                         {c.slug}
                       </div>
                     </div>
@@ -82,12 +85,12 @@ export function PopularChannelGrid({
                 </div>
 
                 {c.description && (
-                  <p className="mt-3 line-clamp-2 text-xs text-muted-foreground">
+                  <p className="mt-2.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
                     {c.description}
                   </p>
                 )}
 
-                <div className="mt-3 flex items-center gap-3 border-t border-border/40 pt-3 text-[11px] text-muted-foreground tabular-nums">
+                <div className="mt-3 flex items-center gap-3 border-t border-border/30 pt-2.5 text-[11px] text-muted-foreground tabular-nums">
                   <span className="inline-flex items-center gap-1">
                     <MessageSquare className="size-3" />
                     {c._count.posts} 帖
@@ -99,7 +102,7 @@ export function PopularChannelGrid({
                 </div>
 
                 {latest && (
-                  <div className="mt-2 truncate text-[11px] text-muted-foreground/80">
+                  <div className="mt-2 truncate text-[11px] text-muted-foreground/70">
                     最新：
                     <span className="ml-1 text-foreground/70">
                       {latest.title}

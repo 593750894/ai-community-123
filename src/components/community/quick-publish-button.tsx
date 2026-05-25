@@ -22,7 +22,7 @@ export function QuickPublishButton() {
           <Link
             key={a.href}
             href={a.href}
-            className="flex items-center gap-2 rounded-full border border-border/60 bg-card px-4 py-2 text-sm font-medium shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+            className="flex items-center gap-2 rounded-full border border-border/40 bg-card/90 px-4 py-2 text-sm font-medium shadow-lg backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:shadow-xl"
           >
             <a.icon className={cn("size-4", a.color)} />
             {a.label}
@@ -32,7 +32,7 @@ export function QuickPublishButton() {
       <button
         onClick={() => setOpen(!open)}
         className={cn(
-          "flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl",
+          "flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-xl",
           open && "rotate-45",
         )}
       >

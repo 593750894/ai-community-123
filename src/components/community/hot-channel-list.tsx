@@ -68,7 +68,7 @@ export function HotChannelList({
               <li key={ch.id}>
                 <Link
                   href={`/community/${ch.id}`}
-                  className="group flex items-start gap-2.5 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50"
+                  className="group flex items-start gap-2.5 rounded-lg px-2 py-2 transition-colors hover:bg-muted/40"
                 >
                   <span
                     className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg text-base"

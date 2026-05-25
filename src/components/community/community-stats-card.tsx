@@ -38,18 +38,18 @@ export function CommunityStatsCard({
 
   return (
     <section className="surface-card p-4">
-      <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold text-foreground/90">
+      <div className="mb-3.5 flex items-center gap-1.5 text-xs font-semibold text-foreground/90">
         <TrendingUp className="size-3.5 text-primary" />
         社区数据
       </div>
       {error ? (
         <InlineError message="统计数据加载失败" />
       ) : (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2.5">
           {stats.map((s) => (
             <div
               key={s.label}
-              className="rounded-lg border border-border/40 bg-card/30 px-3 py-2.5 text-center"
+              className="rounded-lg border border-border/30 bg-muted/30 px-3 py-3 text-center transition-colors hover:bg-muted/50"
             >
               <div className="flex items-center justify-center gap-1.5">
                 <s.icon className={`size-3.5 ${s.color}`} />
@@ -57,7 +57,7 @@ export function CommunityStatsCard({
                   {s.value}
                 </span>
               </div>
-              <span className="text-[11px] text-muted-foreground">{s.label}</span>
+              <span className="mt-0.5 block text-[11px] text-muted-foreground">{s.label}</span>
             </div>
           ))}
         </div>

@@ -30,7 +30,7 @@ function CategorySection({
 }) {
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-foreground/90">
+      <h3 className="text-[13px] font-semibold text-foreground/80">
         {category.label}
       </h3>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -70,8 +70,11 @@ export function ChannelGrid({
   const channelMap = new Map(channels.map((ch) => [ch.slug, ch]));
 
   return (
-    <section className="space-y-6">
-      <h2 className="text-base font-semibold">频道分类</h2>
+    <section className="space-y-5">
+      <h2 className="inline-flex items-center gap-1.5 text-base font-semibold">
+        <LayoutGrid className="size-4 text-primary" />
+        频道总览
+      </h2>
       {error ? (
         <InlineError message="频道数据加载失败，显示默认分类" />
       ) : null}

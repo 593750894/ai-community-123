@@ -24,7 +24,7 @@ export function SidebarTags({
     <section className="surface-card p-4">
       <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold text-foreground/90">
         <Sparkles className="size-3.5 text-primary" />
-        推荐标签
+        推荐话题
       </div>
 
       {error ? (
@@ -42,7 +42,7 @@ export function SidebarTags({
             <Link
               key={tag}
               href={`/community?tag=${encodeURIComponent(tag)}`}
-              className={`inline-flex items-center gap-1 rounded-full border border-border/40 bg-card/30 px-2.5 py-1 text-[11px] text-muted-foreground transition-colors ${TAG_COLORS[i % TAG_COLORS.length]}`}
+              className={`inline-flex items-center gap-1 rounded-md border border-border/30 bg-card/20 px-2.5 py-1 text-[11px] text-muted-foreground transition-all ${TAG_COLORS[i % TAG_COLORS.length]}`}
             >
               #{tag}
               {count > 0 && (

@@ -55,7 +55,7 @@ export function PostCard({
   return (
     <article
       className={cn(
-        "group surface-card surface-card-hover p-4 transition-all hover:-translate-y-0.5",
+        "group surface-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:bg-card/60",
         post.pinned && "border-amber-500/40 bg-amber-500/5 hover:border-amber-500/60",
       )}
     >
@@ -116,7 +116,7 @@ export function PostCard({
         </div>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-border/40 pt-3 text-xs text-muted-foreground">
+      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-border/30 pt-2.5 text-xs text-muted-foreground">
         <div className="flex items-center gap-2">
           {post.author.avatar ? (
             // eslint-disable-next-line @next/next/no-img-element

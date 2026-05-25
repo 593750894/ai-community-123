@@ -19,7 +19,7 @@ export function LatestPostList({
   error?: boolean;
 }) {
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="inline-flex items-center gap-1.5 text-base font-semibold">
           <MessageSquarePlus className="size-4 text-blue-400" />
@@ -28,7 +28,7 @@ export function LatestPostList({
         <div className="flex items-center gap-3">
           <Link
             href={publishHref(signedIn)}
-            className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-3 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
           >
             <PenLine className="size-3" />
             发布讨论
