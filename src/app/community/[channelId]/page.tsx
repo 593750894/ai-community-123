@@ -12,9 +12,9 @@ import { loadInteractionState } from "@/lib/interactions/queries";
 
 export const dynamic = "force-dynamic";
 
-async function getChannel(channelId: string) {
-  const channel = await prisma.channel.findUnique({
-    where: { id: channelId },
+async function getChannel(idOrSlug: string) {
+  const channel = await prisma.channel.findFirst({
+    where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }] },
     include: {
       _count: { select: { posts: true, members: true } },
       owner: { select: { id: true, name: true, username: true } },
