@@ -1,0 +1,87 @@
+import { prisma } from "@/lib/db";
+import { requireAuth } from "@/lib/auth/guard";
+import { NotFoundError, ValidationError } from "@/lib/errors";
+import { success, error } from "@/lib/response";
+import { ToggleBookmarkSchema } from "@/lib/interactions/schemas";
+
+export async function POST(request: Request) {
+  try {
+    const user = await requireAuth();
+    const body = await request.json();
+    const parsed = ToggleBookmarkSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new ValidationError("参数校验失败", parsed.error.flatten().fieldErrors);
+    }
+
+    const { targetType, targetId } = parsed.data;
+
+    if (targetType === "POST") {
+      const post = await prisma.post.findUnique({
+        where: { id: targetId },
+        select: { id: true },
+      });
+      if (!post) throw new NotFoundError("帖子");
+
+      const existing = await prisma.bookmark.findUnique({
+        where: { userId_postId: { userId: user.id, postId: targetId } },
+      });
+
+      if (existing) {
+        await prisma.$transaction([
+          prisma.bookmark.delete({ where: { id: existing.id } }),
+          prisma.post.update({
+            where: { id: targetId },
+            data: { bookmarkCount: { decrement: 1 } },
+          }),
+        ]);
+        return success({ bookmarked: false });
+      }
+
+      await prisma.$transaction([
+        prisma.bookmark.create({
+          data: { userId: user.id, postId: targetId },
+        }),
+        prisma.post.update({
+          where: { id: targetId },
+          data: { bookmarkCount: { increment: 1 } },
+        }),
+      ]);
+      return success({ bookmarked: true });
+    }
+
+    // targetType === "WORK"
+    const work = await prisma.work.findUnique({
+      where: { id: targetId },
+      select: { id: true },
+    });
+    if (!work) throw new NotFoundError("作品");
+
+    const existing = await prisma.bookmark.findUnique({
+      where: { userId_workId: { userId: user.id, workId: targetId } },
+    });
+
+    if (existing) {
+      await prisma.$transaction([
+        prisma.bookmark.delete({ where: { id: existing.id } }),
+        prisma.work.update({
+          where: { id: targetId },
+          data: { bookmarkCount: { decrement: 1 } },
+        }),
+      ]);
+      return success({ bookmarked: false });
+    }
+
+    await prisma.$transaction([
+      prisma.bookmark.create({
+        data: { userId: user.id, workId: targetId },
+      }),
+      prisma.work.update({
+        where: { id: targetId },
+        data: { bookmarkCount: { increment: 1 } },
+      }),
+    ]);
+    return success({ bookmarked: true });
+  } catch (err) {
+    return error(err);
+  }
+}

@@ -1,0 +1,388 @@
+// SeedLand · V — AI 视频社群平台数据模型
+// 详细文档：https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────────── enums ─────────────────────────────
+
+enum Role {
+  USER
+  MOD
+  ADMIN
+}
+
+enum WorkModel {
+  SEEDANCE_2_0
+  SEEDANCE_FAST
+}
+
+enum WorkMode {
+  TEXT_TO_VIDEO
+  IMAGE_TO_VIDEO
+  FIRST_LAST_FRAME
+  MULTI_REFERENCE
+}
+
+enum WorkCategory {
+  AI_COMIC        // AI 漫剧
+  AI_DRAMA        // AI 短剧
+  AI_ANIMATION    // AI 动画
+  DIGITAL_HUMAN   // 数字人视频
+  ECOMMERCE_AD    // 电商广告视频
+  PRODUCT_SHOW    // 产品展示视频
+  KNOWLEDGE       // 知识讲解视频
+  STORY           // 故事类视频
+  EXPERIMENT      // 实验短片
+}
+
+enum CollaborationType {
+  LOOKING_FOR // 我正在找
+  OFFERING    // 我可以提供
+}
+
+enum CollaborationStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+enum CollaborationCategory {
+  AI_VIDEO_TEAM      // 找 AI 视频制作团队
+  AI_COMIC_CREATOR   // 找 AI 漫剧创作者
+  AI_DRAMA_TEAM      // 找 AI 短剧团队
+  DIGITAL_HUMAN      // 找数字人制作
+  PROMPT_ENGINEER    // 找提示词工程师
+  COMFYUI_WORKFLOW   // 找 ComfyUI 工作流搭建
+  EDITOR             // 找剪辑师
+  COFOUNDER          // 找联合创始人
+  INVEST_BIZ         // 找投资 / 商务合作
+  OTHER              // 其他
+}
+
+enum CollaborationWorkMode {
+  PROJECT    // 项目制
+  FULL_TIME  // 全职
+  PART_TIME  // 兼职
+  FREELANCE  // 外包
+  EQUITY     // 合伙 / 股权
+  ONE_OFF    // 一次性单子
+}
+
+enum CollaborationLocation {
+  REMOTE  // 远程
+  ONSITE  // 线下
+  HYBRID  // 远程 + 线下
+}
+
+enum ToolPricing {
+  FREE
+  FREEMIUM
+  PAID
+}
+
+enum PostType {
+  DISCUSSION   // 普通交流
+  SHOWCASE     // 作品展示
+  COLLABORATION // 项目合作
+  TOOL_RECOMMEND // 工具推荐
+  TUTORIAL     // 教程经验
+  QUESTION     // 提问求助
+  NEWS         // 行业资讯
+}
+
+// ───────────────────────────── User ─────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  name         String
+  avatar       String?
+  bio          String?
+  passwordHash String   @map("password_hash")
+  role         Role     @default(USER)
+
+  // 阶段 3 个人主页字段
+  industryRole   String?  @map("industry_role") // 行业角色，例如 "导演 / 编剧"
+  expertise      String[] @default([]) // 擅长领域
+  favoriteTools  String[] @default([]) @map("favorite_tools") // 常用 AI 视频工具
+  portfolioLinks String[] @default([]) @map("portfolio_links") // 作品链接
+  contact        String?  // 联系方式，可选
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // owner of channels they created
+  ownedChannels      Channel[]                 @relation("ChannelOwner")
+  // many-to-many membership
+  channelMemberships ChannelMember[]
+  posts              Post[]
+  comments           Comment[]
+  works              Work[]
+  collaborations     Collaboration[]
+  toolsContributed   Tool[]                    @relation("ToolContributor")
+  conversations      ConversationParticipant[]
+  messagesSent       Message[]                 @relation("MessageSender")
+  likes              Like[]
+  bookmarks          Bookmark[]
+
+  @@map("users")
+}
+
+// ───────────────────────────── Channel ─────────────────────────────
+
+model Channel {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  icon        String?
+  banner      String?
+  color       String   @default("#3b82f6")
+  ownerId     String   @map("owner_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  owner   User            @relation("ChannelOwner", fields: [ownerId], references: [id])
+  members ChannelMember[]
+  posts   Post[]
+
+  @@map("channels")
+}
+
+model ChannelMember {
+  channelId String   @map("channel_id")
+  userId    String   @map("user_id")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([channelId, userId])
+  @@map("channel_members")
+}
+
+// ───────────────────────────── Post ─────────────────────────────
+
+model Post {
+  id           String   @id @default(cuid())
+  channelId    String   @map("channel_id")
+  authorId     String   @map("author_id")
+  title        String
+  content      String
+  type         PostType @default(DISCUSSION)
+  videoUrl     String?  @map("video_url")
+  imageUrl     String?  @map("image_url")
+  views        Int      @default(0)
+  likeCount    Int      @default(0) @map("like_count")
+  commentCount Int      @default(0) @map("comment_count")
+  bookmarkCount Int     @default(0) @map("bookmark_count")
+  pinned       Boolean  @default(false)
+  locked       Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  channel   Channel    @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  likes     Like[]
+  bookmarks Bookmark[]
+
+  @@index([channelId, createdAt])
+  @@index([authorId])
+  @@index([type])
+  @@map("posts")
+}
+
+// ───────────────────────────── Comment ─────────────────────────────
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String   @map("post_id")
+  authorId  String   @map("author_id")
+  parentId  String?  @map("parent_id")
+  content   String
+  likeCount Int      @default(0) @map("like_count")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author  User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies Comment[] @relation("CommentReplies")
+  likes   Like[]
+
+  @@index([postId, createdAt])
+  @@map("comments")
+}
+
+// ───────────────────────────── Work (用户 AI 视频作品) ─────────────────────────────
+
+model Work {
+  id            String       @id @default(cuid())
+  authorId      String       @map("author_id")
+  title         String
+  description   String?
+  videoUrl      String       @map("video_url")
+  thumbnailUrl  String?      @map("thumbnail_url")
+  category      WorkCategory @default(STORY) // 作品类型，例 AI 漫剧 / AI 短剧
+  tools         String[]     @default([]) // 使用工具，例 ["Seedance 2.0", "Runway"]
+  model         WorkModel    @default(SEEDANCE_2_0)
+  mode          WorkMode     @default(TEXT_TO_VIDEO)
+  prompt        String?
+  durationSec   Int?         @map("duration_sec")
+  resolution    String? // 例 "1080p"
+  ratio         String? // 例 "16:9"
+  views         Int          @default(0)
+  likeCount     Int          @default(0) @map("like_count")
+  bookmarkCount Int          @default(0) @map("bookmark_count")
+  isPublic      Boolean      @default(true) @map("is_public")
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes     Like[]
+  bookmarks Bookmark[]
+
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([category])
+  @@map("works")
+}
+
+// ───────────────────────────── Collaboration (合作需求) ─────────────────────────────
+
+model Collaboration {
+  id          String                @id @default(cuid())
+  authorId    String                @map("author_id")
+  title       String
+  description String
+  type        CollaborationType     @default(LOOKING_FOR)
+  category    CollaborationCategory @default(OTHER)
+  workMode    CollaborationWorkMode @default(PROJECT) @map("work_mode")
+  location    CollaborationLocation @default(REMOTE)
+  status      CollaborationStatus   @default(OPEN)
+  budget      String?
+  contact     String?
+  deadline    DateTime?
+  tags        String[]
+  createdAt   DateTime              @default(now()) @map("created_at")
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([category])
+  @@index([type])
+  @@map("collaborations")
+}
+
+// ───────────────────────────── Tool (工具库) ─────────────────────────────
+
+model Tool {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  name        String
+  description String
+  url         String
+  category    String
+  useCase     String?     @map("use_case") // 适合场景，例 "电商种草 / 5 秒短广告"
+  logoUrl     String?     @map("logo_url")
+  pricing     ToolPricing @default(FREE)
+  tags        String[]
+  isOfficial  Boolean     @default(false) @map("is_official")
+  createdById String?     @map("created_by_id")
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  createdBy User? @relation("ToolContributor", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([category])
+  @@map("tools")
+}
+
+// ───────────────────────────── Conversation + Message ─────────────────────────────
+
+model Conversation {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now()) @map("created_at")
+  lastMessageAt DateTime @default(now()) @map("last_message_at")
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@index([lastMessageAt])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  conversationId String   @map("conversation_id")
+  userId         String   @map("user_id")
+  joinedAt       DateTime @default(now()) @map("joined_at")
+  lastReadAt     DateTime @default(now()) @map("last_read_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, userId])
+  @@index([userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  conversationId String    @map("conversation_id")
+  senderId       String    @map("sender_id")
+  content        String
+  readAt         DateTime? @map("read_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+// ───────────────────────────── Like (polymorphic: post | work | comment) ─────────────────────────────
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  postId    String?  @map("post_id")
+  workId    String?  @map("work_id")
+  commentId String?  @map("comment_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post    Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  work    Work?    @relation(fields: [workId], references: [id], onDelete: Cascade)
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  // 一个用户对同一目标只能点一次赞
+  @@unique([userId, postId])
+  @@unique([userId, workId])
+  @@unique([userId, commentId])
+  @@map("likes")
+}
+
+// ───────────────────────────── Bookmark (post | work) ─────────────────────────────
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  postId    String?  @map("post_id")
+  workId    String?  @map("work_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
+  work Work? @relation(fields: [workId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@unique([userId, workId])
+  @@map("bookmarks")
+}
