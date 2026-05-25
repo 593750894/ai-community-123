@@ -5,6 +5,14 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+type StatItem = {
+  icon: LucideIcon;
+  label: string;
+  value: number;
+  color: string;
+};
 
 export function CommunityStatsCard({
   channelCount,
@@ -17,11 +25,11 @@ export function CommunityStatsCard({
   creatorCount: number;
   todayPostCount: number;
 }) {
-  const stats = [
-    { icon: Hash, label: "频道", value: channelCount },
-    { icon: MessageSquare, label: "帖子", value: postCount },
-    { icon: Users, label: "创作者", value: creatorCount },
-    { icon: CalendarPlus, label: "今日新帖", value: todayPostCount },
+  const stats: StatItem[] = [
+    { icon: Hash, label: "频道", value: channelCount, color: "text-violet-400" },
+    { icon: MessageSquare, label: "帖子", value: postCount, color: "text-cyan-400" },
+    { icon: Users, label: "创作者", value: creatorCount, color: "text-emerald-400" },
+    { icon: CalendarPlus, label: "今日新帖", value: todayPostCount, color: "text-amber-400" },
   ];
 
   return (
@@ -37,7 +45,7 @@ export function CommunityStatsCard({
             className="rounded-lg border border-border/40 bg-card/30 px-3 py-2.5 text-center"
           >
             <div className="flex items-center justify-center gap-1.5">
-              <s.icon className="size-3.5 text-muted-foreground" />
+              <s.icon className={`size-3.5 ${s.color}`} />
               <span className="text-lg font-bold tabular-nums text-foreground">
                 {s.value}
               </span>

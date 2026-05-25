@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Crown, FileVideo, MessageSquare } from "lucide-react";
+import { Crown, FileVideo, MessageSquare, ArrowUpRight } from "lucide-react";
 
 export type SidebarCreatorData = {
   id: string;
@@ -34,27 +34,34 @@ export function SidebarCreators({
       <ul className="space-y-1">
         {creators.map((user) => (
           <li key={user.id}>
-            <Link
-              href={`/profile/${user.id}`}
-              className="group flex items-center gap-2.5 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50"
-            >
-              {user.avatar ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="size-8 shrink-0 rounded-full border border-border/60"
-                />
-              ) : (
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-foreground">
-                  {user.name.slice(0, 1)}
-                </span>
-              )}
+            <div className="group flex items-center gap-2.5 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50">
+              <Link href={`/profile/${user.id}`} className="shrink-0">
+                {user.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="size-9 rounded-full border border-border/60"
+                  />
+                ) : (
+                  <span className="flex size-9 items-center justify-center rounded-full bg-muted text-xs font-medium text-foreground">
+                    {user.name.slice(0, 1)}
+                  </span>
+                )}
+              </Link>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium group-hover:text-primary">
+                <Link
+                  href={`/profile/${user.id}`}
+                  className="truncate text-sm font-medium hover:text-primary"
+                >
                   {user.name}
-                </div>
-                <div className="flex items-center gap-2 text-[11px] text-muted-foreground tabular-nums">
+                </Link>
+                {user.industryRole && (
+                  <div className="truncate text-[11px] text-muted-foreground">
+                    {user.industryRole}
+                  </div>
+                )}
+                <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground tabular-nums">
                   <span className="inline-flex items-center gap-0.5">
                     <MessageSquare className="size-2.5" />
                     {user._count.posts}
@@ -65,7 +72,17 @@ export function SidebarCreators({
                   </span>
                 </div>
               </div>
-            </Link>
+              <Link
+                href={`/profile/${user.id}`}
+                className="shrink-0 rounded-md border border-border/50 px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+              >
+                <span className="hidden items-center gap-0.5 sm:inline-flex">
+                  主页
+                  <ArrowUpRight className="size-3" />
+                </span>
+                <ArrowUpRight className="size-3 sm:hidden" />
+              </Link>
+            </div>
           </li>
         ))}
       </ul>

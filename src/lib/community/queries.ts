@@ -124,18 +124,16 @@ export async function getActiveCreators(limit = 6) {
 }
 
 const DEFAULT_TAGS: TagOverview[] = [
-  { tag: "AI视频", count: 0 },
-  { tag: "Seedance", count: 0 },
-  { tag: "AI漫剧", count: 0 },
+  { tag: "Seedance 2.0", count: 0 },
   { tag: "AI短剧", count: 0 },
   { tag: "数字人", count: 0 },
   { tag: "ComfyUI", count: 0 },
-  { tag: "提示词", count: 0 },
-  { tag: "Runway", count: 0 },
-  { tag: "电商广告", count: 0 },
+  { tag: "Kling", count: 0 },
   { tag: "教程", count: 0 },
-  { tag: "合作", count: 0 },
   { tag: "工作流", count: 0 },
+  { tag: "工具评测", count: 0 },
+  { tag: "接单", count: 0 },
+  { tag: "招募", count: 0 },
 ];
 
 export async function getPopularTags(limit = 12): Promise<TagOverview[]> {
