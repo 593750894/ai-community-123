@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+import { InlineError } from "@/components/ui/error-state";
+
 type StatItem = {
   icon: LucideIcon;
   label: string;
@@ -19,11 +21,13 @@ export function CommunityStatsCard({
   postCount,
   creatorCount,
   todayPostCount,
+  error = false,
 }: {
   channelCount: number;
   postCount: number;
   creatorCount: number;
   todayPostCount: number;
+  error?: boolean;
 }) {
   const stats: StatItem[] = [
     { icon: Hash, label: "频道", value: channelCount, color: "text-violet-400" },
@@ -38,22 +42,26 @@ export function CommunityStatsCard({
         <TrendingUp className="size-3.5 text-primary" />
         社区数据
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="rounded-lg border border-border/40 bg-card/30 px-3 py-2.5 text-center"
-          >
-            <div className="flex items-center justify-center gap-1.5">
-              <s.icon className={`size-3.5 ${s.color}`} />
-              <span className="text-lg font-bold tabular-nums text-foreground">
-                {s.value}
-              </span>
+      {error ? (
+        <InlineError message="统计数据加载失败" />
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {stats.map((s) => (
+            <div
+              key={s.label}
+              className="rounded-lg border border-border/40 bg-card/30 px-3 py-2.5 text-center"
+            >
+              <div className="flex items-center justify-center gap-1.5">
+                <s.icon className={`size-3.5 ${s.color}`} />
+                <span className="text-lg font-bold tabular-nums text-foreground">
+                  {s.value}
+                </span>
+              </div>
+              <span className="text-[11px] text-muted-foreground">{s.label}</span>
             </div>
-            <span className="text-[11px] text-muted-foreground">{s.label}</span>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

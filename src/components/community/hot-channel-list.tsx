@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { Flame, MessageSquare } from "lucide-react";
+import { Flame, Hash, MessageSquare } from "lucide-react";
+
+import { EmptyState } from "@/components/ui/empty-state";
+import { InlineError } from "@/components/ui/error-state";
 
 export type HotChannelData = {
   id: string;
@@ -27,11 +30,11 @@ function isRecentlyActive(channel: HotChannelData): boolean {
 
 export function HotChannelList({
   channels,
+  error = false,
 }: {
   channels: HotChannelData[];
+  error?: boolean;
 }) {
-  if (channels.length === 0) return null;
-
   return (
     <section className="surface-card p-4">
       <div className="mb-3 flex items-center justify-between">
@@ -47,57 +50,68 @@ export function HotChannelList({
         </Link>
       </div>
 
-      <ul className="space-y-1">
-        {channels.map((ch) => {
-          const active = isRecentlyActive(ch);
+      {error ? (
+        <InlineError message="热门频道数据加载失败" />
+      ) : channels.length === 0 ? (
+        <EmptyState
+          icon={Hash}
+          title="暂无频道"
+          description="管理员正在配置社区结构。"
+          className="border-none bg-transparent py-6"
+        />
+      ) : (
+        <ul className="space-y-1">
+          {channels.map((ch) => {
+            const active = isRecentlyActive(ch);
 
-          return (
-            <li key={ch.id}>
-              <Link
-                href={`/community/${ch.id}`}
-                className="group flex items-start gap-2.5 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50"
-              >
-                <span
-                  className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg text-base"
-                  style={{
-                    backgroundColor: `${ch.color}20`,
-                    color: ch.color,
-                  }}
+            return (
+              <li key={ch.id}>
+                <Link
+                  href={`/community/${ch.id}`}
+                  className="group flex items-start gap-2.5 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50"
                 >
-                  {ch.icon ?? "#"}
-                </span>
+                  <span
+                    className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg text-base"
+                    style={{
+                      backgroundColor: `${ch.color}20`,
+                      color: ch.color,
+                    }}
+                  >
+                    {ch.icon ?? "#"}
+                  </span>
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="truncate text-sm font-medium group-hover:text-primary">
-                      {ch.name}
-                    </span>
-                    {active && (
-                      <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="truncate text-sm font-medium group-hover:text-primary">
+                        {ch.name}
+                      </span>
+                      {active && (
+                        <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" />
+                      )}
+                    </div>
+
+                    {ch.description && (
+                      <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground">
+                        {ch.description}
+                      </p>
                     )}
-                  </div>
 
-                  {ch.description && (
-                    <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground">
-                      {ch.description}
-                    </p>
-                  )}
-
-                  <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground tabular-nums">
-                    <span className="inline-flex items-center gap-0.5">
-                      <MessageSquare className="size-2.5" />
-                      {ch._count.posts} 帖子
-                    </span>
-                    {active && (
-                      <span className="text-emerald-500">活跃</span>
-                    )}
+                    <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground tabular-nums">
+                      <span className="inline-flex items-center gap-0.5">
+                        <MessageSquare className="size-2.5" />
+                        {ch._count.posts} 帖子
+                      </span>
+                      {active && (
+                        <span className="text-emerald-500">活跃</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </section>
   );
 }

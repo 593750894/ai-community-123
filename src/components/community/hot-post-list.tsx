@@ -3,6 +3,7 @@ import { Flame, Heart, MessageCircle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InlineError } from "@/components/ui/error-state";
 
 export type HotPostData = {
   id: string;
@@ -29,7 +30,13 @@ const rankStyle = [
   "bg-gradient-to-br from-amber-700 to-amber-800 text-white shadow-sm shadow-amber-700/30",
 ] as const;
 
-export function HotPostList({ posts }: { posts: HotPostData[] }) {
+export function HotPostList({
+  posts,
+  error = false,
+}: {
+  posts: HotPostData[];
+  error?: boolean;
+}) {
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
@@ -45,11 +52,13 @@ export function HotPostList({ posts }: { posts: HotPostData[] }) {
         </Link>
       </div>
 
-      {posts.length === 0 ? (
+      {error ? (
+        <InlineError message="热门帖子加载失败，请稍后刷新重试" />
+      ) : posts.length === 0 ? (
         <EmptyState
           icon={Flame}
-          title="暂无热门帖子"
-          description="近 7 天内还没有高互动帖子"
+          title="暂无热门内容"
+          description="社区正在升温，近 7 天内还没有高互动帖子。"
         />
       ) : (
         <div className="surface-card divide-y divide-border/40">

@@ -3,6 +3,7 @@ import { MessageSquarePlus, PenLine } from "lucide-react";
 
 import { PostCard, type PostCardData } from "@/components/feed/post-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InlineError } from "@/components/ui/error-state";
 
 function publishHref(signedIn: boolean) {
   return signedIn ? "/create-post" : "/auth/login?next=/create-post";
@@ -11,9 +12,11 @@ function publishHref(signedIn: boolean) {
 export function LatestPostList({
   posts,
   signedIn = false,
+  error = false,
 }: {
   posts: PostCardData[];
   signedIn?: boolean;
+  error?: boolean;
 }) {
   return (
     <section className="space-y-3">
@@ -39,10 +42,12 @@ export function LatestPostList({
         </div>
       </div>
 
-      {posts.length === 0 ? (
+      {error ? (
+        <InlineError message="最新讨论加载失败，请稍后刷新重试" />
+      ) : posts.length === 0 ? (
         <EmptyState
           icon={MessageSquarePlus}
-          title="还没有讨论"
+          title="暂无讨论"
           description="成为第一个发起话题的人。"
         />
       ) : (

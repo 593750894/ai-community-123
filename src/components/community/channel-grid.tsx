@@ -1,8 +1,12 @@
+import { LayoutGrid } from "lucide-react";
+
 import type { ChannelOverview } from "@/types/community";
 import {
   CHANNEL_CATEGORIES,
   type ChannelCategory,
 } from "@/lib/community/channel-categories";
+import { EmptyState } from "@/components/ui/empty-state";
+import { InlineError } from "@/components/ui/error-state";
 import { ChannelCard } from "./channel-card";
 
 function formatRelativeTime(dateStr: string): string {
@@ -58,14 +62,19 @@ function CategorySection({
 
 export function ChannelGrid({
   channels,
+  error = false,
 }: {
   channels: ChannelOverview[];
+  error?: boolean;
 }) {
   const channelMap = new Map(channels.map((ch) => [ch.slug, ch]));
 
   return (
     <section className="space-y-6">
       <h2 className="text-base font-semibold">频道分类</h2>
+      {error ? (
+        <InlineError message="频道数据加载失败，显示默认分类" />
+      ) : null}
       {CHANNEL_CATEGORIES.map((cat) => (
         <CategorySection
           key={cat.key}
