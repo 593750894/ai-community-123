@@ -73,6 +73,42 @@ export interface TagOverview {
   count: number;
 }
 
+// ---------- Channel detail ----------
+export interface ChannelDetail {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  banner: string | null;
+  color: string;
+  createdAt: string;
+  owner: {
+    id: string;
+    name: string;
+    username: string;
+  };
+  postCount: number;
+  memberCount: number;
+  todayPostCount: number;
+}
+
+export interface ChannelPostsQuery {
+  type?: string;
+  sort?: "latest" | "hot";
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface ChannelPostsResult {
+  posts: PostOverview[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 // ---------- Aggregate response ----------
 export interface CommunityOverviewData {
   stats: CommunityStats;

@@ -3,10 +3,14 @@ import type {
   CommunityOverviewData,
   CommunityStats,
   ChannelOverview,
+  ChannelDetail,
+  ChannelPostsQuery,
+  ChannelPostsResult,
   PostOverview,
   CreatorOverview,
   TagOverview,
 } from "@/types/community";
+import type { PostType } from "@/generated/prisma/client";
 
 export async function getCommunityStats(): Promise<CommunityStats> {
   const todayStart = new Date();
@@ -246,6 +250,121 @@ function toChannelOverview(ch: Awaited<ReturnType<typeof getHotChannels>>[number
         }
       : null,
   };
+}
+
+// ---------- Channel detail queries ----------
+
+const postSelect = {
+  id: true,
+  title: true,
+  content: true,
+  type: true,
+  videoUrl: true,
+  imageUrl: true,
+  views: true,
+  likeCount: true,
+  commentCount: true,
+  bookmarkCount: true,
+  pinned: true,
+  createdAt: true,
+  author: {
+    select: { id: true, name: true, username: true, avatar: true },
+  },
+  channel: {
+    select: { id: true, name: true, slug: true, icon: true, color: true },
+  },
+} as const;
+
+export async function getChannelDetail(
+  idOrSlug: string,
+): Promise<ChannelDetail | null> {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const ch = await prisma.channel.findFirst({
+    where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }] },
+    include: {
+      _count: { select: { posts: true, members: true } },
+      owner: { select: { id: true, name: true, username: true } },
+    },
+  });
+  if (!ch) return null;
+
+  const todayPostCount = await prisma.post.count({
+    where: { channelId: ch.id, createdAt: { gte: todayStart } },
+  });
+
+  return {
+    id: ch.id,
+    slug: ch.slug,
+    name: ch.name,
+    description: ch.description,
+    icon: ch.icon,
+    banner: ch.banner,
+    color: ch.color,
+    createdAt: ch.createdAt.toISOString(),
+    owner: ch.owner,
+    postCount: ch._count.posts,
+    memberCount: ch._count.members,
+    todayPostCount,
+  };
+}
+
+export async function getChannelPosts(
+  channelId: string,
+  opts: ChannelPostsQuery = {},
+): Promise<ChannelPostsResult> {
+  const { type, sort = "latest", search, page = 1, limit = 20 } = opts;
+
+  const where: Record<string, unknown> = { channelId };
+  if (type) where.type = type as PostType;
+  if (search) where.title = { contains: search, mode: "insensitive" };
+
+  const [total, rows] = await Promise.all([
+    prisma.post.count({ where }),
+    prisma.post.findMany({
+      where,
+      orderBy:
+        sort === "hot"
+          ? [{ likeCount: "desc" }, { commentCount: "desc" }]
+          : [{ pinned: "desc" }, { createdAt: "desc" }],
+      skip: (page - 1) * limit,
+      take: limit,
+      select: postSelect,
+    }),
+  ]);
+
+  return {
+    posts: rows.map(toPostOverview),
+    total,
+    page,
+    limit,
+    totalPages: Math.max(1, Math.ceil(total / limit)),
+  };
+}
+
+export async function getChannelHotPosts(
+  channelId: string,
+  limit = 5,
+  days = 7,
+): Promise<PostOverview[]> {
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+
+  const posts = await prisma.post.findMany({
+    where: { channelId, createdAt: { gte: since } },
+    take: 50,
+    select: postSelect,
+  });
+
+  return posts
+    .sort((a, b) => {
+      const scoreA = a.likeCount + a.commentCount * 2 + a.bookmarkCount;
+      const scoreB = b.likeCount + b.commentCount * 2 + b.bookmarkCount;
+      return scoreB - scoreA;
+    })
+    .slice(0, limit)
+    .map(toPostOverview);
 }
 
 export async function getCommunityOverview(): Promise<CommunityOverviewData> {
