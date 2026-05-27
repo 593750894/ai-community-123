@@ -21,10 +21,10 @@ export default function ChannelDetailError({
         <AlertTriangle className="size-6" />
       </span>
       <h2 className="text-lg font-semibold text-foreground">
-        频道页面加载失败
+        加载失败
       </h2>
       <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-        无法加载此频道的内容，请稍后再试。
+        频道内容加载失败，请稍后重试。
       </p>
       <div className="mt-6 flex items-center gap-3">
         <button

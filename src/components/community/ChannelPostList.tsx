@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageSquare, Sparkles } from "lucide-react";
+import { MessageSquare, Search, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -44,31 +44,40 @@ export function ChannelPostList({
   };
 }) {
   const publishLabel = getPublishLabel(channelSlug);
+
   if (posts.length === 0) {
+    if (search) {
+      return (
+        <EmptyState
+          icon={Search}
+          title="没有找到相关讨论"
+          description="没有找到相关讨论，换个关键词试试。"
+        />
+      );
+    }
+    if (hasFilters) {
+      return (
+        <EmptyState
+          icon={MessageSquare}
+          title="没有找到匹配的帖子"
+          description="试试调整筛选条件，或清除所有筛选查看全部内容。"
+        />
+      );
+    }
     return (
       <EmptyState
         icon={MessageSquare}
-        title={
-          hasFilters
-            ? "没有找到匹配的帖子"
-            : "这个频道还没有讨论"
-        }
-        description={
-          hasFilters
-            ? "试试调整筛选条件或搜索关键词。"
-            : "这个频道还没有讨论，来成为第一个发帖的人吧。"
-        }
+        title="这个频道还没有讨论"
+        description="这个频道还没有讨论，成为第一个发起话题的人。"
         action={
-          !hasFilters ? (
-            <Button
-              size="sm"
-              nativeButton={false}
-              render={<Link href={publishHref} />}
-            >
-              <Sparkles className="size-3.5" />
-              {publishLabel}
-            </Button>
-          ) : undefined
+          <Button
+            size="sm"
+            nativeButton={false}
+            render={<Link href={publishHref} />}
+          >
+            <Sparkles className="size-3.5" />
+            {publishLabel}
+          </Button>
         }
       />
     );

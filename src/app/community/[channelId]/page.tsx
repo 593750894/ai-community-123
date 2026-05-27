@@ -13,13 +13,17 @@ import {
   getChannelStats,
   getRelatedChannels,
 } from "@/lib/community/queries";
-import type { ChannelPostSort } from "@/types/community";
+import type { ChannelPostSort, ChannelStats, PostOverview, ChannelOverview } from "@/types/community";
+import { POST_TYPE_VALUES } from "@/lib/post-types";
 import { getSession } from "@/lib/auth/session";
 import { loadInteractionState } from "@/lib/interactions/queries";
 
 const VALID_SORTS = new Set<ChannelPostSort>(["latest", "hot", "mostCommented", "mostLiked"]);
+const VALID_TYPES = new Set<string>(POST_TYPE_VALUES);
 const DEFAULT_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 50;
+
+const EMPTY_STATS: ChannelStats = { postCount: 0, todayPostCount: 0, creatorCount: 0, hotPostCount: 0 };
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +65,15 @@ function toPostCard(p: {
   };
 }
 
+async function safeFetch<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn();
+  } catch (e) {
+    console.error("[channel-detail] sidebar fetch failed:", e);
+    return fallback;
+  }
+}
+
 export default async function ChannelDetailPage({
   params,
   searchParams,
@@ -74,27 +87,34 @@ export default async function ChannelDetailPage({
   const channel = await getChannelDetail(channelId);
   if (!channel) notFound();
 
-  const type = typeof sp.type === "string" ? sp.type : undefined;
+  const rawType = typeof sp.type === "string" ? sp.type : undefined;
+  const type = rawType && VALID_TYPES.has(rawType) ? rawType : undefined;
+
   const sortParam = typeof sp.sort === "string" ? sp.sort : "latest";
   const sort: ChannelPostSort = VALID_SORTS.has(sortParam as ChannelPostSort)
     ? (sortParam as ChannelPostSort)
     : "latest";
   const search = typeof sp.q === "string" ? sp.q : undefined;
-  const page = typeof sp.page === "string" ? Math.max(1, parseInt(sp.page, 10) || 1) : 1;
+  const rawPage = typeof sp.page === "string" ? Math.max(1, parseInt(sp.page, 10) || 1) : 1;
   const pageSize = typeof sp.pageSize === "string"
     ? Math.min(MAX_PAGE_SIZE, Math.max(1, parseInt(sp.pageSize, 10) || DEFAULT_PAGE_SIZE))
     : DEFAULT_PAGE_SIZE;
 
   const [result, hotPosts, channelStats, relatedChannels, session] = await Promise.all([
-    getChannelPosts(channel.id, { type, sort, search, page, limit: pageSize }),
-    getChannelHotPosts(channel.id),
-    getChannelStats(channel.id),
-    getRelatedChannels(channel.id, channel.slug),
+    getChannelPosts(channel.id, { type, sort, search, page: rawPage, limit: pageSize }),
+    safeFetch<PostOverview[]>(() => getChannelHotPosts(channel.id), []),
+    safeFetch<ChannelStats>(() => getChannelStats(channel.id), EMPTY_STATS),
+    safeFetch<ChannelOverview[]>(() => getRelatedChannels(channel.id, channel.slug), []),
     getSession(),
   ]);
 
+  const page = result.totalPages > 0 ? Math.min(rawPage, result.totalPages) : 1;
+  const clampedPosts = page !== rawPage
+    ? (await getChannelPosts(channel.id, { type, sort, search, page, limit: pageSize })).posts
+    : result.posts;
+
   const interactions = await loadInteractionState({
-    postIds: result.posts.map((p) => p.id),
+    postIds: clampedPosts.map((p) => p.id),
   });
   const signedIn = Boolean(session);
 
@@ -110,17 +130,15 @@ export default async function ChannelDetailPage({
       <div className="flex flex-col gap-6 px-4 py-5 sm:px-8 sm:py-6 xl:flex-row">
         {/* Main content */}
         <div className="min-w-0 flex-1 space-y-4">
-          {/* Toolbar: filter + sort + search */}
           <Suspense>
             <ChannelFilters type={type} sort={sort} search={search} />
           </Suspense>
 
-          {/* Posts */}
           <ChannelPostList
-            posts={result.posts.map(toPostCard)}
+            posts={clampedPosts.map(toPostCard)}
             total={result.total}
             sort={sort}
-            page={result.page}
+            page={page}
             totalPages={result.totalPages}
             search={search}
             hasFilters={hasFilters}
@@ -131,7 +149,6 @@ export default async function ChannelDetailPage({
           />
         </div>
 
-        {/* Sidebar */}
         <ChannelRightPanel
           stats={channelStats}
           hotPosts={hotPosts}
