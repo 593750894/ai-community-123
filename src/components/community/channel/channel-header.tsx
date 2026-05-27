@@ -10,6 +10,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import type { ChannelDetail, ChannelStats } from "@/types/community";
+import { getPublishLabel } from "@/lib/community/channel-categories";
 
 const CHANNEL_COPY: Record<string, string> = {
   "ai-video-tools":
@@ -55,6 +56,7 @@ export function ChannelHeader({
     ? `/create-post?channelId=${channel.id}`
     : `/auth/login?next=/create-post?channelId=${channel.id}`;
 
+  const publishLabel = getPublishLabel(channel.slug);
   const auxiliaryCopy = CHANNEL_COPY[channel.slug];
 
   return (
@@ -138,7 +140,7 @@ export function ChannelHeader({
               render={<Link href={publishHref} />}
             >
               <Sparkles className="size-3.5" />
-              发布讨论
+              {publishLabel}
             </Button>
           </div>
         </div>

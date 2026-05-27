@@ -138,3 +138,27 @@ export const CHANNEL_CATEGORIES: ChannelCategory[] = [
 ];
 
 export const ALL_CHANNEL_DEFS = CHANNEL_CATEGORIES.flatMap((c) => c.channels);
+
+const SLUG_TO_CATEGORY = new Map(
+  CHANNEL_CATEGORIES.flatMap((cat) =>
+    cat.channels.map((ch) => [ch.slug, cat.key] as const),
+  ),
+);
+
+const PUBLISH_LABEL_BY_SLUG: Record<string, string> = {
+  "newbie-qa": "提出问题",
+  "prompts-workflow": "发布工作流教程",
+  "project-collab": "发布项目合作",
+};
+
+const PUBLISH_LABEL_BY_CATEGORY: Record<string, string> = {
+  tools: "分享工具体验",
+};
+
+export function getPublishLabel(slug: string): string {
+  return (
+    PUBLISH_LABEL_BY_SLUG[slug] ??
+    PUBLISH_LABEL_BY_CATEGORY[SLUG_TO_CATEGORY.get(slug) ?? ""] ??
+    "发布讨论"
+  );
+}

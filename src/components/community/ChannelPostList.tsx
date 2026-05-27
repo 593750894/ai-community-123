@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PostCard, type PostCardData } from "@/components/feed/post-card";
 import { PostPagination } from "@/components/community/channel/post-pagination";
+import { getPublishLabel } from "@/lib/community/channel-categories";
 import type { ChannelPostSort } from "@/types/community";
 
 const SORT_LABELS: Record<ChannelPostSort, string> = {
@@ -23,6 +24,7 @@ export function ChannelPostList({
   search,
   hasFilters,
   publishHref,
+  channelSlug,
   signedIn,
   interactions,
 }: {
@@ -34,12 +36,14 @@ export function ChannelPostList({
   search?: string;
   hasFilters: boolean;
   publishHref: string;
+  channelSlug: string;
   signedIn: boolean;
   interactions: {
     likedPostIds: Set<string>;
     bookmarkedPostIds: Set<string>;
   };
 }) {
+  const publishLabel = getPublishLabel(channelSlug);
   if (posts.length === 0) {
     return (
       <EmptyState
@@ -52,7 +56,7 @@ export function ChannelPostList({
         description={
           hasFilters
             ? "试试调整筛选条件或搜索关键词。"
-            : "这个频道还没有讨论。你可以成为第一个分享 Seedance、Kling、ComfyUI 或 AI 视频经验的人。"
+            : "这个频道还没有讨论，来成为第一个发帖的人吧。"
         }
         action={
           !hasFilters ? (
@@ -62,7 +66,7 @@ export function ChannelPostList({
               render={<Link href={publishHref} />}
             >
               <Sparkles className="size-3.5" />
-              发布第一帖
+              {publishLabel}
             </Button>
           ) : undefined
         }

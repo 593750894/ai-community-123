@@ -125,6 +125,7 @@ export default async function ChannelDetailPage({
             search={search}
             hasFilters={hasFilters}
             publishHref={publishHref}
+            channelSlug={channel.slug}
             signedIn={signedIn}
             interactions={interactions}
           />
