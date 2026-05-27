@@ -85,15 +85,24 @@ export function ChannelPostList({
 
   return (
     <>
-      {search && (
-        <p className="text-xs text-muted-foreground">
-          搜索 &ldquo;{search}&rdquo; · 共 {total} 条结果
-        </p>
-      )}
-
-      <div className="flex items-center justify-between">
-        <h2 className="text-xs text-muted-foreground">
-          {SORT_LABELS[sort]} · 共 {total} 帖
+      <div className="flex items-center justify-between rounded-lg border border-border/25 bg-card/20 px-4 py-2.5">
+        <h2 className="flex items-center gap-2 text-xs text-muted-foreground">
+          {search ? (
+            <>
+              搜索 &ldquo;{search}&rdquo;
+              <span className="h-3 w-px bg-border/60" />
+              <span className="tabular-nums">共 {total} 条结果</span>
+            </>
+          ) : (
+            <>
+              <span>{SORT_LABELS[sort]}</span>
+              <span className="h-3 w-px bg-border/60" />
+              <span className="tabular-nums font-medium text-foreground/80">
+                {total}
+              </span>
+              <span>帖</span>
+            </>
+          )}
         </h2>
       </div>
 

@@ -68,13 +68,14 @@ export function ChannelFilters({
       </div>
 
       {activeFilters.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] text-muted-foreground/70">筛选中:</span>
+        <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-border/20 bg-card/20 px-3 py-2">
+          <span className="text-[11px] font-medium text-muted-foreground/70">筛选中</span>
+          <span className="h-3 w-px bg-border/40" />
           {activeFilters.map((f) => (
             <button
               key={f.param}
               onClick={() => clearOne(f.param)}
-              className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-[11px] text-primary transition-colors hover:bg-primary/10"
+              className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/8 px-2.5 py-0.5 text-[11px] font-medium text-primary transition-all hover:bg-primary/15 hover:shadow-sm"
             >
               {f.label}
               <X className="size-2.5" />
@@ -83,7 +84,7 @@ export function ChannelFilters({
           {activeFilters.length > 1 && (
             <button
               onClick={clearAll}
-              className="text-[11px] text-muted-foreground hover:text-foreground"
+              className="ml-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
             >
               清除全部
             </button>

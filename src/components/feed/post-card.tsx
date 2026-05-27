@@ -62,14 +62,15 @@ export function PostCard({
   return (
     <article
       className={cn(
-        "group surface-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:bg-card/60",
+        "group surface-card overflow-hidden p-4 transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:bg-card/60 hover:shadow-[0_0_20px_rgba(var(--color-primary)/0.06)] sm:p-5",
         post.pinned && "border-amber-500/40 bg-amber-500/5 hover:border-amber-500/60",
       )}
     >
+      {/* Top row: type badge + meta */}
       <div className="flex items-center gap-2 text-[11px]">
         <span
           className={cn(
-            "inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 font-medium",
+            "inline-flex shrink-0 items-center rounded-full border px-2.5 py-0.5 font-medium",
             meta.tone,
           )}
         >
@@ -81,6 +82,22 @@ export function PostCard({
             置顶
           </Badge>
         )}
+        {hasMedia && (
+          <div className="flex items-center gap-1.5">
+            {post.videoUrl && (
+              <Badge variant="primary">
+                <Play className="size-3" />
+                视频
+              </Badge>
+            )}
+            {post.imageUrl && (
+              <Badge variant="cyan">
+                <ImageIcon className="size-3" />
+                图片
+              </Badge>
+            )}
+          </div>
+        )}
         {showChannel && post.channel && (
           <Link
             href={`/community/${post.channel.id}`}
@@ -90,50 +107,36 @@ export function PostCard({
             <span>{post.channel.name}</span>
           </Link>
         )}
-        <span className="ml-auto text-muted-foreground tabular-nums">
+        <span className="ml-auto text-muted-foreground/70 tabular-nums">
           {formatRelativeTime(post.createdAt)}
         </span>
       </div>
 
+      {/* Title */}
       <Link
         href={`/post/${post.id}`}
-        className="mt-2 block text-base font-semibold leading-snug text-foreground/95 group-hover:text-primary"
+        className="mt-2.5 block text-[15px] font-semibold leading-snug text-foreground/95 transition-colors group-hover:text-primary"
       >
         {post.title}
       </Link>
 
-      <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">
+      {/* Content preview */}
+      <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground/80">
         {post.content}
       </p>
 
-      {hasMedia && (
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-          {post.videoUrl && (
-            <Badge variant="primary">
-              <Play className="size-3" />
-              视频
-            </Badge>
-          )}
-          {post.imageUrl && (
-            <Badge variant="cyan">
-              <ImageIcon className="size-3" />
-              图片
-            </Badge>
-          )}
-        </div>
-      )}
-
-      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-border/30 pt-2.5 text-xs text-muted-foreground">
+      {/* Author + interaction footer */}
+      <div className="mt-3.5 flex flex-wrap items-center gap-3 border-t border-border/25 pt-3 text-xs text-muted-foreground">
         <div className="flex items-center gap-2">
           {post.author.avatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={post.author.avatar}
               alt={post.author.name}
-              className="size-6 rounded-full border border-border/60"
+              className="size-6 rounded-full border border-border/60 ring-1 ring-border/20"
             />
           ) : (
-            <span className="flex size-6 items-center justify-center rounded-full bg-muted text-[10px] font-medium text-foreground">
+            <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
               {post.author.name.slice(0, 1)}
             </span>
           )}
@@ -154,12 +157,12 @@ export function PostCard({
             );
           })()}
         </div>
-        <div className="ml-auto flex items-center gap-2 tabular-nums">
-          <span className="inline-flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-2.5 tabular-nums">
+          <span className="inline-flex items-center gap-1 text-muted-foreground/60">
             <Eye className="size-3" />
             {post.views}
           </span>
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex items-center gap-1 text-muted-foreground/60">
             <MessageCircle className="size-3" />
             {post.commentCount}
           </span>

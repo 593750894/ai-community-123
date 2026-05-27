@@ -60,17 +60,23 @@ export function ChannelHeader({
   const auxiliaryCopy = CHANNEL_COPY[channel.slug];
 
   return (
-    <header className="relative overflow-hidden border-b border-border/40 px-6 py-8 sm:px-8 sm:py-10">
+    <header className="relative overflow-hidden border-b border-border/40 px-6 py-10 sm:px-8 sm:py-12">
+      {/* Multi-layer gradient background matching community hero */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-fuchsia-500/6" />
       <div
-        className="absolute inset-0 opacity-[0.07]"
+        className="absolute inset-0 opacity-[0.12]"
         style={{
-          background: `linear-gradient(135deg, ${channel.color}, transparent 70%)`,
+          background: `linear-gradient(135deg, ${channel.color}, transparent 60%)`,
         }}
       />
-      <div className="absolute inset-0 bg-grid opacity-20" />
+      <div className="absolute inset-0 bg-grid opacity-30" />
+      <div
+        className="absolute -top-24 left-1/3 size-80 rounded-full blur-3xl"
+        style={{ backgroundColor: `${channel.color}14` }}
+      />
 
       <div className="relative space-y-5">
-        {/* Breadcrumb + category */}
+        {/* Breadcrumb + channel badge */}
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/community"
@@ -88,29 +94,48 @@ export function ChannelHeader({
               </span>
             </>
           )}
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
+            style={{
+              borderColor: `${channel.color}40`,
+              backgroundColor: `${channel.color}15`,
+              color: channel.color,
+            }}
+          >
+            <span
+              className="size-1.5 rounded-full"
+              style={{
+                backgroundColor: channel.color,
+                boxShadow: `0 0 8px ${channel.color}`,
+              }}
+            />
+            频道
+          </span>
         </div>
 
         {/* Title row */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-3">
-            <div className="flex items-center gap-3.5">
+            <div className="flex items-center gap-4">
               {channel.icon && (
                 <span
-                  className="flex size-14 items-center justify-center rounded-xl text-3xl shadow-sm"
+                  className="flex size-14 items-center justify-center rounded-xl border text-3xl shadow-lg sm:size-16 sm:text-4xl"
                   style={{
-                    backgroundColor: `${channel.color}20`,
+                    backgroundColor: `${channel.color}18`,
+                    borderColor: `${channel.color}30`,
                     color: channel.color,
+                    boxShadow: `0 0 24px ${channel.color}18`,
                   }}
                 >
                   {channel.icon}
                 </span>
               )}
               <div>
-                <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
+                <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
                   {channel.name}
                 </h1>
                 {channel.description && (
-                  <p className="mt-0.5 max-w-xl text-sm text-muted-foreground">
+                  <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted-foreground">
                     {channel.description}
                   </p>
                 )}
@@ -118,7 +143,7 @@ export function ChannelHeader({
             </div>
 
             {auxiliaryCopy && (
-              <p className="max-w-2xl rounded-lg border border-border/30 bg-muted/30 px-3.5 py-2.5 text-[13px] leading-relaxed text-muted-foreground">
+              <p className="max-w-2xl rounded-lg border border-primary/10 bg-primary/5 px-4 py-3 text-[13px] leading-relaxed text-muted-foreground">
                 {auxiliaryCopy}
               </p>
             )}
@@ -138,6 +163,7 @@ export function ChannelHeader({
               size="sm"
               nativeButton={false}
               render={<Link href={publishHref} />}
+              className="shadow-sm shadow-primary/25"
             >
               <Sparkles className="size-3.5" />
               {publishLabel}
@@ -146,28 +172,32 @@ export function ChannelHeader({
         </div>
 
         {/* Stats bar */}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-border/30 bg-card/30 px-4 py-2.5 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <MessageSquare className="size-3.5 text-cyan-400" />
-            <span className="tabular-nums font-medium text-foreground/80">
+            <span className="tabular-nums font-semibold text-foreground/90">
               {stats.postCount}
             </span>
             <span>个帖子</span>
           </div>
+          <div className="h-3 w-px bg-border/60" />
           <div className="flex items-center gap-1.5">
             <Users className="size-3.5 text-emerald-400" />
-            <span className="tabular-nums font-medium text-foreground/80">
+            <span className="tabular-nums font-semibold text-foreground/90">
               {stats.creatorCount}
             </span>
             <span>位创作者</span>
           </div>
           {stats.todayPostCount > 0 && (
-            <div className="flex items-center gap-1.5">
-              <CalendarPlus className="size-3.5 text-amber-400" />
-              <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
-                今日 +{stats.todayPostCount}
-              </span>
-            </div>
+            <>
+              <div className="h-3 w-px bg-border/60" />
+              <div className="flex items-center gap-1.5">
+                <CalendarPlus className="size-3.5 text-amber-400" />
+                <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
+                  今日 +{stats.todayPostCount}
+                </span>
+              </div>
+            </>
           )}
         </div>
       </div>

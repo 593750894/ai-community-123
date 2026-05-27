@@ -33,32 +33,38 @@ export function PostPagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center gap-1.5 pt-2">
+    <div className="flex items-center justify-center gap-2 pt-4">
       <button
         disabled={page <= 1}
         onClick={() => goTo(page - 1)}
         className={cn(
-          "inline-flex size-8 items-center justify-center rounded-lg border border-border/40 text-muted-foreground transition-colors",
+          "inline-flex size-9 items-center justify-center rounded-lg border border-border/40 bg-card/30 text-muted-foreground transition-all",
           page <= 1
-            ? "cursor-not-allowed opacity-40"
-            : "hover:border-primary/30 hover:text-foreground",
+            ? "cursor-not-allowed opacity-30"
+            : "hover:border-primary/30 hover:bg-primary/10 hover:text-primary",
         )}
       >
         <ChevronLeft className="size-4" />
       </button>
 
-      <span className="px-2 text-xs tabular-nums text-muted-foreground">
-        {page} / {totalPages}
-      </span>
+      <div className="flex items-center gap-1 rounded-lg border border-border/30 bg-card/20 px-3 py-1.5">
+        <span className="text-xs font-semibold tabular-nums text-primary">
+          {page}
+        </span>
+        <span className="text-xs text-muted-foreground/50">/</span>
+        <span className="text-xs tabular-nums text-muted-foreground">
+          {totalPages}
+        </span>
+      </div>
 
       <button
         disabled={page >= totalPages}
         onClick={() => goTo(page + 1)}
         className={cn(
-          "inline-flex size-8 items-center justify-center rounded-lg border border-border/40 text-muted-foreground transition-colors",
+          "inline-flex size-9 items-center justify-center rounded-lg border border-border/40 bg-card/30 text-muted-foreground transition-all",
           page >= totalPages
-            ? "cursor-not-allowed opacity-40"
-            : "hover:border-primary/30 hover:text-foreground",
+            ? "cursor-not-allowed opacity-30"
+            : "hover:border-primary/30 hover:bg-primary/10 hover:text-primary",
         )}
       >
         <ChevronRight className="size-4" />

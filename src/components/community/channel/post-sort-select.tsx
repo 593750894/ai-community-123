@@ -33,7 +33,7 @@ export function PostSortSelect({ current = "latest" }: { current?: string }) {
   );
 
   return (
-    <div className="flex items-center gap-1 rounded-lg border border-border/40 bg-card/30 p-0.5">
+    <div className="flex items-center gap-0.5 rounded-lg border border-border/40 bg-card/30 p-0.5">
       {SORT_OPTIONS.map((opt) => {
         const active = current === opt.value;
         return (
@@ -41,13 +41,13 @@ export function PostSortSelect({ current = "latest" }: { current?: string }) {
             key={opt.value}
             onClick={() => setSort(opt.value)}
             className={cn(
-              "inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+              "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
               active
-                ? "bg-muted text-foreground"
-                : "text-muted-foreground hover:text-foreground",
+                ? "bg-primary/10 text-primary shadow-sm"
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
             )}
           >
-            <opt.icon className="size-3" />
+            <opt.icon className={cn("size-3", active && "text-primary")} />
             {opt.label}
           </button>
         );

@@ -127,7 +127,7 @@ export default async function ChannelDetailPage({
     <div className="flex flex-1 flex-col">
       <ChannelHeader channel={channel} stats={channelStats} signedIn={signedIn} />
 
-      <div className="flex flex-col gap-6 px-4 py-5 sm:px-8 sm:py-6 xl:flex-row">
+      <div className="flex flex-col gap-6 px-4 py-6 sm:px-8 sm:py-8 xl:flex-row xl:gap-8">
         {/* Main content */}
         <div className="min-w-0 flex-1 space-y-4">
           <Suspense>

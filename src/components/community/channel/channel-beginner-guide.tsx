@@ -36,21 +36,21 @@ export function ChannelBeginnerGuide({ channelId }: { channelId: string }) {
           新手提示
         </div>
       </div>
-      <p className="px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+      <p className="px-4 py-3 text-xs leading-relaxed text-muted-foreground/80">
         第一次来这个频道？可以先分享你正在使用的 AI 视频工具、遇到的问题或最近完成的作品。
       </p>
-      <div className="border-t border-border/30 p-2">
+      <div className="border-t border-border/25 p-2">
         {guides.map((g) => (
           <Link
             key={g.href}
             href={g.href}
-            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/50"
+            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-muted/40"
           >
-            <g.icon className={`size-4 ${g.color}`} />
-            <span className="flex-1 text-sm text-foreground/90 group-hover:text-foreground">
+            <g.icon className={`size-4 ${g.color} transition-transform group-hover:scale-110`} />
+            <span className="flex-1 text-sm text-foreground/90 transition-colors group-hover:text-foreground">
               {g.label}
             </span>
-            <ArrowUpRight className="size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            <ArrowUpRight className="size-3.5 text-muted-foreground opacity-0 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100" />
           </Link>
         ))}
       </div>

@@ -25,19 +25,19 @@ export function ChannelStatsCard({ stats }: { stats: ChannelStats }) {
   ];
 
   return (
-    <section className="surface-card p-4">
-      <div className="mb-3.5 flex items-center gap-1.5 text-xs font-semibold text-foreground/90">
+    <section className="surface-card overflow-hidden">
+      <div className="flex items-center gap-1.5 border-b border-border/30 bg-gradient-to-r from-primary/8 via-transparent to-transparent px-4 py-3 text-xs font-semibold text-foreground/90">
         <TrendingUp className="size-3.5 text-primary" />
         频道数据
       </div>
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-2 gap-2.5 p-3.5">
         {items.map((s) => (
           <div
             key={s.label}
-            className="rounded-lg border border-border/30 bg-muted/30 px-3 py-3 text-center transition-colors hover:bg-muted/50"
+            className="group rounded-lg border border-border/25 bg-muted/20 px-3 py-3 text-center transition-all hover:border-border/40 hover:bg-muted/40"
           >
             <div className="flex items-center justify-center gap-1.5">
-              <s.icon className={`size-3.5 ${s.color}`} />
+              <s.icon className={`size-3.5 ${s.color} transition-transform group-hover:scale-110`} />
               <span className="text-lg font-bold tabular-nums text-foreground">
                 {s.value}
               </span>

@@ -11,29 +11,30 @@ export function RelatedChannels({
   if (channels.length === 0) return null;
 
   return (
-    <section className="surface-card p-4">
-      <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold text-foreground/90">
+    <section className="surface-card overflow-hidden">
+      <div className="flex items-center gap-1.5 border-b border-border/30 bg-gradient-to-r from-violet-500/8 via-transparent to-transparent px-4 py-3 text-xs font-semibold text-foreground/90">
         <Hash className="size-3.5 text-violet-400" />
         推荐相关频道
       </div>
-      <ul className="space-y-1">
+      <ul className="p-1.5">
         {channels.map((ch) => (
           <li key={ch.id}>
             <Link
               href={`/community/${ch.id}`}
-              className="group flex items-start gap-2.5 rounded-lg px-2 py-2 transition-colors hover:bg-muted/40"
+              className="group flex items-start gap-2.5 rounded-lg px-2.5 py-2.5 transition-colors hover:bg-muted/40"
             >
               <span
-                className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg text-base"
+                className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border text-base"
                 style={{
-                  backgroundColor: `${ch.color}20`,
+                  backgroundColor: `${ch.color}15`,
+                  borderColor: `${ch.color}25`,
                   color: ch.color,
                 }}
               >
                 {ch.icon ?? "#"}
               </span>
               <div className="min-w-0 flex-1">
-                <span className="truncate text-sm font-medium group-hover:text-primary">
+                <span className="truncate text-sm font-medium transition-colors group-hover:text-primary">
                   {ch.name}
                 </span>
                 {ch.description && (
