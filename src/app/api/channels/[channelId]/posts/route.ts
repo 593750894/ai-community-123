@@ -1,7 +1,10 @@
-import { prisma } from "@/lib/db";
 import { NotFoundError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
-import { parsePagination, paginatedResponse } from "@/lib/pagination";
+import { getChannelDetail, getChannelPosts } from "@/lib/community/queries";
+import type { ChannelPostSort } from "@/types/community";
+
+const VALID_SORTS = new Set<ChannelPostSort>(["latest", "hot", "mostCommented", "mostLiked"]);
+const MAX_PAGE_SIZE = 50;
 
 export async function GET(
   request: Request,
@@ -9,38 +12,41 @@ export async function GET(
 ) {
   try {
     const { channelId } = await params;
-
-    const channel = await prisma.channel.findUnique({
-      where: { id: channelId },
-      select: { id: true },
-    });
+    const channel = await getChannelDetail(channelId);
     if (!channel) throw new NotFoundError("频道");
 
     const url = new URL(request.url);
-    const { page, pageSize, skip } = parsePagination(url);
+    const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
+    const limit = Math.min(
+      MAX_PAGE_SIZE,
+      Math.max(1, Number(url.searchParams.get("pageSize")) || 20),
+    );
     const type = url.searchParams.get("type") || undefined;
+    const search = url.searchParams.get("search") || undefined;
+    const sortParam = url.searchParams.get("sort") || "latest";
+    const sort: ChannelPostSort = VALID_SORTS.has(sortParam as ChannelPostSort)
+      ? (sortParam as ChannelPostSort)
+      : "latest";
 
-    const where = {
-      channelId,
-      ...(type ? { type: type as never } : {}),
-    };
+    const result = await getChannelPosts(channel.id, {
+      type,
+      sort,
+      search,
+      page,
+      limit,
+    });
 
-    const [items, total] = await Promise.all([
-      prisma.post.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: pageSize,
-        include: {
-          author: {
-            select: { id: true, username: true, name: true, avatar: true },
-          },
-        },
-      }),
-      prisma.post.count({ where }),
-    ]);
-
-    return success(paginatedResponse(items, total, page, pageSize));
+    return success({
+      channel: { id: channel.id, name: channel.name, slug: channel.slug },
+      posts: result.posts,
+      pagination: {
+        page: result.page,
+        pageSize: result.limit,
+        total: result.total,
+        totalPages: result.totalPages,
+        hasMore: result.page < result.totalPages,
+      },
+    });
   } catch (err) {
     return error(err);
   }

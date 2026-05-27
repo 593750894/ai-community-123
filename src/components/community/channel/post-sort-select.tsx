@@ -2,13 +2,15 @@
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { ArrowDownWideNarrow, Flame } from "lucide-react";
+import { ArrowDownWideNarrow, Flame, MessageSquare, Heart } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const SORT_OPTIONS = [
   { value: "latest", label: "最新", icon: ArrowDownWideNarrow },
   { value: "hot", label: "热门", icon: Flame },
+  { value: "mostCommented", label: "最多评论", icon: MessageSquare },
+  { value: "mostLiked", label: "最多点赞", icon: Heart },
 ] as const;
 
 export function PostSortSelect({ current = "latest" }: { current?: string }) {

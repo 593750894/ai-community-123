@@ -6,11 +6,40 @@ import type {
   ChannelDetail,
   ChannelPostsQuery,
   ChannelPostsResult,
+  ChannelStats,
+  ChannelHotPost,
   PostOverview,
   CreatorOverview,
   TagOverview,
 } from "@/types/community";
 import type { PostType } from "@/generated/prisma/client";
+import { CHANNEL_CATEGORIES } from "./channel-categories";
+
+// ---------- Shared select shapes ----------
+
+const postSelect = {
+  id: true,
+  title: true,
+  content: true,
+  type: true,
+  videoUrl: true,
+  imageUrl: true,
+  views: true,
+  likeCount: true,
+  commentCount: true,
+  bookmarkCount: true,
+  pinned: true,
+  createdAt: true,
+  updatedAt: true,
+  author: {
+    select: { id: true, name: true, username: true, avatar: true, role: true },
+  },
+  channel: {
+    select: { id: true, name: true, slug: true, icon: true, color: true },
+  },
+} as const;
+
+// ---------- Community overview queries ----------
 
 export async function getCommunityStats(): Promise<CommunityStats> {
   const todayStart = new Date();
@@ -50,26 +79,7 @@ export async function getLatestPosts(limit = 8) {
   return prisma.post.findMany({
     orderBy: { createdAt: "desc" },
     take: limit,
-    select: {
-      id: true,
-      title: true,
-      content: true,
-      type: true,
-      videoUrl: true,
-      imageUrl: true,
-      views: true,
-      likeCount: true,
-      commentCount: true,
-      bookmarkCount: true,
-      pinned: true,
-      createdAt: true,
-      author: {
-        select: { id: true, name: true, username: true, avatar: true },
-      },
-      channel: {
-        select: { id: true, name: true, slug: true, icon: true, color: true },
-      },
-    },
+    select: postSelect,
   });
 }
 
@@ -80,26 +90,7 @@ export async function getHotPosts(limit = 6, days = 7) {
   const posts = await prisma.post.findMany({
     where: { createdAt: { gte: since } },
     take: 50,
-    select: {
-      id: true,
-      title: true,
-      content: true,
-      type: true,
-      videoUrl: true,
-      imageUrl: true,
-      views: true,
-      likeCount: true,
-      commentCount: true,
-      bookmarkCount: true,
-      pinned: true,
-      createdAt: true,
-      author: {
-        select: { id: true, name: true, username: true, avatar: true },
-      },
-      channel: {
-        select: { id: true, name: true, slug: true, icon: true, color: true },
-      },
-    },
+    select: postSelect,
   });
 
   return posts
@@ -213,7 +204,10 @@ function toPostOverview(post: Awaited<ReturnType<typeof getLatestPosts>>[number]
     bookmarkCount: post.bookmarkCount,
     pinned: post.pinned,
     createdAt: (post.createdAt instanceof Date ? post.createdAt : new Date(post.createdAt)).toISOString(),
-    author: post.author,
+    updatedAt: ("updatedAt" in post && post.updatedAt)
+      ? (post.updatedAt instanceof Date ? post.updatedAt : new Date(post.updatedAt as string)).toISOString()
+      : (post.createdAt instanceof Date ? post.createdAt : new Date(post.createdAt)).toISOString(),
+    author: post.author as PostOverview["author"],
     channel: post.channel!,
   };
 }
@@ -254,26 +248,14 @@ function toChannelOverview(ch: Awaited<ReturnType<typeof getHotChannels>>[number
 
 // ---------- Channel detail queries ----------
 
-const postSelect = {
-  id: true,
-  title: true,
-  content: true,
-  type: true,
-  videoUrl: true,
-  imageUrl: true,
-  views: true,
-  likeCount: true,
-  commentCount: true,
-  bookmarkCount: true,
-  pinned: true,
-  createdAt: true,
-  author: {
-    select: { id: true, name: true, username: true, avatar: true },
-  },
-  channel: {
-    select: { id: true, name: true, slug: true, icon: true, color: true },
-  },
-} as const;
+function getChannelCategory(slug: string): string | null {
+  for (const cat of CHANNEL_CATEGORIES) {
+    if (cat.channels.some((ch) => ch.slug === slug)) {
+      return cat.label;
+    }
+  }
+  return null;
+}
 
 export async function getChannelDetail(
   idOrSlug: string,
@@ -302,12 +284,26 @@ export async function getChannelDetail(
     icon: ch.icon,
     banner: ch.banner,
     color: ch.color,
+    category: getChannelCategory(ch.slug),
     createdAt: ch.createdAt.toISOString(),
     owner: ch.owner,
     postCount: ch._count.posts,
     memberCount: ch._count.members,
     todayPostCount,
   };
+}
+
+function buildPostOrderBy(sort: ChannelPostsQuery["sort"]) {
+  switch (sort) {
+    case "hot":
+      return [{ likeCount: "desc" as const }, { commentCount: "desc" as const }];
+    case "mostCommented":
+      return [{ commentCount: "desc" as const }, { createdAt: "desc" as const }];
+    case "mostLiked":
+      return [{ likeCount: "desc" as const }, { createdAt: "desc" as const }];
+    default:
+      return [{ pinned: "desc" as const }, { createdAt: "desc" as const }];
+  }
 }
 
 export async function getChannelPosts(
@@ -324,10 +320,7 @@ export async function getChannelPosts(
     prisma.post.count({ where }),
     prisma.post.findMany({
       where,
-      orderBy:
-        sort === "hot"
-          ? [{ likeCount: "desc" }, { commentCount: "desc" }]
-          : [{ pinned: "desc" }, { createdAt: "desc" }],
+      orderBy: buildPostOrderBy(sort),
       skip: (page - 1) * limit,
       take: limit,
       select: postSelect,
@@ -365,6 +358,60 @@ export async function getChannelHotPosts(
     })
     .slice(0, limit)
     .map(toPostOverview);
+}
+
+export async function getChannelHotPostsLite(
+  channelId: string,
+  limit = 5,
+  days = 7,
+): Promise<ChannelHotPost[]> {
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+
+  const posts = await prisma.post.findMany({
+    where: { channelId, createdAt: { gte: since } },
+    take: 50,
+    select: {
+      id: true,
+      title: true,
+      likeCount: true,
+      commentCount: true,
+      bookmarkCount: true,
+    },
+  });
+
+  return posts
+    .sort((a, b) => {
+      const scoreA = a.likeCount + a.commentCount * 2 + a.bookmarkCount;
+      const scoreB = b.likeCount + b.commentCount * 2 + b.bookmarkCount;
+      return scoreB - scoreA;
+    })
+    .slice(0, limit);
+}
+
+export async function getChannelStats(channelId: string): Promise<ChannelStats> {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+
+  const [postCount, todayPostCount, creatorCount, hotPostCount] =
+    await Promise.all([
+      prisma.post.count({ where: { channelId } }),
+      prisma.post.count({ where: { channelId, createdAt: { gte: todayStart } } }),
+      prisma.post
+        .groupBy({ by: ["authorId"], where: { channelId } })
+        .then((rows) => rows.length),
+      prisma.post.count({
+        where: {
+          channelId,
+          createdAt: { gte: weekAgo },
+          OR: [{ likeCount: { gte: 3 } }, { commentCount: { gte: 2 } }],
+        },
+      }),
+    ]);
+
+  return { postCount, todayPostCount, creatorCount, hotPostCount };
 }
 
 export async function getCommunityOverview(): Promise<CommunityOverviewData> {

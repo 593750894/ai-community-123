@@ -1,6 +1,10 @@
-import { prisma } from "@/lib/db";
 import { NotFoundError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
+import {
+  getChannelDetail,
+  getChannelStats,
+  getChannelHotPostsLite,
+} from "@/lib/community/queries";
 
 export async function GET(
   _request: Request,
@@ -8,17 +12,15 @@ export async function GET(
 ) {
   try {
     const { channelId } = await params;
-    const channel = await prisma.channel.findUnique({
-      where: { id: channelId },
-      include: {
-        owner: {
-          select: { id: true, username: true, name: true, avatar: true },
-        },
-        _count: { select: { posts: true, members: true } },
-      },
-    });
+    const channel = await getChannelDetail(channelId);
     if (!channel) throw new NotFoundError("频道");
-    return success(channel);
+
+    const [stats, hotPosts] = await Promise.all([
+      getChannelStats(channel.id),
+      getChannelHotPostsLite(channel.id),
+    ]);
+
+    return success({ channel, stats, hotPosts });
   } catch (err) {
     return error(err);
   }

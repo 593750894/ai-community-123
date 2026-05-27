@@ -17,8 +17,11 @@ import {
   getChannelPosts,
   getChannelHotPosts,
 } from "@/lib/community/queries";
+import type { ChannelPostSort } from "@/types/community";
 import { getSession } from "@/lib/auth/session";
 import { loadInteractionState } from "@/lib/interactions/queries";
+
+const VALID_SORTS = new Set<ChannelPostSort>(["latest", "hot", "mostCommented", "mostLiked"]);
 
 export const dynamic = "force-dynamic";
 
@@ -66,13 +69,15 @@ export default async function ChannelDetailPage({
   if (!channel) notFound();
 
   const type = typeof sp.type === "string" ? sp.type : undefined;
-  const sort =
-    typeof sp.sort === "string" && sp.sort === "hot" ? "hot" : "latest";
+  const sortParam = typeof sp.sort === "string" ? sp.sort : "latest";
+  const sort: ChannelPostSort = VALID_SORTS.has(sortParam as ChannelPostSort)
+    ? (sortParam as ChannelPostSort)
+    : "latest";
   const search = typeof sp.q === "string" ? sp.q : undefined;
   const page = typeof sp.page === "string" ? Math.max(1, parseInt(sp.page, 10) || 1) : 1;
 
   const [result, hotPosts, session] = await Promise.all([
-    getChannelPosts(channel.id, { type, sort: sort as "latest" | "hot", search, page }),
+    getChannelPosts(channel.id, { type, sort, search, page }),
     getChannelHotPosts(channel.id),
     getSession(),
   ]);
@@ -147,7 +152,7 @@ export default async function ChannelDetailPage({
             <>
               <div className="flex items-center justify-between">
                 <h2 className="text-xs text-muted-foreground">
-                  {sort === "hot" ? "按热度排序" : "按发布时间排序"} · 共{" "}
+                  {{ latest: "按发布时间排序", hot: "按热度排序", mostCommented: "按评论数排序", mostLiked: "按点赞数排序" }[sort]} · 共{" "}
                   {result.total} 帖
                 </h2>
               </div>
