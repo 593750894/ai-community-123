@@ -8,9 +8,7 @@ import { ChannelHotPosts } from "@/components/community/channel/channel-hot-post
 import { ChannelStatsCard } from "@/components/community/channel/channel-stats-card";
 import { RelatedChannels } from "@/components/community/channel/related-channels";
 import { ChannelBeginnerGuide } from "@/components/community/channel/channel-beginner-guide";
-import { PostTypeFilter } from "@/components/community/channel/post-type-filter";
-import { PostSortSelect } from "@/components/community/channel/post-sort-select";
-import { ChannelSearchBar } from "@/components/community/channel/channel-search-bar";
+import { ChannelFilters } from "@/components/community/ChannelFilters";
 import {
   getChannelDetail,
   getChannelPosts,
@@ -111,19 +109,9 @@ export default async function ChannelDetailPage({
         {/* Main content */}
         <div className="min-w-0 flex-1 space-y-4">
           {/* Toolbar: filter + sort + search */}
-          <div className="space-y-3">
-            <Suspense>
-              <PostTypeFilter current={type} />
-            </Suspense>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <Suspense>
-                <PostSortSelect current={sort} />
-              </Suspense>
-              <Suspense>
-                <ChannelSearchBar current={search} />
-              </Suspense>
-            </div>
-          </div>
+          <Suspense>
+            <ChannelFilters type={type} sort={sort} search={search} />
+          </Suspense>
 
           {/* Posts */}
           <ChannelPostList
