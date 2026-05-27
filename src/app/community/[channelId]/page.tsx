@@ -21,6 +21,8 @@ import { getSession } from "@/lib/auth/session";
 import { loadInteractionState } from "@/lib/interactions/queries";
 
 const VALID_SORTS = new Set<ChannelPostSort>(["latest", "hot", "mostCommented", "mostLiked"]);
+const DEFAULT_PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 50;
 
 export const dynamic = "force-dynamic";
 
@@ -82,9 +84,12 @@ export default async function ChannelDetailPage({
     : "latest";
   const search = typeof sp.q === "string" ? sp.q : undefined;
   const page = typeof sp.page === "string" ? Math.max(1, parseInt(sp.page, 10) || 1) : 1;
+  const pageSize = typeof sp.pageSize === "string"
+    ? Math.min(MAX_PAGE_SIZE, Math.max(1, parseInt(sp.pageSize, 10) || DEFAULT_PAGE_SIZE))
+    : DEFAULT_PAGE_SIZE;
 
   const [result, hotPosts, channelStats, relatedChannels, session] = await Promise.all([
-    getChannelPosts(channel.id, { type, sort, search, page }),
+    getChannelPosts(channel.id, { type, sort, search, page, limit: pageSize }),
     getChannelHotPosts(channel.id),
     getChannelStats(channel.id),
     getRelatedChannels(channel.id, channel.slug),
