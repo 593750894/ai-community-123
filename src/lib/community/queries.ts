@@ -440,6 +440,65 @@ export async function getChannelStats(channelId: string): Promise<ChannelStats> 
   return { postCount, todayPostCount, creatorCount, hotPostCount };
 }
 
+export async function getRelatedChannels(
+  channelId: string,
+  channelSlug: string,
+  limit = 4,
+): Promise<ChannelOverview[]> {
+  let sameCategoryChannelSlugs: string[] = [];
+  for (const cat of CHANNEL_CATEGORIES) {
+    if (cat.channels.some((ch) => ch.slug === channelSlug)) {
+      sameCategoryChannelSlugs = cat.channels
+        .filter((ch) => ch.slug !== channelSlug)
+        .map((ch) => ch.slug);
+      break;
+    }
+  }
+
+  const rows = await prisma.channel.findMany({
+    where: {
+      id: { not: channelId },
+      ...(sameCategoryChannelSlugs.length > 0
+        ? { slug: { in: sameCategoryChannelSlugs } }
+        : {}),
+    },
+    orderBy: { posts: { _count: "desc" } },
+    take: limit,
+    include: {
+      _count: { select: { posts: true, members: true } },
+      posts: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: {
+          id: true,
+          title: true,
+          createdAt: true,
+          author: { select: { name: true } },
+        },
+      },
+    },
+  });
+
+  return rows.map((ch) => ({
+    id: ch.id,
+    slug: ch.slug,
+    name: ch.name,
+    description: ch.description,
+    icon: ch.icon,
+    color: ch.color,
+    postCount: ch._count.posts,
+    memberCount: ch._count.members,
+    latestPost: ch.posts[0]
+      ? {
+          id: ch.posts[0].id,
+          title: ch.posts[0].title,
+          createdAt: ch.posts[0].createdAt.toISOString(),
+          authorName: ch.posts[0].author.name,
+        }
+      : null,
+  }));
+}
+
 export async function getCommunityOverview(): Promise<CommunityOverviewData> {
   const [stats, channels, hotChannels, latestPosts, hotPosts, creators, tags] =
     await Promise.all([

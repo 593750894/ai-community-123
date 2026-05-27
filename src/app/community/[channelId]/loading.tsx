@@ -44,9 +44,30 @@ export default function ChannelDetailLoading() {
         </div>
 
         {/* Sidebar */}
-        <aside className="hidden w-64 shrink-0 space-y-3 xl:block">
-          <Skeleton className="h-5 w-20" />
-          <Skeleton className="h-48 rounded-xl" />
+        <aside className="hidden w-80 shrink-0 space-y-5 xl:block">
+          {/* Stats skeleton */}
+          <div className="surface-card p-4 space-y-3">
+            <Skeleton className="h-4 w-20" />
+            <div className="grid grid-cols-2 gap-2.5">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 rounded-lg" />
+              ))}
+            </div>
+          </div>
+          {/* Hot posts skeleton */}
+          <div className="surface-card p-4 space-y-3">
+            <Skeleton className="h-4 w-20" />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-12 rounded-lg" />
+            ))}
+          </div>
+          {/* Related channels skeleton */}
+          <div className="surface-card p-4 space-y-3">
+            <Skeleton className="h-4 w-28" />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-14 rounded-lg" />
+            ))}
+          </div>
         </aside>
       </div>
     </div>

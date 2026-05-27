@@ -8,6 +8,9 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PostCard, type PostCardData } from "@/components/feed/post-card";
 import { ChannelHeader } from "@/components/community/channel/channel-header";
 import { ChannelHotPosts } from "@/components/community/channel/channel-hot-posts";
+import { ChannelStatsCard } from "@/components/community/channel/channel-stats-card";
+import { RelatedChannels } from "@/components/community/channel/related-channels";
+import { ChannelBeginnerGuide } from "@/components/community/channel/channel-beginner-guide";
 import { PostTypeFilter } from "@/components/community/channel/post-type-filter";
 import { PostSortSelect } from "@/components/community/channel/post-sort-select";
 import { ChannelSearchBar } from "@/components/community/channel/channel-search-bar";
@@ -16,6 +19,8 @@ import {
   getChannelDetail,
   getChannelPosts,
   getChannelHotPosts,
+  getChannelStats,
+  getRelatedChannels,
 } from "@/lib/community/queries";
 import type { ChannelPostSort } from "@/types/community";
 import { getSession } from "@/lib/auth/session";
@@ -76,9 +81,11 @@ export default async function ChannelDetailPage({
   const search = typeof sp.q === "string" ? sp.q : undefined;
   const page = typeof sp.page === "string" ? Math.max(1, parseInt(sp.page, 10) || 1) : 1;
 
-  const [result, hotPosts, session] = await Promise.all([
+  const [result, hotPosts, channelStats, relatedChannels, session] = await Promise.all([
     getChannelPosts(channel.id, { type, sort, search, page }),
     getChannelHotPosts(channel.id),
+    getChannelStats(channel.id),
+    getRelatedChannels(channel.id, channel.slug),
     getSession(),
   ]);
 
@@ -177,8 +184,11 @@ export default async function ChannelDetailPage({
         </div>
 
         {/* Sidebar */}
-        <aside className="hidden w-64 shrink-0 space-y-5 xl:block">
+        <aside className="hidden w-80 shrink-0 space-y-5 xl:block">
+          <ChannelStatsCard stats={channelStats} />
           <ChannelHotPosts posts={hotPosts} />
+          <RelatedChannels channels={relatedChannels} />
+          <ChannelBeginnerGuide channelId={channel.id} />
         </aside>
       </div>
     </div>
