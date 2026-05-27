@@ -36,7 +36,10 @@ export function ChannelBeginnerGuide({ channelId }: { channelId: string }) {
           新手提示
         </div>
       </div>
-      <div className="p-2">
+      <p className="px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+        第一次来这个频道？可以先分享你正在使用的 AI 视频工具、遇到的问题或最近完成的作品。
+      </p>
+      <div className="border-t border-border/30 p-2">
         {guides.map((g) => (
           <Link
             key={g.href}

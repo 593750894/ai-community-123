@@ -4,10 +4,7 @@ import { Suspense } from "react";
 import type { PostCardData } from "@/components/feed/post-card";
 import { ChannelHeader } from "@/components/community/channel/channel-header";
 import { ChannelPostList } from "@/components/community/ChannelPostList";
-import { ChannelHotPosts } from "@/components/community/channel/channel-hot-posts";
-import { ChannelStatsCard } from "@/components/community/channel/channel-stats-card";
-import { RelatedChannels } from "@/components/community/channel/related-channels";
-import { ChannelBeginnerGuide } from "@/components/community/channel/channel-beginner-guide";
+import { ChannelRightPanel } from "@/components/community/ChannelRightPanel";
 import { ChannelFilters } from "@/components/community/ChannelFilters";
 import {
   getChannelDetail,
@@ -110,7 +107,7 @@ export default async function ChannelDetailPage({
     <div className="flex flex-1 flex-col">
       <ChannelHeader channel={channel} stats={channelStats} signedIn={signedIn} />
 
-      <div className="flex gap-6 px-4 py-5 sm:px-8 sm:py-6">
+      <div className="flex flex-col gap-6 px-4 py-5 sm:px-8 sm:py-6 xl:flex-row">
         {/* Main content */}
         <div className="min-w-0 flex-1 space-y-4">
           {/* Toolbar: filter + sort + search */}
@@ -134,12 +131,12 @@ export default async function ChannelDetailPage({
         </div>
 
         {/* Sidebar */}
-        <aside className="hidden w-80 shrink-0 space-y-5 xl:block">
-          <ChannelStatsCard stats={channelStats} />
-          <ChannelHotPosts posts={hotPosts} />
-          <RelatedChannels channels={relatedChannels} />
-          <ChannelBeginnerGuide channelId={channel.id} />
-        </aside>
+        <ChannelRightPanel
+          stats={channelStats}
+          hotPosts={hotPosts}
+          relatedChannels={relatedChannels}
+          channelId={channel.id}
+        />
       </div>
     </div>
   );
