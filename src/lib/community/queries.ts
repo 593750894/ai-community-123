@@ -295,12 +295,11 @@ export async function getChannelDetail(
 
 function buildPostOrderBy(sort: ChannelPostsQuery["sort"]) {
   switch (sort) {
-    case "hot":
-      return [{ likeCount: "desc" as const }, { commentCount: "desc" as const }];
     case "mostCommented":
       return [{ commentCount: "desc" as const }, { createdAt: "desc" as const }];
     case "mostLiked":
       return [{ likeCount: "desc" as const }, { createdAt: "desc" as const }];
+    case "hot":
     default:
       return [{ pinned: "desc" as const }, { createdAt: "desc" as const }];
   }
@@ -310,11 +309,38 @@ export async function getChannelPosts(
   channelId: string,
   opts: ChannelPostsQuery = {},
 ): Promise<ChannelPostsResult> {
-  const { type, sort = "latest", search, page = 1, limit = 20 } = opts;
+  const { type, sort = "latest", search, page = 1, limit = 10 } = opts;
 
   const where: Record<string, unknown> = { channelId };
   if (type) where.type = type as PostType;
-  if (search) where.title = { contains: search, mode: "insensitive" };
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { content: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  if (sort === "hot") {
+    const [total, all] = await Promise.all([
+      prisma.post.count({ where }),
+      prisma.post.findMany({ where, select: postSelect }),
+    ]);
+
+    const sorted = all.sort((a, b) => {
+      const scoreA = a.likeCount + a.commentCount * 2 + a.bookmarkCount;
+      const scoreB = b.likeCount + b.commentCount * 2 + b.bookmarkCount;
+      return scoreB - scoreA;
+    });
+
+    const paged = sorted.slice((page - 1) * limit, page * limit);
+    return {
+      posts: paged.map(toPostOverview),
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    };
+  }
 
   const [total, rows] = await Promise.all([
     prisma.post.count({ where }),

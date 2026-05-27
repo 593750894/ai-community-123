@@ -1,9 +1,13 @@
-import { NotFoundError } from "@/lib/errors";
+import { NotFoundError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
 import { getChannelDetail, getChannelPosts } from "@/lib/community/queries";
 import type { ChannelPostSort } from "@/types/community";
 
 const VALID_SORTS = new Set<ChannelPostSort>(["latest", "hot", "mostCommented", "mostLiked"]);
+const VALID_TYPES = new Set([
+  "DISCUSSION", "SHOWCASE", "COLLABORATION",
+  "TOOL_RECOMMEND", "TUTORIAL", "QUESTION", "NEWS",
+]);
 const MAX_PAGE_SIZE = 50;
 
 export async function GET(
@@ -19,17 +23,25 @@ export async function GET(
     const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
     const limit = Math.min(
       MAX_PAGE_SIZE,
-      Math.max(1, Number(url.searchParams.get("pageSize")) || 20),
+      Math.max(1, Number(url.searchParams.get("pageSize")) || 10),
     );
-    const type = url.searchParams.get("type") || undefined;
+
+    const typeParam = url.searchParams.get("type") || undefined;
+    if (typeParam && !VALID_TYPES.has(typeParam)) {
+      throw new ValidationError("无效的帖子类型", { type: typeParam });
+    }
+
     const search = url.searchParams.get("search") || undefined;
     const sortParam = url.searchParams.get("sort") || "latest";
+    if (url.searchParams.has("sort") && !VALID_SORTS.has(sortParam as ChannelPostSort)) {
+      throw new ValidationError("无效的排序方式", { sort: sortParam });
+    }
     const sort: ChannelPostSort = VALID_SORTS.has(sortParam as ChannelPostSort)
       ? (sortParam as ChannelPostSort)
       : "latest";
 
     const result = await getChannelPosts(channel.id, {
-      type,
+      type: typeParam,
       sort,
       search,
       page,
