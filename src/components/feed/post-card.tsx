@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Eye, ImageIcon, MessageCircle, Pin, Play } from "lucide-react";
+import { Eye, ImageIcon, MessageCircle, Pin, Play, Shield, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { cn, formatRelativeTime } from "@/lib/utils";
@@ -8,6 +8,11 @@ import {
   BookmarkButton,
   LikeButton,
 } from "@/components/feed/interaction-buttons";
+
+const ROLE_META: Record<string, { label: string; icon: typeof Shield; className: string } | undefined> = {
+  MOD: { label: "版主", icon: Shield, className: "text-blue-400" },
+  ADMIN: { label: "管理员", icon: ShieldCheck, className: "text-amber-400" },
+};
 
 export type PostCardData = {
   id: string;
@@ -19,6 +24,7 @@ export type PostCardData = {
   views: number;
   likeCount: number;
   commentCount: number;
+  bookmarkCount?: number;
   pinned: boolean;
   createdAt: Date | string;
   author: {
@@ -26,6 +32,7 @@ export type PostCardData = {
     name: string;
     username: string;
     avatar: string | null;
+    role?: "USER" | "MOD" | "ADMIN";
   };
   channel?: {
     id: string;
@@ -136,6 +143,16 @@ export function PostCard({
           >
             {post.author.name}
           </Link>
+          {post.author.role && ROLE_META[post.author.role] && (() => {
+            const rm = ROLE_META[post.author.role!]!;
+            const RoleIcon = rm.icon;
+            return (
+              <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-medium", rm.className)}>
+                <RoleIcon className="size-3" />
+                {rm.label}
+              </span>
+            );
+          })()}
         </div>
         <div className="ml-auto flex items-center gap-2 tabular-nums">
           <span className="inline-flex items-center gap-1">
@@ -155,6 +172,8 @@ export function PostCard({
           <BookmarkButton
             target={{ kind: "post", id: post.id }}
             initialActive={bookmarked}
+            initialCount={post.bookmarkCount}
+            showCount={post.bookmarkCount != null}
             signedIn={signedIn}
           />
         </div>

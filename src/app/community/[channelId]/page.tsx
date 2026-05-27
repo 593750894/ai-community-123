@@ -1,12 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MessageSquare, Sparkles } from "lucide-react";
 import { Suspense } from "react";
 
-import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/empty-state";
-import { PostCard, type PostCardData } from "@/components/feed/post-card";
+import type { PostCardData } from "@/components/feed/post-card";
 import { ChannelHeader } from "@/components/community/channel/channel-header";
+import { ChannelPostList } from "@/components/community/ChannelPostList";
 import { ChannelHotPosts } from "@/components/community/channel/channel-hot-posts";
 import { ChannelStatsCard } from "@/components/community/channel/channel-stats-card";
 import { RelatedChannels } from "@/components/community/channel/related-channels";
@@ -14,7 +11,6 @@ import { ChannelBeginnerGuide } from "@/components/community/channel/channel-beg
 import { PostTypeFilter } from "@/components/community/channel/post-type-filter";
 import { PostSortSelect } from "@/components/community/channel/post-sort-select";
 import { ChannelSearchBar } from "@/components/community/channel/channel-search-bar";
-import { PostPagination } from "@/components/community/channel/post-pagination";
 import {
   getChannelDetail,
   getChannelPosts,
@@ -40,9 +36,10 @@ function toPostCard(p: {
   views: number;
   likeCount: number;
   commentCount: number;
+  bookmarkCount: number;
   pinned: boolean;
   createdAt: string;
-  author: { id: string; name: string; username: string; avatar: string | null };
+  author: { id: string; name: string; username: string; avatar: string | null; role: string };
 }): PostCardData {
   return {
     id: p.id,
@@ -54,9 +51,16 @@ function toPostCard(p: {
     views: p.views,
     likeCount: p.likeCount,
     commentCount: p.commentCount,
+    bookmarkCount: p.bookmarkCount,
     pinned: p.pinned,
     createdAt: p.createdAt,
-    author: p.author,
+    author: {
+      id: p.author.id,
+      name: p.author.name,
+      username: p.author.username,
+      avatar: p.author.avatar,
+      role: p.author.role as PostCardData["author"]["role"],
+    },
   };
 }
 
@@ -121,66 +125,19 @@ export default async function ChannelDetailPage({
             </div>
           </div>
 
-          {/* Search indicator */}
-          {search && (
-            <p className="text-xs text-muted-foreground">
-              搜索 &ldquo;{search}&rdquo; · 共 {result.total} 条结果
-            </p>
-          )}
-
           {/* Posts */}
-          {result.posts.length === 0 ? (
-            <EmptyState
-              icon={MessageSquare}
-              title={
-                hasFilters
-                  ? "没有找到匹配的帖子"
-                  : "这个频道还没有帖子"
-              }
-              description={
-                hasFilters
-                  ? "试试调整筛选条件或搜索关键词。"
-                  : "成为第一个在这个频道发帖的人，分享你的工作流或问题。"
-              }
-              action={
-                !hasFilters ? (
-                  <Button
-                    size="sm"
-                    nativeButton={false}
-                    render={<Link href={publishHref} />}
-                  >
-                    <Sparkles className="size-3.5" />
-                    发布第一帖
-                  </Button>
-                ) : undefined
-              }
-            />
-          ) : (
-            <>
-              <div className="flex items-center justify-between">
-                <h2 className="text-xs text-muted-foreground">
-                  {{ latest: "按发布时间排序", hot: "按热度排序", mostCommented: "按评论数排序", mostLiked: "按点赞数排序" }[sort]} · 共{" "}
-                  {result.total} 帖
-                </h2>
-              </div>
-              <ul className="space-y-3">
-                {result.posts.map((post) => (
-                  <li key={post.id} id={`post-${post.id}`}>
-                    <PostCard
-                      post={toPostCard(post)}
-                      signedIn={signedIn}
-                      liked={interactions.likedPostIds.has(post.id)}
-                      bookmarked={interactions.bookmarkedPostIds.has(post.id)}
-                    />
-                  </li>
-                ))}
-              </ul>
-              <PostPagination
-                page={result.page}
-                totalPages={result.totalPages}
-              />
-            </>
-          )}
+          <ChannelPostList
+            posts={result.posts.map(toPostCard)}
+            total={result.total}
+            sort={sort}
+            page={result.page}
+            totalPages={result.totalPages}
+            search={search}
+            hasFilters={hasFilters}
+            publishHref={publishHref}
+            signedIn={signedIn}
+            interactions={interactions}
+          />
         </div>
 
         {/* Sidebar */}
