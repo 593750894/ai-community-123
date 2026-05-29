@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import {
+  BillingCycle,
   CollaborationCategory,
   CollaborationLocation,
   CollaborationStatus,
@@ -355,6 +356,15 @@ const COMMENT_POOL = [
 async function main() {
   console.log("→ 清空数据…");
   await prisma.$transaction([
+    prisma.auditLog.deleteMany(),
+    prisma.report.deleteMany(),
+    prisma.notification.deleteMany(),
+    prisma.order.deleteMany(),
+    prisma.subscription.deleteMany(),
+    prisma.workflowItem.deleteMany(),
+    prisma.organizationMember.deleteMany(),
+    prisma.organization.deleteMany(),
+    prisma.membershipPlan.deleteMany(),
     prisma.bookmark.deleteMany(),
     prisma.like.deleteMany(),
     prisma.message.deleteMany(),
@@ -697,6 +707,54 @@ async function main() {
   });
   console.log("   ✓ 3 conversations, 10 messages");
 
+  // ──── Membership plans（商业化基础参考数据）────
+  console.log("→ 写入 membership plans…");
+  const plans = await prisma.$transaction([
+    prisma.membershipPlan.create({
+      data: {
+        slug: "free",
+        name: "免费会员",
+        description: "基础功能体验，适合新用户。",
+        priceCents: 0,
+        cycle: BillingCycle.MONTHLY,
+        features: ["发帖 / 评论", "上传作品", "工具库浏览"],
+        sortOrder: 0,
+      },
+    }),
+    prisma.membershipPlan.create({
+      data: {
+        slug: "pro-monthly",
+        name: "Pro 月度",
+        description: "解锁高级数据看板、工作流市场佣金减免、优先客服。",
+        priceCents: 4900,
+        cycle: BillingCycle.MONTHLY,
+        features: [
+          "全部免费功能",
+          "工作流市场上架免抽成（前 3 单）",
+          "AI 工具优惠码",
+          "高级数据看板",
+        ],
+        sortOrder: 1,
+      },
+    }),
+    prisma.membershipPlan.create({
+      data: {
+        slug: "pro-annual",
+        name: "Pro 年度",
+        description: "Pro 月度年付版，立省 ¥119，赠 6 次工作流首推位。",
+        priceCents: 47900,
+        cycle: BillingCycle.ANNUAL,
+        features: [
+          "全部 Pro 月度功能",
+          "工作流首推位 × 6",
+          "线下活动优先入场",
+        ],
+        sortOrder: 2,
+      },
+    }),
+  ]);
+  console.log(`   ✓ ${plans.length} membership plans`);
+
   // ──── 汇总 ────
   const counts = await Promise.all([
     prisma.user.count(),
@@ -710,6 +768,7 @@ async function main() {
     prisma.message.count(),
     prisma.like.count(),
     prisma.bookmark.count(),
+    prisma.membershipPlan.count(),
   ]);
   console.log("\n┌─────────────────┬────────┐");
   console.log("│ table           │ rows   │");
@@ -726,6 +785,7 @@ async function main() {
     "messages",
     "likes",
     "bookmarks",
+    "membership_plans",
   ];
   labels.forEach((label, i) => {
     console.log(`│ ${label.padEnd(15)} │ ${String(counts[i]).padStart(6)} │`);

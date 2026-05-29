@@ -1,5 +1,14 @@
 // SeedLand · V — AI 视频社群平台数据模型
 // 详细文档：https://pris.ly/d/prisma-schema
+//
+// 设计原则
+// 1. 所有主键使用 cuid。
+// 2. 所有表都有 createdAt；可被修改的表带 updatedAt。
+// 3. 用户密码只保存 passwordHash。
+// 4. Like / Bookmark 通过可空外键实现多态（Post / Work），Like 额外支持 Comment。
+// 5. Conversation 走 N:N 参与者表，可直接复用为一对一私信。
+// 6. 字段命名 camelCase，库列名 snake_case。
+// 7. 商业化扩展（会员、订单、工作流市场、企业账号）已预留 stub 模型。
 
 generator client {
   provider = "prisma-client"
@@ -10,12 +19,21 @@ datasource db {
   provider = "postgresql"
 }
 
-// ───────────────────────────── enums ─────────────────────────────
+// ═════════════════════════════════════════════════════════════════
+//                              enums
+// ═════════════════════════════════════════════════════════════════
 
 enum Role {
   USER
   MOD
   ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  DELETED
 }
 
 enum WorkModel {
@@ -88,55 +106,158 @@ enum ToolPricing {
 }
 
 enum PostType {
-  DISCUSSION   // 普通交流
-  SHOWCASE     // 作品展示
+  DISCUSSION    // 普通交流
+  SHOWCASE      // 作品展示
   COLLABORATION // 项目合作
   TOOL_RECOMMEND // 工具推荐
-  TUTORIAL     // 教程经验
-  QUESTION     // 提问求助
-  NEWS         // 行业资讯
+  TUTORIAL      // 教程经验
+  QUESTION      // 提问求助
+  NEWS          // 行业资讯
 }
 
-// ───────────────────────────── User ─────────────────────────────
+enum NotificationType {
+  POST_REPLY
+  COMMENT_REPLY
+  POST_LIKE
+  WORK_LIKE
+  COMMENT_LIKE
+  BOOKMARK
+  MENTION
+  COLLAB_REPLY
+  MESSAGE
+  SYSTEM
+}
+
+enum ReportTargetType {
+  USER
+  POST
+  COMMENT
+  WORK
+  COLLABORATION
+  MESSAGE
+  TOOL
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+enum BillingCycle {
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+  LIFETIME
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+enum OrderType {
+  MEMBERSHIP
+  WORKFLOW_PURCHASE
+  COLLABORATION_DEPOSIT
+  CUSTOM
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELED
+  REFUNDED
+  FAILED
+}
+
+enum PaymentMethod {
+  WECHAT_PAY
+  ALIPAY
+  STRIPE
+  MANUAL
+}
+
+enum WorkflowItemStatus {
+  DRAFT
+  PUBLISHED
+  SOLD_OUT
+  ARCHIVED
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+// ═════════════════════════════════════════════════════════════════
+//                           User & Auth
+// ═════════════════════════════════════════════════════════════════
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  username     String   @unique
+  id           String     @id @default(cuid())
+  email        String     @unique
+  username     String     @unique
   name         String
   avatar       String?
   bio          String?
-  passwordHash String   @map("password_hash")
-  role         Role     @default(USER)
+  passwordHash String     @map("password_hash")
+  role         Role       @default(USER)
+  status       UserStatus @default(ACTIVE)
 
-  // 阶段 3 个人主页字段
-  industryRole   String?  @map("industry_role") // 行业角色，例如 "导演 / 编剧"
-  expertise      String[] @default([]) // 擅长领域
+  // 个人主页字段
+  industryRole   String?  @map("industry_role")            // 行业角色，例如 "导演 / 编剧"
+  expertise      String[] @default([])                     // 擅长领域
   favoriteTools  String[] @default([]) @map("favorite_tools") // 常用 AI 视频工具
-  portfolioLinks String[] @default([]) @map("portfolio_links") // 作品链接
-  contact        String?  // 联系方式，可选
+  portfolioLinks String[] @default([]) @map("portfolio_links")
+  contact        String?
 
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  // owner of channels they created
-  ownedChannels      Channel[]                 @relation("ChannelOwner")
-  // many-to-many membership
+  // 社区关系
+  ownedChannels      Channel[]       @relation("ChannelOwner")
   channelMemberships ChannelMember[]
   posts              Post[]
   comments           Comment[]
   works              Work[]
   collaborations     Collaboration[]
-  toolsContributed   Tool[]                    @relation("ToolContributor")
-  conversations      ConversationParticipant[]
-  messagesSent       Message[]                 @relation("MessageSender")
-  likes              Like[]
-  bookmarks          Bookmark[]
+  toolsContributed   Tool[]          @relation("ToolContributor")
 
+  // 私信
+  conversations ConversationParticipant[]
+  messagesSent  Message[]                 @relation("MessageSender")
+
+  // 互动
+  likes     Like[]
+  bookmarks Bookmark[]
+
+  // 通知 / 举报 / 审计
+  notificationsReceived  Notification[] @relation("NotificationRecipient")
+  notificationsTriggered Notification[] @relation("NotificationActor")
+  reportsFiled           Report[]       @relation("ReportReporter")
+  reportsResolved        Report[]       @relation("ReportResolver")
+  auditLogs              AuditLog[]     @relation("AuditAdmin")
+
+  // 商业化扩展
+  subscriptions           Subscription[]
+  orders                  Order[]
+  workflowItemsAsSeller   WorkflowItem[]       @relation("WorkflowItemSeller")
+  organizationMemberships OrganizationMember[]
+
+  @@index([status])
+  @@index([role])
   @@map("users")
 }
 
-// ───────────────────────────── Channel ─────────────────────────────
+// ═════════════════════════════════════════════════════════════════
+//                            Community
+// ═════════════════════════════════════════════════════════════════
 
 model Channel {
   id          String   @id @default(cuid())
@@ -148,6 +269,7 @@ model Channel {
   color       String   @default("#3b82f6")
   ownerId     String   @map("owner_id")
   createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   owner   User            @relation("ChannelOwner", fields: [ownerId], references: [id])
   members ChannelMember[]
@@ -159,34 +281,37 @@ model Channel {
 model ChannelMember {
   channelId String   @map("channel_id")
   userId    String   @map("user_id")
-  joinedAt  DateTime @default(now()) @map("joined_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
   channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([channelId, userId])
+  @@index([userId])
   @@map("channel_members")
 }
 
-// ───────────────────────────── Post ─────────────────────────────
+// ═════════════════════════════════════════════════════════════════
+//                              Posts
+// ═════════════════════════════════════════════════════════════════
 
 model Post {
-  id           String   @id @default(cuid())
-  channelId    String   @map("channel_id")
-  authorId     String   @map("author_id")
-  title        String
-  content      String
-  type         PostType @default(DISCUSSION)
-  videoUrl     String?  @map("video_url")
-  imageUrl     String?  @map("image_url")
-  views        Int      @default(0)
-  likeCount    Int      @default(0) @map("like_count")
-  commentCount Int      @default(0) @map("comment_count")
-  bookmarkCount Int     @default(0) @map("bookmark_count")
-  pinned       Boolean  @default(false)
-  locked       Boolean  @default(false)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(cuid())
+  channelId     String   @map("channel_id")
+  authorId      String   @map("author_id")
+  title         String
+  content       String
+  type          PostType @default(DISCUSSION)
+  videoUrl      String?  @map("video_url")
+  imageUrl      String?  @map("image_url")
+  views         Int      @default(0)
+  likeCount     Int      @default(0) @map("like_count")
+  commentCount  Int      @default(0) @map("comment_count")
+  bookmarkCount Int      @default(0) @map("bookmark_count")
+  pinned        Boolean  @default(false)
+  locked        Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   channel   Channel    @relation(fields: [channelId], references: [id], onDelete: Cascade)
   author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -200,7 +325,9 @@ model Post {
   @@map("posts")
 }
 
-// ───────────────────────────── Comment ─────────────────────────────
+// ═════════════════════════════════════════════════════════════════
+//                            Comments
+// ═════════════════════════════════════════════════════════════════
 
 model Comment {
   id        String   @id @default(cuid())
@@ -219,10 +346,13 @@ model Comment {
   likes   Like[]
 
   @@index([postId, createdAt])
+  @@index([parentId])
   @@map("comments")
 }
 
-// ───────────────────────────── Work (用户 AI 视频作品) ─────────────────────────────
+// ═════════════════════════════════════════════════════════════════
+//                         Works (作品广场)
+// ═════════════════════════════════════════════════════════════════
 
 model Work {
   id            String       @id @default(cuid())
@@ -231,19 +361,20 @@ model Work {
   description   String?
   videoUrl      String       @map("video_url")
   thumbnailUrl  String?      @map("thumbnail_url")
-  category      WorkCategory @default(STORY) // 作品类型，例 AI 漫剧 / AI 短剧
-  tools         String[]     @default([]) // 使用工具，例 ["Seedance 2.0", "Runway"]
+  category      WorkCategory @default(STORY)
+  tools         String[]     @default([])
   model         WorkModel    @default(SEEDANCE_2_0)
   mode          WorkMode     @default(TEXT_TO_VIDEO)
   prompt        String?
   durationSec   Int?         @map("duration_sec")
-  resolution    String? // 例 "1080p"
-  ratio         String? // 例 "16:9"
+  resolution    String?
+  ratio         String?
   views         Int          @default(0)
   likeCount     Int          @default(0) @map("like_count")
   bookmarkCount Int          @default(0) @map("bookmark_count")
   isPublic      Boolean      @default(true) @map("is_public")
   createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
 
   author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
   likes     Like[]
@@ -255,7 +386,9 @@ model Work {
   @@map("works")
 }
 
-// ───────────────────────────── Collaboration (合作需求) ─────────────────────────────
+// ═════════════════════════════════════════════════════════════════
+//                  Collaboration (项目合作 / 接单)
+// ═════════════════════════════════════════════════════════════════
 
 model Collaboration {
   id          String                @id @default(cuid())
@@ -272,6 +405,7 @@ model Collaboration {
   deadline    DateTime?
   tags        String[]
   createdAt   DateTime              @default(now()) @map("created_at")
+  updatedAt   DateTime              @updatedAt @map("updated_at")
 
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
@@ -281,7 +415,9 @@ model Collaboration {
   @@map("collaborations")
 }
 
-// ───────────────────────────── Tool (工具库) ─────────────────────────────
+// ═════════════════════════════════════════════════════════════════
+//                Tools (AI 视频工具库) + Workflow Market
+// ═════════════════════════════════════════════════════════════════
 
 model Tool {
   id          String      @id @default(cuid())
@@ -290,13 +426,14 @@ model Tool {
   description String
   url         String
   category    String
-  useCase     String?     @map("use_case") // 适合场景，例 "电商种草 / 5 秒短广告"
+  useCase     String?     @map("use_case")
   logoUrl     String?     @map("logo_url")
   pricing     ToolPricing @default(FREE)
   tags        String[]
   isOfficial  Boolean     @default(false) @map("is_official")
   createdById String?     @map("created_by_id")
   createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
 
   createdBy User? @relation("ToolContributor", fields: [createdById], references: [id], onDelete: SetNull)
 
@@ -304,7 +441,36 @@ model Tool {
   @@map("tools")
 }
 
-// ───────────────────────────── Conversation + Message ─────────────────────────────
+/// 工作流商品（用户可上架/售卖 ComfyUI / 节点图 / Prompt 包等）
+model WorkflowItem {
+  id          String             @id @default(cuid())
+  sellerId    String             @map("seller_id")
+  title       String
+  description String
+  coverUrl    String?            @map("cover_url")
+  downloadUrl String?            @map("download_url")
+  priceCents  Int                @default(0) @map("price_cents")
+  currency    String             @default("CNY")
+  category    String
+  tags        String[]           @default([])
+  toolStack   String[]           @default([]) @map("tool_stack")
+  salesCount  Int                @default(0) @map("sales_count")
+  status      WorkflowItemStatus @default(DRAFT)
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  seller User    @relation("WorkflowItemSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([sellerId])
+  @@index([status, createdAt])
+  @@index([category])
+  @@map("workflow_items")
+}
+
+// ═════════════════════════════════════════════════════════════════
+//                  Messaging (一对一 / 群聊 私信)
+// ═════════════════════════════════════════════════════════════════
 
 model Conversation {
   id            String   @id @default(cuid())
@@ -321,7 +487,7 @@ model Conversation {
 model ConversationParticipant {
   conversationId String   @map("conversation_id")
   userId         String   @map("user_id")
-  joinedAt       DateTime @default(now()) @map("joined_at")
+  createdAt      DateTime @default(now()) @map("created_at")
   lastReadAt     DateTime @default(now()) @map("last_read_at")
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -347,8 +513,11 @@ model Message {
   @@map("messages")
 }
 
-// ───────────────────────────── Like (polymorphic: post | work | comment) ─────────────────────────────
+// ═════════════════════════════════════════════════════════════════
+//                   Engagement (点赞 / 收藏)
+// ═════════════════════════════════════════════════════════════════
 
+/// 多态点赞：post / work / comment 三选一，由可空外键 + DB 唯一约束保证
 model Like {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
@@ -362,15 +531,13 @@ model Like {
   work    Work?    @relation(fields: [workId], references: [id], onDelete: Cascade)
   comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
-  // 一个用户对同一目标只能点一次赞
   @@unique([userId, postId])
   @@unique([userId, workId])
   @@unique([userId, commentId])
   @@map("likes")
 }
 
-// ───────────────────────────── Bookmark (post | work) ─────────────────────────────
-
+/// 多态收藏：post / work 二选一
 model Bookmark {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
@@ -385,4 +552,176 @@ model Bookmark {
   @@unique([userId, postId])
   @@unique([userId, workId])
   @@map("bookmarks")
+}
+
+// ═════════════════════════════════════════════════════════════════
+//             Notification / Report / AuditLog (管理后台)
+// ═════════════════════════════════════════════════════════════════
+
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String           @map("user_id")
+  type       NotificationType
+  title      String
+  body       String?
+  link       String?
+  actorId    String?          @map("actor_id")
+  targetType String?          @map("target_type")
+  targetId   String?          @map("target_id")
+  readAt     DateTime?        @map("read_at")
+  createdAt  DateTime         @default(now()) @map("created_at")
+
+  user  User  @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor User? @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+model Report {
+  id           String           @id @default(cuid())
+  reporterId   String           @map("reporter_id")
+  targetType   ReportTargetType @map("target_type")
+  targetId     String           @map("target_id")
+  reason       String
+  description  String?
+  status       ReportStatus     @default(PENDING)
+  resolvedById String?          @map("resolved_by_id")
+  resolvedAt   DateTime?        @map("resolved_at")
+  resolution   String?
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  reporter   User  @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  resolvedBy User? @relation("ReportResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([targetType, targetId])
+  @@map("reports")
+}
+
+/// 后台管理员操作审计；action 用大写下划线字符串（如 "DELETE_POST" / "BAN_USER"）
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String   @map("admin_id")
+  action     String
+  targetType String?  @map("target_type")
+  targetId   String?  @map("target_id")
+  metadata   Json?
+  ip         String?
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  admin User @relation("AuditAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId, createdAt])
+  @@index([action, createdAt])
+  @@index([targetType, targetId])
+  @@map("audit_logs")
+}
+
+// ═════════════════════════════════════════════════════════════════
+//      Commerce (会员 / 订阅 / 订单) — 商业化扩展 stub
+// ═════════════════════════════════════════════════════════════════
+
+model MembershipPlan {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  name        String
+  description String?
+  priceCents  Int          @map("price_cents")
+  currency    String       @default("CNY")
+  cycle       BillingCycle @default(MONTHLY)
+  features    String[]     @default([])
+  isActive    Boolean      @default(true) @map("is_active")
+  sortOrder   Int          @default(0) @map("sort_order")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  subscriptions Subscription[]
+  orders        Order[]
+
+  @@map("membership_plans")
+}
+
+model Subscription {
+  id               String             @id @default(cuid())
+  userId           String             @map("user_id")
+  planId           String             @map("plan_id")
+  status           SubscriptionStatus @default(ACTIVE)
+  startedAt        DateTime           @default(now()) @map("started_at")
+  currentPeriodEnd DateTime           @map("current_period_end")
+  canceledAt       DateTime?          @map("canceled_at")
+  externalId       String?            @map("external_id")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+
+  user User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan MembershipPlan @relation(fields: [planId], references: [id])
+
+  @@index([userId, status])
+  @@index([status, currentPeriodEnd])
+  @@map("subscriptions")
+}
+
+model Order {
+  id             String         @id @default(cuid())
+  userId         String         @map("user_id")
+  orderNo        String         @unique @map("order_no")
+  type           OrderType
+  status         OrderStatus    @default(PENDING)
+  amountCents    Int            @map("amount_cents")
+  currency       String         @default("CNY")
+  planId         String?        @map("plan_id")
+  workflowItemId String?        @map("workflow_item_id")
+  paymentMethod  PaymentMethod? @map("payment_method")
+  paidAt         DateTime?      @map("paid_at")
+  refundedAt     DateTime?      @map("refunded_at")
+  metadata       Json?
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan         MembershipPlan? @relation(fields: [planId], references: [id])
+  workflowItem WorkflowItem?   @relation(fields: [workflowItemId], references: [id])
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@index([type])
+  @@map("orders")
+}
+
+// ═════════════════════════════════════════════════════════════════
+//                  Organization (企业账号) stub
+// ═════════════════════════════════════════════════════════════════
+
+model Organization {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  logo        String?
+  website     String?
+  isVerified  Boolean  @default(false) @map("is_verified")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  members OrganizationMember[]
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  organizationId String   @map("organization_id")
+  userId         String   @map("user_id")
+  role           OrgRole  @default(MEMBER)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([organizationId, userId])
+  @@index([userId])
+  @@map("organization_members")
 }
