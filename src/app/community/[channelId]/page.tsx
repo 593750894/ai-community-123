@@ -119,9 +119,10 @@ export default async function ChannelDetailPage({
   const signedIn = Boolean(session);
 
   const hasFilters = Boolean(type || search || sort !== "latest");
+  const createPostPath = `/create-post?channelId=${channel.id}`;
   const publishHref = signedIn
-    ? `/create-post?channelId=${channel.id}`
-    : `/auth/login?next=/create-post?channelId=${channel.id}`;
+    ? createPostPath
+    : `/auth/login?next=${encodeURIComponent(createPostPath)}`;
 
   return (
     <div className="flex flex-1 flex-col">

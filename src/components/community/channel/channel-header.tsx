@@ -52,9 +52,10 @@ export function ChannelHeader({
   stats: ChannelStats;
   signedIn: boolean;
 }) {
+  const createPostPath = `/create-post?channelId=${channel.id}`;
   const publishHref = signedIn
-    ? `/create-post?channelId=${channel.id}`
-    : `/auth/login?next=/create-post?channelId=${channel.id}`;
+    ? createPostPath
+    : `/auth/login?next=${encodeURIComponent(createPostPath)}`;
 
   const publishLabel = getPublishLabel(channel.slug);
   const auxiliaryCopy = CHANNEL_COPY[channel.slug];

@@ -24,7 +24,7 @@ export default function ChannelDetailLoading() {
         </div>
       </header>
 
-      <div className="flex gap-6 px-4 py-6 sm:px-8 sm:py-8 xl:gap-8">
+      <div className="flex flex-col gap-6 px-4 py-6 sm:px-8 sm:py-8 xl:flex-row xl:gap-8">
         {/* Main */}
         <div className="min-w-0 flex-1 space-y-4">
           {/* Type filter skeleton */}
@@ -45,7 +45,7 @@ export default function ChannelDetailLoading() {
         </div>
 
         {/* Sidebar */}
-        <aside className="hidden w-80 shrink-0 space-y-5 xl:block">
+        <aside className="w-full shrink-0 space-y-5 xl:w-80">
           {/* Stats skeleton */}
           <div className="surface-card overflow-hidden">
             <div className="border-b border-border/30 bg-gradient-to-r from-primary/8 via-transparent to-transparent px-4 py-3">
