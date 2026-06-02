@@ -257,9 +257,7 @@ function getChannelCategory(slug: string): string | null {
   return null;
 }
 
-export async function getChannelDetail(
-  idOrSlug: string,
-): Promise<ChannelDetail | null> {
+export async function getChannelDetail(idOrSlug: string): Promise<ChannelDetail | null> {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 

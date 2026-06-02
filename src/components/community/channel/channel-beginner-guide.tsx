@@ -7,11 +7,16 @@ import {
 } from "lucide-react";
 
 export function ChannelBeginnerGuide({ channelId }: { channelId: string }) {
-  const guides = [
+  const guides: {
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    href: string | null;
+    color: string;
+  }[] = [
     {
       icon: BookOpen,
       label: "社区公约",
-      href: "/community/rules",
+      href: null,
       color: "text-cyan-400",
     },
     {
@@ -40,19 +45,35 @@ export function ChannelBeginnerGuide({ channelId }: { channelId: string }) {
         第一次来这个频道？可以先分享你正在使用的 AI 视频工具、遇到的问题或最近完成的作品。
       </p>
       <div className="border-t border-border/25 p-2">
-        {guides.map((g) => (
-          <Link
-            key={g.href}
-            href={g.href}
-            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-muted/40"
-          >
-            <g.icon className={`size-4 ${g.color} transition-transform group-hover:scale-110`} />
-            <span className="flex-1 text-sm text-foreground/90 transition-colors group-hover:text-foreground">
-              {g.label}
+        {guides.map((g) =>
+          g.href ? (
+            <Link
+              key={g.label}
+              href={g.href}
+              className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-muted/40"
+            >
+              <g.icon className={`size-4 ${g.color} transition-transform group-hover:scale-110`} />
+              <span className="flex-1 text-sm text-foreground/90 transition-colors group-hover:text-foreground">
+                {g.label}
+              </span>
+              <ArrowUpRight className="size-3.5 text-muted-foreground opacity-0 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100" />
+            </Link>
+          ) : (
+            <span
+              key={g.label}
+              role="link"
+              aria-disabled="true"
+              title="即将上线"
+              className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 opacity-60"
+            >
+              <g.icon className={`size-4 ${g.color}`} />
+              <span className="flex-1 text-sm text-muted-foreground">
+                {g.label}
+              </span>
+              <span className="text-[10px] text-muted-foreground/70">即将上线</span>
             </span>
-            <ArrowUpRight className="size-3.5 text-muted-foreground opacity-0 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100" />
-          </Link>
-        ))}
+          ),
+        )}
       </div>
     </section>
   );

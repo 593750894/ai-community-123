@@ -3,6 +3,10 @@ import { requireAuth } from "@/lib/auth/guard";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
 import { ToggleBookmarkSchema } from "@/lib/interactions/schemas";
+import {
+  notifyPostBookmark,
+  notifyWorkBookmark,
+} from "@/lib/notifications/emit";
 
 export async function POST(request: Request) {
   try {
@@ -46,6 +50,7 @@ export async function POST(request: Request) {
           data: { bookmarkCount: { increment: 1 } },
         }),
       ]);
+      await notifyPostBookmark({ postId: targetId, actorId: user.id });
       return success({ bookmarked: true });
     }
 
@@ -80,6 +85,7 @@ export async function POST(request: Request) {
         data: { bookmarkCount: { increment: 1 } },
       }),
     ]);
+    await notifyWorkBookmark({ workId: targetId, actorId: user.id });
     return success({ bookmarked: true });
   } catch (err) {
     return error(err);

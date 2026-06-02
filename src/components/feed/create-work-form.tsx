@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import { FormError, FormField } from "@/components/ui/field";
 import { Input, Textarea } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/loading";
+import { MediaUploader } from "@/components/uploads/media-uploader";
 import { cn } from "@/lib/utils";
 import {
   WORK_CATEGORY_META,
@@ -121,34 +122,20 @@ export function CreateWorkForm() {
       </FormField>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormField
-          label="封面链接"
-          htmlFor="thumbnailUrl"
-          hint="选填，建议 16:9 静帧图"
-          error={state.fieldErrors?.thumbnailUrl}
-        >
-          <Input
-            id="thumbnailUrl"
+        <FormField error={state.fieldErrors?.thumbnailUrl}>
+          <MediaUploader
+            kind="image"
             name="thumbnailUrl"
-            type="url"
-            placeholder="https://..."
-            aria-invalid={(state.fieldErrors?.thumbnailUrl?.length ?? 0) > 0 || undefined}
+            label="封面图（选填）"
+            hint="建议 16:9 静帧图 · 最大 10MB"
           />
         </FormField>
-        <FormField
-          label="视频链接"
-          htmlFor="videoUrl"
-          required
-          hint="B 站 / YouTube / CDN 直链均可"
-          error={state.fieldErrors?.videoUrl}
-        >
-          <Input
-            id="videoUrl"
+        <FormField error={state.fieldErrors?.videoUrl}>
+          <MediaUploader
+            kind="video"
             name="videoUrl"
-            type="url"
-            required
-            placeholder="https://..."
-            aria-invalid={(state.fieldErrors?.videoUrl?.length ?? 0) > 0 || undefined}
+            label="视频文件 *"
+            hint="MP4 / WEBM / MOV · 最大 100MB（先等上传完成再提交）"
           />
         </FormField>
       </div>

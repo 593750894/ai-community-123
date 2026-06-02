@@ -3,11 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Bell,
   LogOut,
   Menu,
   MessageSquare,
-  Search,
   Sparkles,
   Upload,
   User as UserIcon,
@@ -16,6 +14,8 @@ import {
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/layout/notification-bell";
+import { NavbarSearch } from "@/components/layout/navbar-search";
 import { logoutAction } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
@@ -92,17 +92,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
         </nav>
 
         <div className="hidden flex-1 items-center justify-center lg:flex">
-          <label className="group/search relative flex h-8 w-full max-w-md items-center rounded-lg border border-border/60 bg-card/40 px-2.5 text-sm transition-colors focus-within:border-primary/50 focus-within:bg-card/70">
-            <Search className="size-3.5 text-muted-foreground" />
-            <input
-              type="search"
-              placeholder="搜索作品、创作者、标签..."
-              className="ml-2 h-full flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-            />
-            <kbd className="hidden rounded border border-border/60 bg-muted/40 px-1.5 py-0.5 text-[10px] text-muted-foreground sm:inline-block">
-              /
-            </kbd>
-          </label>
+          <NavbarSearch />
         </div>
 
         <div className="ml-auto flex items-center gap-1">
@@ -114,15 +104,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
           >
             <MessageSquare className="size-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            nativeButton={false}
-            aria-label="通知"
-            className="hidden sm:inline-flex"
-          >
-            <Bell className="size-4" />
-          </Button>
+          <NotificationBell isLoggedIn={!!user} />
           <Button
             variant="outline"
             size="sm"

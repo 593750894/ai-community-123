@@ -5,6 +5,12 @@ import { Navbar } from "@/components/layout/navbar";
 import { RightPanel } from "@/components/layout/right-panel";
 import { Sidebar } from "@/components/layout/sidebar";
 import { getCurrentUser } from "@/lib/auth/session";
+import {
+  getActiveCreators,
+  getHotChannels,
+  getPopularTags,
+} from "@/lib/community/queries";
+import { getFollowingMap } from "@/lib/follows/queries";
 
 import "./globals.css";
 
@@ -19,7 +25,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getCurrentUser();
+  const [user, hotChannelRows, popularTags, activeCreatorRows] =
+    await Promise.all([
+      getCurrentUser(),
+      getHotChannels(8),
+      getPopularTags(6),
+      getActiveCreators(4),
+    ]);
+
   const navbarUser = user
     ? {
         id: user.id,
@@ -28,6 +41,28 @@ export default async function RootLayout({
         avatar: user.avatar,
       }
     : null;
+
+  const sidebarChannels = hotChannelRows.map((c) => ({
+    slug: c.slug,
+    name: c.name,
+    icon: c.icon,
+  }));
+
+  const followingMap = await getFollowingMap({
+    followerId: user?.id ?? null,
+    targetUserIds: activeCreatorRows.map((c) => c.id),
+  });
+
+  const rightPanelCreators = activeCreatorRows.map((c) => ({
+    id: c.id,
+    name: c.name,
+    username: c.username,
+    avatar: c.avatar,
+    industryRole: c.industryRole,
+    postCount: c._count.posts,
+    workCount: c._count.works,
+    isFollowing: followingMap.get(c.id) ?? false,
+  }));
 
   return (
     <html
@@ -38,11 +73,16 @@ export default async function RootLayout({
       <body className="flex min-h-full flex-col">
         <Navbar user={navbarUser} />
         <div className="mx-auto flex w-full max-w-[1600px] flex-1">
-          <Sidebar />
+          <Sidebar hotChannels={sidebarChannels} popularTags={popularTags} />
           <main className="flex min-w-0 flex-1 flex-col pb-16 lg:pb-0">
             {children}
           </main>
-          <RightPanel />
+          <RightPanel
+            popularTags={popularTags}
+            activeCreators={rightPanelCreators}
+            viewerId={user?.id ?? null}
+            signedIn={!!user}
+          />
         </div>
         <MobileBottomNav />
       </body>

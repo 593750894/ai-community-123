@@ -7,11 +7,18 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 
-const GUIDES = [
+type Guide = {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  href: string | null;
+  color: string;
+};
+
+const GUIDES: Guide[] = [
   {
     icon: BookOpen,
     label: "社区公约",
-    href: "/community/rules",
+    href: null,
     color: "text-cyan-400",
   },
   {
@@ -29,7 +36,7 @@ const GUIDES = [
   {
     icon: Sparkles,
     label: "创作者计划",
-    href: "/community/creator-program",
+    href: null,
     color: "text-amber-400",
   },
 ];
@@ -44,19 +51,35 @@ export function BeginnerGuide() {
         </div>
       </div>
       <div className="p-2">
-        {GUIDES.map((g) => (
-          <Link
-            key={g.href}
-            href={g.href}
-            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/50"
-          >
-            <g.icon className={`size-4 ${g.color}`} />
-            <span className="flex-1 text-sm text-foreground/90 group-hover:text-foreground">
-              {g.label}
+        {GUIDES.map((g) =>
+          g.href ? (
+            <Link
+              key={g.label}
+              href={g.href}
+              className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/50"
+            >
+              <g.icon className={`size-4 ${g.color}`} />
+              <span className="flex-1 text-sm text-foreground/90 group-hover:text-foreground">
+                {g.label}
+              </span>
+              <ArrowUpRight className="size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            </Link>
+          ) : (
+            <span
+              key={g.label}
+              role="link"
+              aria-disabled="true"
+              title="即将上线"
+              className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 opacity-60"
+            >
+              <g.icon className={`size-4 ${g.color}`} />
+              <span className="flex-1 text-sm text-muted-foreground">
+                {g.label}
+              </span>
+              <span className="text-[10px] text-muted-foreground/70">即将上线</span>
             </span>
-            <ArrowUpRight className="size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-          </Link>
-        ))}
+          ),
+        )}
       </div>
     </section>
   );

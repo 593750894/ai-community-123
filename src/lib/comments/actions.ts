@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
 import { CreateCommentSchema } from "@/lib/comments/schemas";
+import { notifyPostReply } from "@/lib/notifications/emit";
 
 export type CreateCommentFormState = {
   ok?: boolean;
@@ -63,13 +64,14 @@ export async function createCommentAction(
     return { ok: false, message: "该帖子已被锁定，无法评论" };
   }
 
-  await prisma.$transaction([
+  const [comment] = await prisma.$transaction([
     prisma.comment.create({
       data: {
         postId: post.id,
         authorId: session.userId,
         content: parsed.data.content,
       },
+      select: { id: true, parentId: true },
     }),
     prisma.post.update({
       where: { id: post.id },
@@ -79,6 +81,13 @@ export async function createCommentAction(
 
   revalidatePath(`/post/${post.id}`);
   revalidatePath(`/community/${post.channelId}`);
+
+  await notifyPostReply({
+    postId: post.id,
+    commentId: comment.id,
+    parentCommentId: comment.parentId,
+    actorId: session.userId,
+  });
 
   return {
     ok: true,

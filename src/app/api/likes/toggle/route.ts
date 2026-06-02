@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth/guard";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
 import { ToggleLikeSchema } from "@/lib/interactions/schemas";
+import { notifyPostLike, notifyWorkLike } from "@/lib/notifications/emit";
 
 export async function POST(request: Request) {
   try {
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
           data: { likeCount: { increment: 1 } },
         }),
       ]);
+      await notifyPostLike({ postId: targetId, actorId: user.id });
       return success({ liked: true });
     }
 
@@ -80,6 +82,7 @@ export async function POST(request: Request) {
         data: { likeCount: { increment: 1 } },
       }),
     ]);
+    await notifyWorkLike({ workId: targetId, actorId: user.id });
     return success({ liked: true });
   } catch (err) {
     return error(err);

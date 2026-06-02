@@ -1,4 +1,7 @@
-import "dotenv/config";
+import { config as loadEnv } from "dotenv";
+
+loadEnv({ path: ".env" });
+loadEnv({ path: ".env.local", override: true });
 
 import bcrypt from "bcryptjs";
 
@@ -27,6 +30,10 @@ if (!url) {
 }
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: url }),
+  transactionOptions: {
+    maxWait: 20_000,
+    timeout: 120_000,
+  },
 });
 
 async function hashPassword(plain: string): Promise<string> {

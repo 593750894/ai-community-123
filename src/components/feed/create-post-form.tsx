@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import { FormError, FormField } from "@/components/ui/field";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/loading";
+import { MediaUploader } from "@/components/uploads/media-uploader";
 import { cn } from "@/lib/utils";
 import {
   POST_TYPE_META,
@@ -133,32 +134,20 @@ export function CreatePostForm({
       </FormField>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormField
-          label="视频链接"
-          htmlFor="videoUrl"
-          hint="选填"
-          error={state.fieldErrors?.videoUrl}
-        >
-          <Input
-            id="videoUrl"
-            name="videoUrl"
-            type="url"
-            placeholder="https://..."
-            aria-invalid={(state.fieldErrors?.videoUrl?.length ?? 0) > 0 || undefined}
+        <FormField error={state.fieldErrors?.imageUrl}>
+          <MediaUploader
+            kind="image"
+            name="imageUrl"
+            label="封面图（选填）"
+            hint="JPG / PNG / WEBP / GIF · 最大 10MB"
           />
         </FormField>
-        <FormField
-          label="图片链接"
-          htmlFor="imageUrl"
-          hint="选填"
-          error={state.fieldErrors?.imageUrl}
-        >
-          <Input
-            id="imageUrl"
-            name="imageUrl"
-            type="url"
-            placeholder="https://..."
-            aria-invalid={(state.fieldErrors?.imageUrl?.length ?? 0) > 0 || undefined}
+        <FormField error={state.fieldErrors?.videoUrl}>
+          <MediaUploader
+            kind="video"
+            name="videoUrl"
+            label="视频（选填）"
+            hint="MP4 / WEBM / MOV · 最大 100MB"
           />
         </FormField>
       </div>

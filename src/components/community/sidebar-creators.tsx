@@ -27,12 +27,14 @@ export function SidebarCreators({
           <Crown className="size-3.5 text-primary" />
           活跃创作者
         </div>
-        <Link
-          href="/community/leaderboard"
-          className="text-[11px] text-muted-foreground transition-colors hover:text-primary"
+        <span
+          role="link"
+          aria-disabled="true"
+          title="即将上线"
+          className="cursor-not-allowed text-[11px] text-muted-foreground/50"
         >
           排行榜
-        </Link>
+        </span>
       </div>
 
       {error ? (

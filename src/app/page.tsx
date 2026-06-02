@@ -4,25 +4,36 @@ import {
   Compass,
   Flame,
   Handshake,
+  Heart,
   Sparkles,
+  UserPlus,
   Wand2,
   Wrench,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { DEMO_WORKS, WorkCard } from "@/components/feed/work-card";
+import { PostCard, type PostCardData } from "@/components/feed/post-card";
+import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth/session";
+import { getFollowingUserIds } from "@/lib/follows/queries";
+import { cn } from "@/lib/utils";
 
+// 阶段 2：先实现"关注" tab，其他 tab 暂保留 mock；阶段 8 会全部 URL-driven。
 const FEED_TABS = [
-  { label: "推荐", active: true },
-  { label: "关注" },
-  { label: "最新" },
-  { label: "Seedance 2.0" },
-  { label: "短剧" },
-  { label: "数字人" },
-  { label: "教程" },
-  { label: "评测" },
-];
+  { key: "recommend", label: "推荐" },
+  { key: "following", label: "关注" },
+  { key: "latest", label: "最新" },
+  { key: "seedance-2", label: "Seedance 2.0", disabled: true },
+  { key: "drama", label: "短剧", disabled: true },
+  { key: "digital-human", label: "数字人", disabled: true },
+  { key: "tutorial", label: "教程", disabled: true },
+  { key: "review", label: "评测", disabled: true },
+] as const;
+
+type TabKey = (typeof FEED_TABS)[number]["key"];
 
 const QUICK_ENTRIES = [
   {
@@ -55,7 +66,21 @@ const QUICK_ENTRIES = [
   },
 ];
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const sp = await searchParams;
+  const rawTab = (sp.tab ?? "recommend") as TabKey;
+  const activeKey: TabKey =
+    FEED_TABS.find((t) => t.key === rawTab && !("disabled" in t && t.disabled))
+      ?.key ?? "recommend";
+
+  const session = await getSession();
+
   return (
     <div className="flex flex-1 flex-col">
       <section className="relative isolate overflow-hidden border-b border-border/60 px-4 py-8 sm:px-8 sm:py-10">
@@ -124,38 +149,163 @@ export default function Home() {
 
       <section className="flex flex-col gap-4 px-4 py-6 sm:px-8">
         <div className="sticky top-14 z-20 -mx-4 flex items-center gap-1 overflow-x-auto border-b border-border/40 bg-background/85 px-4 py-2 backdrop-blur scroll-x-snap sm:-mx-8 sm:px-8">
-          {FEED_TABS.map((t) => (
-            <button
-              key={t.label}
-              className={`shrink-0 rounded-md px-3 py-1.5 text-sm transition-colors ${
-                t.active
-                  ? "bg-muted text-foreground"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+          {FEED_TABS.map((t) => {
+            const active = activeKey === t.key;
+            const disabled = "disabled" in t && t.disabled;
+            const baseCls = cn(
+              "shrink-0 rounded-md px-3 py-1.5 text-sm transition-colors",
+              active
+                ? "bg-muted text-foreground"
+                : disabled
+                  ? "text-muted-foreground/40 cursor-not-allowed"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+            );
+            if (disabled) {
+              return (
+                <span
+                  key={t.key}
+                  className={baseCls}
+                  title="即将上线"
+                  aria-disabled="true"
+                >
+                  {t.label}
+                </span>
+              );
+            }
+            return (
+              <Link
+                key={t.key}
+                href={t.key === "recommend" ? "/" : `/?tab=${t.key}`}
+                className={baseCls}
+              >
+                {t.label}
+              </Link>
+            );
+          })}
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3 2xl:grid-cols-4">
-          {DEMO_WORKS.map((w) => (
-            <WorkCard key={w.id} work={w} />
-          ))}
-        </div>
+        {activeKey === "following" ? (
+          <FollowingFeed userId={session?.userId ?? null} />
+        ) : (
+          <DefaultFeed />
+        )}
+      </section>
+    </div>
+  );
+}
 
-        <div className="mt-2 flex justify-center">
+function DefaultFeed() {
+  return (
+    <>
+      <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3 2xl:grid-cols-4">
+        {DEMO_WORKS.map((w) => (
+          <WorkCard key={w.id} work={w} />
+        ))}
+      </div>
+
+      <div className="mt-2 flex justify-center">
+        <Button
+          variant="outline"
+          size="lg"
+          nativeButton={false}
+          render={<Link href="/showcase" />}
+        >
+          浏览全部作品
+          <ArrowRight className="size-4" />
+        </Button>
+      </div>
+    </>
+  );
+}
+
+async function FollowingFeed({ userId }: { userId: string | null }) {
+  if (!userId) {
+    return (
+      <EmptyState
+        icon={UserPlus}
+        title="登录后即可查看关注流"
+        description="关注你感兴趣的创作者，他们发布的新帖会在这里聚合。"
+        action={
           <Button
             variant="outline"
-            size="lg"
+            size="sm"
             nativeButton={false}
-            render={<Link href="/showcase" />}
+            render={<Link href={`/auth/login?next=${encodeURIComponent("/?tab=following")}`} />}
           >
-            浏览全部作品
-            <ArrowRight className="size-4" />
+            去登录
           </Button>
-        </div>
-      </section>
+        }
+      />
+    );
+  }
+
+  const followingIds = await getFollowingUserIds(userId);
+  if (followingIds.length === 0) {
+    return (
+      <EmptyState
+        icon={Heart}
+        title="你还没有关注任何人"
+        description="去社区或活跃创作者列表，关注感兴趣的人，这里就会出现他们的最新动态。"
+        action={
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={<Link href="/community" />}
+          >
+            去逛逛社区
+          </Button>
+        }
+      />
+    );
+  }
+
+  const rows = await prisma.post.findMany({
+    where: { authorId: { in: followingIds } },
+    orderBy: { createdAt: "desc" },
+    take: 30,
+    include: {
+      author: {
+        select: { id: true, name: true, username: true, avatar: true, role: true },
+      },
+      channel: {
+        select: { id: true, name: true, slug: true, icon: true, color: true },
+      },
+    },
+  });
+
+  const posts: PostCardData[] = rows.map((p) => ({
+    id: p.id,
+    title: p.title,
+    content: p.content,
+    type: p.type,
+    videoUrl: p.videoUrl,
+    imageUrl: p.imageUrl,
+    views: p.views,
+    likeCount: p.likeCount,
+    commentCount: p.commentCount,
+    bookmarkCount: p.bookmarkCount,
+    pinned: p.pinned,
+    createdAt: p.createdAt,
+    author: p.author,
+    channel: p.channel,
+  }));
+
+  if (posts.length === 0) {
+    return (
+      <EmptyState
+        icon={Heart}
+        title="你关注的人最近还没有发布"
+        description="再去关注几位活跃创作者，让首页热闹起来。"
+      />
+    );
+  }
+
+  return (
+    <div className="grid gap-3 lg:grid-cols-2">
+      {posts.map((post) => (
+        <PostCard key={post.id} post={post} showChannel />
+      ))}
     </div>
   );
 }

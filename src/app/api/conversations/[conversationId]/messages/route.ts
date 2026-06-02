@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth/guard";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { success, created, error } from "@/lib/response";
 import { parsePagination, paginatedResponse } from "@/lib/pagination";
+import { notifyMessage } from "@/lib/notifications/emit";
 import { z } from "zod";
 
 const SendMessageBodySchema = z.object({
@@ -102,6 +103,13 @@ export async function POST(
         data: { lastMessageAt: now },
       }),
     ]);
+
+    await notifyMessage({
+      conversationId,
+      messageId: message.id,
+      actorId: user.id,
+      preview: parsed.data.content,
+    });
 
     return created(message, "发送成功");
   } catch (err) {

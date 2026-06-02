@@ -5,6 +5,12 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { Prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
+import {
+  notifyPostLike,
+  notifyWorkLike,
+  notifyPostBookmark,
+  notifyWorkBookmark,
+} from "@/lib/notifications/emit";
 
 export type InteractionResult = {
   ok: boolean;
@@ -67,6 +73,10 @@ export async function togglePostLike(postId: string): Promise<InteractionResult>
 
     revalidatePath(`/post/${postId}`);
     revalidatePath(`/community/${post.channelId}`);
+
+    if (!existing) {
+      await notifyPostLike({ postId, actorId: userId });
+    }
 
     return {
       ok: true,
@@ -137,6 +147,10 @@ export async function toggleWorkLike(workId: string): Promise<InteractionResult>
     revalidatePath(`/showcase/${workId}`);
     revalidatePath("/showcase");
 
+    if (!existing) {
+      await notifyWorkLike({ workId, actorId: userId });
+    }
+
     return {
       ok: true,
       active: !existing,
@@ -195,6 +209,9 @@ export async function togglePostBookmark(
     }
     revalidatePath(`/post/${postId}`);
     revalidatePath(`/community/${post.channelId}`);
+    if (!existing) {
+      await notifyPostBookmark({ postId, actorId: userId });
+    }
     return { ok: true, active: !existing, count: 0 };
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
@@ -253,6 +270,10 @@ export async function toggleWorkBookmark(
 
     revalidatePath(`/showcase/${workId}`);
     revalidatePath("/showcase");
+
+    if (!existing) {
+      await notifyWorkBookmark({ workId, actorId: userId });
+    }
 
     return {
       ok: true,

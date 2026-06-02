@@ -4,6 +4,7 @@ import { NotFoundError, ValidationError } from "@/lib/errors";
 import { success, created, error } from "@/lib/response";
 import { CreateCommentBodySchema } from "@/lib/comments/schemas";
 import { parsePagination, paginatedResponse } from "@/lib/pagination";
+import { notifyPostReply } from "@/lib/notifications/emit";
 
 export async function GET(
   request: Request,
@@ -87,6 +88,13 @@ export async function POST(
         data: { commentCount: { increment: 1 } },
       }),
     ]);
+
+    await notifyPostReply({
+      postId,
+      commentId: comment.id,
+      parentCommentId: comment.parentId,
+      actorId: user.id,
+    });
 
     return created(comment, "评论成功");
   } catch (err) {

@@ -9,6 +9,7 @@ import {
   SendMessageSchema,
   StartConversationSchema,
 } from "@/lib/messages/schemas";
+import { notifyMessage } from "@/lib/notifications/emit";
 
 export type SendMessageFormState = {
   ok?: boolean;
@@ -138,13 +139,14 @@ export async function sendMessageAction(
   }
 
   const now = new Date();
-  await prisma.$transaction([
+  const [message] = await prisma.$transaction([
     prisma.message.create({
       data: {
         conversationId,
         senderId: session.userId,
         content,
       },
+      select: { id: true },
     }),
     prisma.conversation.update({
       where: { id: conversationId },
@@ -164,6 +166,13 @@ export async function sendMessageAction(
 
   revalidatePath(`/messages/${conversationId}`);
   revalidatePath("/messages");
+
+  await notifyMessage({
+    conversationId,
+    messageId: message.id,
+    actorId: session.userId,
+    preview: content,
+  });
 
   return {
     ok: true,

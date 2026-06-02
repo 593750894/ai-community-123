@@ -125,6 +125,7 @@ enum NotificationType {
   MENTION
   COLLAB_REPLY
   MESSAGE
+  FOLLOW
   SYSTEM
 }
 
@@ -243,6 +244,10 @@ model User {
   reportsFiled           Report[]       @relation("ReportReporter")
   reportsResolved        Report[]       @relation("ReportResolver")
   auditLogs              AuditLog[]     @relation("AuditAdmin")
+
+  // 关注关系（阶段 2）
+  followers Follow[] @relation("UserFollowers")
+  following Follow[] @relation("UserFollowing")
 
   // 商业化扩展
   subscriptions           Subscription[]
@@ -511,6 +516,26 @@ model Message {
 
   @@index([conversationId, createdAt])
   @@map("messages")
+}
+
+// ═════════════════════════════════════════════════════════════════
+//                       Follow (关注关系)
+// ═════════════════════════════════════════════════════════════════
+
+/// 关注关系：followerId 关注 followingId。同一对人只能有一条记录。
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String   @map("follower_id")
+  followingId String   @map("following_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followingId, createdAt])
+  @@index([followerId, createdAt])
+  @@map("follows")
 }
 
 // ═════════════════════════════════════════════════════════════════

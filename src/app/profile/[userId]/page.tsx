@@ -18,6 +18,11 @@ import { getSession } from "@/lib/auth/session";
 import { PageHeader } from "@/components/layout/page-header";
 import { ProfileEditDialog } from "@/components/auth/profile-edit-dialog";
 import { startConversationAction } from "@/lib/messages/actions";
+import { FollowButton } from "@/components/follows/follow-button";
+import {
+  getFollowCounts,
+  isFollowing as queryIsFollowing,
+} from "@/lib/follows/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +56,16 @@ export default async function ProfilePage({
   });
 
   if (!user) notFound();
+
+  const [followCounts, viewerIsFollowing] = await Promise.all([
+    getFollowCounts(user.id),
+    session && !isOwner
+      ? queryIsFollowing({
+          followerId: session.userId,
+          followingId: user.id,
+        })
+      : Promise.resolve(false),
+  ]);
 
   const works = await prisma.work.findMany({
     where: { authorId: userId, isPublic: true },
@@ -100,16 +115,28 @@ export default async function ProfilePage({
               }
             />
           ) : (
-            <form action={startConversationAction}>
-              <input type="hidden" name="targetUserId" value={user.id} />
-              <button
-                type="submit"
-                className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-              >
-                <MessageSquare className="size-3.5" />
-                私信
-              </button>
-            </form>
+            <div className="flex items-center gap-2">
+              <FollowButton
+                targetUserId={user.id}
+                initialFollowing={viewerIsFollowing}
+                initialFollowerCount={followCounts.followers}
+                signedIn={!!session}
+                isSelf={false}
+                loginNext={`/profile/${user.id}`}
+                size="md"
+                variant="default"
+              />
+              <form action={startConversationAction}>
+                <input type="hidden" name="targetUserId" value={user.id} />
+                <button
+                  type="submit"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border/60 bg-card px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                >
+                  <MessageSquare className="size-3.5" />
+                  私信
+                </button>
+              </form>
+            </div>
           )
         }
       />
@@ -138,6 +165,18 @@ export default async function ProfilePage({
               <Stat label="作品" value={user._count.works} />
               <Stat label="帖子" value={user._count.posts} />
               <Stat label="合作" value={user._count.collaborations} />
+            </div>
+            <div className="mt-3 flex justify-around border-t border-border/40 pt-3 text-center">
+              <StatLink
+                href={`/profile/${user.id}/followers`}
+                label="粉丝"
+                value={followCounts.followers}
+              />
+              <StatLink
+                href={`/profile/${user.id}/following`}
+                label="关注"
+                value={followCounts.following}
+              />
             </div>
           </div>
 
@@ -280,6 +319,28 @@ function Stat({ label, value }: { label: string; value: number }) {
       <div className="text-base font-semibold">{value}</div>
       <div className="text-[11px] text-muted-foreground">{label}</div>
     </div>
+  );
+}
+
+function StatLink({
+  href,
+  label,
+  value,
+}: {
+  href: string;
+  label: string;
+  value: number;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group rounded-md px-1 transition-colors hover:bg-muted/50"
+    >
+      <div className="text-base font-semibold group-hover:text-primary">
+        {value}
+      </div>
+      <div className="text-[11px] text-muted-foreground">{label}</div>
+    </Link>
   );
 }
 
