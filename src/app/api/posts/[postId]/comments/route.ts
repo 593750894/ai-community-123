@@ -76,6 +76,7 @@ export async function POST(
           postId,
           authorId: user.id,
           content: parsed.data.content,
+          parentId: parsed.data.parentId ?? null,
         },
         include: {
           author: {

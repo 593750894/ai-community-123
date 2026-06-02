@@ -37,6 +37,12 @@ export function CreatePostForm({
   const [selectedType, setSelectedType] = useState<PostTypeValue>("DISCUSSION");
   const [titleLen, setTitleLen] = useState(0);
   const [contentLen, setContentLen] = useState(0);
+  const [imageStatus, setImageStatus] = useState<
+    "idle" | "uploading" | "done" | "error"
+  >("idle");
+  const [videoStatus, setVideoStatus] = useState<
+    "idle" | "uploading" | "done" | "error"
+  >("idle");
 
   return (
     <form action={action} className="space-y-5">
@@ -140,6 +146,7 @@ export function CreatePostForm({
             name="imageUrl"
             label="封面图（选填）"
             hint="JPG / PNG / WEBP / GIF · 最大 10MB"
+            onStatusChange={setImageStatus}
           />
         </FormField>
         <FormField error={state.fieldErrors?.videoUrl}>
@@ -148,6 +155,7 @@ export function CreatePostForm({
             name="videoUrl"
             label="视频（选填）"
             hint="MP4 / WEBM / MOV · 最大 100MB"
+            onStatusChange={setVideoStatus}
           />
         </FormField>
       </div>
@@ -163,7 +171,7 @@ export function CreatePostForm({
         </button>
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || imageStatus === "uploading" || videoStatus === "uploading"}
           className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending && <Spinner className="size-4 text-primary-foreground" />}

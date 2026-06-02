@@ -29,6 +29,8 @@ export interface MediaUploaderProps {
   defaultValue?: string;
   /** 上传成功 / 清除时通知父组件，便于做表单联动 */
   onChange?: (publicUrl: string | null) => void;
+  /** 上传状态变化时通知父组件，便于阻止表单在上传中提交 */
+  onStatusChange?: (status: "idle" | "uploading" | "done" | "error") => void;
   label?: string;
   hint?: string;
   className?: string;
@@ -51,6 +53,7 @@ export function MediaUploader({
   name,
   defaultValue,
   onChange,
+  onStatusChange,
   label,
   hint,
   className,
@@ -73,6 +76,10 @@ export function MediaUploader({
       abortRef.current?.abort();
     };
   }, []);
+
+  useEffect(() => {
+    onStatusChange?.(status);
+  }, [status, onStatusChange]);
 
   function applyUrl(next: string) {
     setUrl(next);

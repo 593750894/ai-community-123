@@ -195,40 +195,57 @@ async function listFollowSide(args: {
       ? { followingId: subjectId }
       : { followerId: subjectId };
 
-  const rows = await prisma.follow.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    take: pageSize + 1,
-    ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
-    include: {
-      follower:
-        direction === "followers"
-          ? {
-              select: {
-                id: true,
-                username: true,
-                name: true,
-                avatar: true,
-                industryRole: true,
-                bio: true,
-              },
-            }
-          : false,
-      following:
-        direction === "following"
-          ? {
-              select: {
-                id: true,
-                username: true,
-                name: true,
-                avatar: true,
-                industryRole: true,
-                bio: true,
-              },
-            }
-          : false,
-    },
-  });
+  const include = {
+    follower:
+      direction === "followers"
+        ? {
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              avatar: true,
+              industryRole: true,
+              bio: true,
+            },
+          }
+        : false,
+    following:
+      direction === "following"
+        ? {
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              avatar: true,
+              industryRole: true,
+              bio: true,
+            },
+          }
+        : false,
+  };
+
+  let rows;
+  try {
+    rows = await prisma.follow.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: pageSize + 1,
+      ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+      include,
+    });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      // Invalid cursor — retry without cursor (treat as page 1)
+      rows = await prisma.follow.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        take: pageSize + 1,
+        include,
+      });
+    } else {
+      throw err;
+    }
+  }
 
   const hasMore = rows.length > pageSize;
   const sliced = hasMore ? rows.slice(0, pageSize) : rows;

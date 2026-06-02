@@ -41,6 +41,12 @@ export function CreateWorkForm() {
   const [toolsInput, setToolsInput] = useState("");
   const [titleLen, setTitleLen] = useState(0);
   const [descLen, setDescLen] = useState(0);
+  const [thumbnailStatus, setThumbnailStatus] = useState<
+    "idle" | "uploading" | "done" | "error"
+  >("idle");
+  const [videoStatus, setVideoStatus] = useState<
+    "idle" | "uploading" | "done" | "error"
+  >("idle");
 
   const appendTool = (tool: string) => {
     const parts = toolsInput
@@ -128,6 +134,7 @@ export function CreateWorkForm() {
             name="thumbnailUrl"
             label="封面图（选填）"
             hint="建议 16:9 静帧图 · 最大 10MB"
+            onStatusChange={setThumbnailStatus}
           />
         </FormField>
         <FormField error={state.fieldErrors?.videoUrl}>
@@ -136,6 +143,7 @@ export function CreateWorkForm() {
             name="videoUrl"
             label="视频文件 *"
             hint="MP4 / WEBM / MOV · 最大 100MB（先等上传完成再提交）"
+            onStatusChange={setVideoStatus}
           />
         </FormField>
       </div>
@@ -187,7 +195,7 @@ export function CreateWorkForm() {
         </button>
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || thumbnailStatus === "uploading" || videoStatus === "uploading"}
           className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending && <Spinner className="size-4 text-primary-foreground" />}

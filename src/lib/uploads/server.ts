@@ -32,7 +32,7 @@ export interface SignUploadResult {
   expiresAt: number;
 }
 
-const PRESIGN_EXPIRES_SECONDS = 5 * 60; // 5 分钟
+const PRESIGN_EXPIRES_SECONDS = 30 * 60; // 30 分钟
 
 /** Generate a URL-safe random key segment (cuid-ish, no deps). */
 function randomKey(bytes = 16): string {

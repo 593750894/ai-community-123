@@ -15,8 +15,23 @@ const RATE_LIMIT_PER_MIN = 20;
 const RATE_WINDOW_MS = 60 * 1000;
 const rateBuckets = new Map<string, number[]>();
 
+let rateCallCounter = 0;
+function pruneRateBuckets(now: number) {
+  for (const [uid, ts] of rateBuckets) {
+    const alive = ts.filter((t) => now - t < RATE_WINDOW_MS);
+    if (alive.length === 0) {
+      rateBuckets.delete(uid);
+    } else if (alive.length !== ts.length) {
+      rateBuckets.set(uid, alive);
+    }
+  }
+}
+
 function checkRateLimit(userId: string) {
   const now = Date.now();
+  if (++rateCallCounter % 100 === 0) {
+    pruneRateBuckets(now);
+  }
   const arr = rateBuckets.get(userId) ?? [];
   const fresh = arr.filter((t) => now - t < RATE_WINDOW_MS);
   if (fresh.length >= RATE_LIMIT_PER_MIN) {
@@ -40,7 +55,6 @@ const Schema = z.object({
 export async function POST(request: Request) {
   try {
     const user = await requireAuth();
-    checkRateLimit(user.id);
 
     const body = await request.json();
     const parsed = Schema.safeParse(body);
@@ -50,6 +64,8 @@ export async function POST(request: Request) {
         parsed.error.flatten().fieldErrors,
       );
     }
+
+    checkRateLimit(user.id);
 
     try {
       const result = await signUploadUrl({

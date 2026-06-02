@@ -114,9 +114,15 @@ export async function uploadFile(opts: UploadOptions): Promise<UploadResult> {
         opts.onProgress?.(100);
         resolve();
       } else {
+        const text = xhr.responseText || "";
+        const codeMatch = text.match(/<Code>([^<]+)<\/Code>/);
+        const msgMatch = text.match(/<Message>([^<]+)<\/Message>/);
+        const detail = codeMatch
+          ? `${codeMatch[1]}${msgMatch ? " — " + msgMatch[1] : ""}`
+          : text.slice(0, 200);
         reject(
           new UploadClientError(
-            `上传失败 (HTTP ${xhr.status})`,
+            `上传失败 (HTTP ${xhr.status})${detail ? ": " + detail : ""}`,
             "PUT_FAILED",
           ),
         );

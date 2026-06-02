@@ -12,6 +12,15 @@ import type { NotificationType } from "@/generated/prisma/client";
 
 const DEDUPE_WINDOW_MS = 24 * 60 * 60 * 1000;
 
+const DEDUP_TYPES: Set<NotificationType> = new Set([
+  "POST_LIKE",
+  "WORK_LIKE",
+  "COMMENT_LIKE",
+  "BOOKMARK",
+  "FOLLOW",
+  "MENTION",
+]);
+
 export interface EmitNotificationInput {
   recipientId: string;
   actorId?: string | null;
@@ -29,7 +38,7 @@ export async function emitNotification(input: EmitNotificationInput) {
 
     if (actorId && actorId === recipientId) return null;
 
-    if (actorId && targetType && targetId) {
+    if (DEDUP_TYPES.has(type) && actorId && targetType && targetId) {
       const since = new Date(Date.now() - DEDUPE_WINDOW_MS);
       const existing = await prisma.notification.findFirst({
         where: {

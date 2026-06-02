@@ -68,7 +68,7 @@ export async function listNotifications(args: {
 
   const rows = await prisma.notification.findMany({
     where,
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: pageSize + 1,
     ...(args.cursor
       ? { skip: 1, cursor: { id: args.cursor } }

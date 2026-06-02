@@ -601,6 +601,7 @@ model Notification {
 
   @@index([userId, readAt])
   @@index([userId, createdAt])
+  @@index([userId, actorId, type, targetType, targetId, createdAt(sort: Desc)])
   @@map("notifications")
 }
 

@@ -44,9 +44,14 @@ export async function createCommentAction(
     };
   }
 
+  const rawParentId = formData.get("parentId");
   const parsed = CreateCommentSchema.safeParse({
     postId,
     content: formData.get("content"),
+    parentId:
+      typeof rawParentId === "string" && rawParentId.length > 0
+        ? rawParentId
+        : undefined,
   });
 
   if (!parsed.success) {
@@ -70,6 +75,7 @@ export async function createCommentAction(
         postId: post.id,
         authorId: session.userId,
         content: parsed.data.content,
+        parentId: parsed.data.parentId ?? null,
       },
       select: { id: true, parentId: true },
     }),
