@@ -115,7 +115,7 @@ export function Sidebar({
           <ul className="space-y-0.5">
             {popularTags.map((t) => (
               <li key={t.tag}>
-                <DisabledItem icon={Hash} label={t.tag} />
+                <TagLink tag={t.tag} />
               </li>
             ))}
           </ul>
@@ -190,6 +190,18 @@ function ChannelLink({
         {ch.icon ?? "🗂"}
       </span>
       <span className="truncate">{ch.name}</span>
+    </Link>
+  );
+}
+
+function TagLink({ tag }: { tag: string }) {
+  return (
+    <Link
+      href={`/search?q=${encodeURIComponent(tag)}`}
+      className="group flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+    >
+      <Hash className="size-4 shrink-0 text-muted-foreground/80 group-hover:text-foreground" />
+      <span className="truncate">{tag}</span>
     </Link>
   );
 }

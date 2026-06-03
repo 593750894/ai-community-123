@@ -32,6 +32,9 @@ const STATIC_SHELL_ROUTES = [
 
 // Labels that must exist on the homepage shell but must NOT be clickable links
 // (these are the routes deferred to future phases).
+// NOTE: footer labels (关于/社区公约/服务条款/隐私政策/联系我们) were placeholders
+// in Phase 0 and got their real destinations in Phase 6, so they no longer belong
+// here. /me/* + /settings remain deferred to Phases 7/9.
 const DISABLED_LABELS = [
   // /me/* (Phase 7)
   "我的作品",
@@ -40,12 +43,6 @@ const DISABLED_LABELS = [
   "浏览历史",
   // /settings (Phase 9)
   "设置",
-  // footer (Phase 6)
-  "关于",
-  "社区公约",
-  "服务条款",
-  "隐私政策",
-  "联系我们",
 ];
 
 // Mock strings deleted in Phase 0 — they must not appear anywhere on "/".

@@ -218,6 +218,38 @@
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.25rem);
 }
 
+/* 静态页排版 · 不依赖 @tailwindcss/typography */
+@layer components {
+  .static-prose p {
+    @apply my-4 leading-relaxed text-foreground/80;
+  }
+  .static-prose ul,
+  .static-prose ol {
+    @apply my-4 space-y-1.5 pl-6;
+  }
+  .static-prose ul {
+    @apply list-disc;
+  }
+  .static-prose ol {
+    @apply list-decimal;
+  }
+  .static-prose li {
+    @apply leading-relaxed text-foreground/80;
+  }
+  .static-prose li::marker {
+    @apply text-muted-foreground/60;
+  }
+  .static-prose strong {
+    @apply font-semibold text-foreground;
+  }
+  .static-prose a {
+    @apply text-primary underline-offset-2 transition-colors hover:underline;
+  }
+  .static-prose code {
+    @apply rounded bg-muted/60 px-1.5 py-0.5 font-mono text-[0.85em];
+  }
+}
+
 /* Skeleton 闪动 */
 @keyframes skeleton-shimmer {
   0% {

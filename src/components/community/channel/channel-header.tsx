@@ -6,9 +6,11 @@ import {
   Sparkles,
   Tag,
   Users,
+  UsersRound,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { JoinChannelButton } from "@/components/community/channel/join-channel-button";
 import type { ChannelDetail, ChannelStats } from "@/types/community";
 import { getPublishLabel } from "@/lib/community/channel-categories";
 
@@ -47,10 +49,12 @@ export function ChannelHeader({
   channel,
   stats,
   signedIn,
+  isMember,
 }: {
   channel: ChannelDetail;
   stats: ChannelStats;
   signedIn: boolean;
+  isMember: boolean;
 }) {
   const createPostPath = `/create-post?channelId=${channel.id}`;
   const publishHref = signedIn
@@ -160,6 +164,13 @@ export function ChannelHeader({
               <ArrowLeft className="size-3.5" />
               全部频道
             </Button>
+            <JoinChannelButton
+              channelId={channel.id}
+              initialMember={isMember}
+              initialMemberCount={channel.memberCount}
+              signedIn={signedIn}
+              size="md"
+            />
             <Button
               size="sm"
               nativeButton={false}
@@ -188,6 +199,14 @@ export function ChannelHeader({
               {stats.creatorCount}
             </span>
             <span>位创作者</span>
+          </div>
+          <div className="h-3 w-px bg-border/60" />
+          <div className="flex items-center gap-1.5">
+            <UsersRound className="size-3.5 text-sky-400" />
+            <span className="tabular-nums font-semibold text-foreground/90">
+              {channel.memberCount}
+            </span>
+            <span>位成员</span>
           </div>
           {stats.todayPostCount > 0 && (
             <>

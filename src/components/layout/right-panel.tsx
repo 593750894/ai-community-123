@@ -46,11 +46,9 @@ export function RightPanel({
           <ul className="space-y-1">
             {popularTags.map((t, idx) => (
               <li key={t.tag}>
-                <span
-                  role="link"
-                  aria-disabled="true"
-                  title="搜索功能即将上线"
-                  className="flex cursor-not-allowed items-center gap-2 rounded-md px-2 py-1.5"
+                <Link
+                  href={`/search?q=${encodeURIComponent(t.tag)}`}
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
                 >
                   <span
                     className={`w-5 text-center text-xs font-semibold tabular-nums ${
@@ -68,7 +66,7 @@ export function RightPanel({
                       {t.count}
                     </span>
                   )}
-                </span>
+                </Link>
               </li>
             ))}
           </ul>
@@ -127,10 +125,10 @@ export function RightPanel({
         )}
       </Section>
 
-      <div
-        aria-disabled="true"
-        title="即将上线"
-        className="mt-6 cursor-not-allowed rounded-lg border border-border/60 bg-gradient-to-br from-primary/10 via-card/40 to-card/40 p-4 opacity-70"
+      <Link
+        href="/community/creator-program"
+        aria-label="加入创作者计划"
+        className="mt-6 block rounded-lg border border-border/60 bg-gradient-to-br from-primary/10 via-card/40 to-card/40 p-4 transition-colors hover:border-primary/40 hover:bg-primary/5"
       >
         <div className="mb-2 flex items-center gap-2 text-xs text-primary/80">
           <Sparkles className="size-3.5" />
@@ -140,17 +138,17 @@ export function RightPanel({
         <div className="mt-1 text-[11px] text-muted-foreground">
           注册成为认证创作者，享受官方分成与首页推荐位曝光。
         </div>
-        <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
-          即将上线 <ArrowUpRight className="size-3" />
+        <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary/80">
+          了解更多 <ArrowUpRight className="size-3" />
         </span>
-      </div>
+      </Link>
 
-      <div className="mt-6 flex flex-wrap gap-x-3 gap-y-1 px-1 text-[11px] text-muted-foreground/50">
-        <DisabledFooterLink>关于</DisabledFooterLink>
-        <DisabledFooterLink>社区公约</DisabledFooterLink>
-        <DisabledFooterLink>服务条款</DisabledFooterLink>
-        <DisabledFooterLink>隐私政策</DisabledFooterLink>
-        <DisabledFooterLink>联系我们</DisabledFooterLink>
+      <div className="mt-6 flex flex-wrap gap-x-3 gap-y-1 px-1 text-[11px] text-muted-foreground/60">
+        <FooterLink href="/about">关于</FooterLink>
+        <FooterLink href="/community/rules">社区公约</FooterLink>
+        <FooterLink href="/legal/terms">服务条款</FooterLink>
+        <FooterLink href="/legal/privacy">隐私政策</FooterLink>
+        <FooterLink href="/contact">联系我们</FooterLink>
         <span>© 2026 SeedLand</span>
       </div>
     </aside>
@@ -185,15 +183,19 @@ function EmptyHint({ children }: { children: React.ReactNode }) {
   );
 }
 
-function DisabledFooterLink({ children }: { children: React.ReactNode }) {
+function FooterLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
   return (
-    <span
-      role="link"
-      aria-disabled="true"
-      title="即将上线"
-      className="cursor-not-allowed"
+    <Link
+      href={href}
+      className="transition-colors hover:text-foreground/80"
     >
       {children}
-    </span>
+    </Link>
   );
 }

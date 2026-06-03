@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireAuth } from "@/lib/auth/guard";
 import { AppError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
+import { createRateLimiter } from "@/lib/rate-limit";
 import {
   signUploadUrl,
   UploadNotConfiguredError,
@@ -10,40 +11,13 @@ import {
 } from "@/lib/uploads/server";
 import { UPLOAD_KIND } from "@/lib/uploads/config";
 
-// 每用户每分钟最多签 20 次。简易内存令牌桶，足够 MVP；上 Redis 时再换。
-const RATE_LIMIT_PER_MIN = 20;
-const RATE_WINDOW_MS = 60 * 1000;
-const rateBuckets = new Map<string, number[]>();
-
-let rateCallCounter = 0;
-function pruneRateBuckets(now: number) {
-  for (const [uid, ts] of rateBuckets) {
-    const alive = ts.filter((t) => now - t < RATE_WINDOW_MS);
-    if (alive.length === 0) {
-      rateBuckets.delete(uid);
-    } else if (alive.length !== ts.length) {
-      rateBuckets.set(uid, alive);
-    }
-  }
-}
-
-function checkRateLimit(userId: string) {
-  const now = Date.now();
-  if (++rateCallCounter % 100 === 0) {
-    pruneRateBuckets(now);
-  }
-  const arr = rateBuckets.get(userId) ?? [];
-  const fresh = arr.filter((t) => now - t < RATE_WINDOW_MS);
-  if (fresh.length >= RATE_LIMIT_PER_MIN) {
-    throw new AppError(
-      `上传过于频繁，请稍后再试（每分钟最多 ${RATE_LIMIT_PER_MIN} 次）`,
-      "RATE_LIMITED",
-      429,
-    );
-  }
-  fresh.push(now);
-  rateBuckets.set(userId, fresh);
-}
+const uploadLimiter = createRateLimiter({
+  limit: 20,
+  windowMs: 60 * 1000,
+  name: "上传签名",
+  message: ({ limit }) =>
+    `上传过于频繁，请稍后再试（每分钟最多 ${limit} 次）`,
+});
 
 const Schema = z.object({
   kind: z.enum([UPLOAD_KIND.IMAGE, UPLOAD_KIND.VIDEO]),
@@ -65,7 +39,7 @@ export async function POST(request: Request) {
       );
     }
 
-    checkRateLimit(user.id);
+    uploadLimiter.check(user.id);
 
     try {
       const result = await signUploadUrl({

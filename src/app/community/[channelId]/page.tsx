@@ -13,6 +13,7 @@ import {
   getChannelStats,
   getRelatedChannels,
 } from "@/lib/community/queries";
+import { isChannelMember } from "@/lib/community/members";
 import type { ChannelPostSort, ChannelStats, PostOverview, ChannelOverview } from "@/types/community";
 import { POST_TYPE_VALUES } from "@/lib/post-types";
 import { getSession } from "@/lib/auth/session";
@@ -100,12 +101,19 @@ export default async function ChannelDetailPage({
     ? Math.min(MAX_PAGE_SIZE, Math.max(1, parseInt(sp.pageSize, 10) || DEFAULT_PAGE_SIZE))
     : DEFAULT_PAGE_SIZE;
 
-  const [result, hotPosts, channelStats, relatedChannels, session] = await Promise.all([
+  // 先解 session（只读 cookie + JWT，不打 DB），后续可以把所有 DB 查询并行起来。
+  const session = await getSession();
+
+  const [result, hotPosts, channelStats, relatedChannels, isMember] = await Promise.all([
     getChannelPosts(channel.id, { type, sort, search, page: rawPage, limit: pageSize }),
     safeFetch<PostOverview[]>(() => getChannelHotPosts(channel.id), []),
     safeFetch<ChannelStats>(() => getChannelStats(channel.id), EMPTY_STATS),
     safeFetch<ChannelOverview[]>(() => getRelatedChannels(channel.id, channel.slug), []),
-    getSession(),
+    // 不能用 safeFetch：isMember 决定一个有副作用的 toggle 按钮，悄悄 fallback 到 false 会把
+    // 真实的「已加入」用户误导成「加入频道」，下一次点击实际是「退出频道」。
+    session
+      ? isChannelMember({ channelId: channel.id, userId: session.userId })
+      : Promise.resolve(false),
   ]);
 
   const page = result.totalPages > 0 ? Math.min(rawPage, result.totalPages) : 1;
@@ -126,7 +134,12 @@ export default async function ChannelDetailPage({
 
   return (
     <div className="flex flex-1 flex-col">
-      <ChannelHeader channel={channel} stats={channelStats} signedIn={signedIn} />
+      <ChannelHeader
+        channel={channel}
+        stats={channelStats}
+        signedIn={signedIn}
+        isMember={isMember}
+      />
 
       <div className="flex flex-col gap-6 px-4 py-6 sm:px-8 sm:py-8 xl:flex-row xl:gap-8">
         {/* Main content */}

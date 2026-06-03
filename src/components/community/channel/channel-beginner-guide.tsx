@@ -16,7 +16,7 @@ export function ChannelBeginnerGuide({ channelId }: { channelId: string }) {
     {
       icon: BookOpen,
       label: "社区公约",
-      href: null,
+      href: "/community/rules",
       color: "text-cyan-400",
     },
     {

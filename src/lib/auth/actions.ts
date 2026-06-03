@@ -128,10 +128,13 @@ export async function loginAction(
   await createSessionCookie({ userId: user.id, username: user.username });
 
   const redirectTo = formData.get("redirectTo");
+  // 必须是站内路径：`/` 开头，第二字符不能是 `/` 或 `\`，否则浏览器把
+  // `//evil.com/x` 或 `/\evil.com` 当跨站，构成开放重定向。
   const target =
     typeof redirectTo === "string" &&
     redirectTo.startsWith("/") &&
-    !redirectTo.startsWith("//")
+    redirectTo[1] !== "/" &&
+    redirectTo[1] !== "\\"
       ? redirectTo
       : `/profile/${user.id}`;
   redirect(target);

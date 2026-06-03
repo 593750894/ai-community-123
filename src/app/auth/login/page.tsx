@@ -15,7 +15,16 @@ export default async function LoginPage({
 }) {
   const session = await getSession();
   const params = await searchParams;
-  const next = params?.next && params.next.startsWith("/") ? params.next : null;
+  // 必须是站内路径：单个 `/` 开头，且第二字符不能是 `/` 或 `\`，否则浏览器会把
+  // `//evil.com/x` 或 `/\evil.com` 解析为跨站，构成开放重定向。
+  const rawNext = params?.next;
+  const next =
+    typeof rawNext === "string" &&
+    rawNext.startsWith("/") &&
+    rawNext[1] !== "/" &&
+    rawNext[1] !== "\\"
+      ? rawNext
+      : null;
 
   if (session) {
     redirect(next ?? `/profile/${session.userId}`);

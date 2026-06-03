@@ -18,7 +18,7 @@ const GUIDES: Guide[] = [
   {
     icon: BookOpen,
     label: "社区公约",
-    href: null,
+    href: "/community/rules",
     color: "text-cyan-400",
   },
   {
@@ -36,7 +36,7 @@ const GUIDES: Guide[] = [
   {
     icon: Sparkles,
     label: "创作者计划",
-    href: null,
+    href: "/community/creator-program",
     color: "text-amber-400",
   },
 ];
