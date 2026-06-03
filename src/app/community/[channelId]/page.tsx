@@ -146,6 +146,7 @@ export default async function ChannelDetailPage({
             publishHref={publishHref}
             channelSlug={channel.slug}
             signedIn={signedIn}
+            viewerId={session?.userId ?? null}
             interactions={interactions}
           />
         </div>

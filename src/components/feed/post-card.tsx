@@ -8,6 +8,7 @@ import {
   BookmarkButton,
   LikeButton,
 } from "@/components/feed/interaction-buttons";
+import { ReportButton } from "@/components/reports/report-button";
 
 const ROLE_META: Record<string, { label: string; icon: typeof Shield; className: string } | undefined> = {
   MOD: { label: "版主", icon: Shield, className: "text-blue-400" },
@@ -49,12 +50,14 @@ export function PostCard({
   signedIn = false,
   liked = false,
   bookmarked = false,
+  viewerId = null,
 }: {
   post: PostCardData;
   showChannel?: boolean;
   signedIn?: boolean;
   liked?: boolean;
   bookmarked?: boolean;
+  viewerId?: string | null;
 }) {
   const meta = postTypeMeta(post.type);
   const hasMedia = Boolean(post.videoUrl || post.imageUrl);
@@ -178,6 +181,14 @@ export function PostCard({
             initialCount={post.bookmarkCount}
             showCount={post.bookmarkCount != null}
             signedIn={signedIn}
+          />
+          <ReportButton
+            targetType="POST"
+            targetId={post.id}
+            ownerId={post.author.id}
+            viewerId={viewerId}
+            variant="icon"
+            loginNext={`/post/${post.id}`}
           />
         </div>
       </div>

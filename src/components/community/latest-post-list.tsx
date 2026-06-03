@@ -12,10 +12,12 @@ function publishHref(signedIn: boolean) {
 export function LatestPostList({
   posts,
   signedIn = false,
+  viewerId = null,
   error = false,
 }: {
   posts: PostCardData[];
   signedIn?: boolean;
+  viewerId?: string | null;
   error?: boolean;
 }) {
   return (
@@ -53,7 +55,13 @@ export function LatestPostList({
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} showChannel />
+            <PostCard
+              key={post.id}
+              post={post}
+              showChannel
+              signedIn={signedIn}
+              viewerId={viewerId}
+            />
           ))}
         </div>
       )}

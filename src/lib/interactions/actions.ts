@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { Prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
 import {
+  notifyCommentLike,
   notifyPostLike,
   notifyWorkLike,
   notifyPostBookmark,
@@ -164,6 +165,82 @@ export async function toggleWorkLike(workId: string): Promise<InteractionResult>
       });
       const stillLiked = await prisma.like.findUnique({
         where: { userId_workId: { userId, workId } },
+        select: { id: true },
+      });
+      return {
+        ok: true,
+        active: Boolean(stillLiked),
+        count: Math.max(0, fresh?.likeCount ?? 0),
+      };
+    }
+    throw err;
+  }
+}
+
+/**
+ * 评论点赞 toggle
+ * - 已点过：取消，likeCount - 1
+ * - 未点过：创建 Like，likeCount + 1
+ * 防重：依赖 likes 表 (userId, commentId) 的 @@unique 约束
+ */
+export async function toggleCommentLike(
+  commentId: string,
+): Promise<InteractionResult> {
+  const session = await getSession();
+  if (!session) return needLoginResult();
+
+  const userId = session.userId;
+
+  const comment = await prisma.comment.findUnique({
+    where: { id: commentId },
+    select: { id: true, postId: true, authorId: true },
+  });
+  if (!comment) {
+    return { ok: false, active: false, count: 0, message: "评论不存在或已被删除" };
+  }
+
+  const existing = await prisma.like.findUnique({
+    where: { userId_commentId: { userId, commentId } },
+    select: { id: true },
+  });
+
+  try {
+    const updated = await prisma.$transaction(async (tx) => {
+      if (existing) {
+        await tx.like.delete({ where: { id: existing.id } });
+        return tx.comment.update({
+          where: { id: commentId },
+          data: { likeCount: { decrement: 1 } },
+          select: { likeCount: true },
+        });
+      }
+      await tx.like.create({ data: { userId, commentId } });
+      return tx.comment.update({
+        where: { id: commentId },
+        data: { likeCount: { increment: 1 } },
+        select: { likeCount: true },
+      });
+    });
+
+    revalidatePath(`/post/${comment.postId}`);
+
+    if (!existing) {
+      await notifyCommentLike({ commentId, actorId: userId });
+    }
+
+    return {
+      ok: true,
+      active: !existing,
+      count: Math.max(0, updated.likeCount),
+    };
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      const fresh = await prisma.comment.findUnique({
+        where: { id: commentId },
+        select: { likeCount: true },
+      });
+      const stillLiked = await prisma.like.findUnique({
+        where: { userId_commentId: { userId, commentId } },
         select: { id: true },
       });
       return {

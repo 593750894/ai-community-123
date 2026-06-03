@@ -3,6 +3,7 @@ import {
   Banknote,
   ChevronRight,
   Film,
+  Flag,
   MessageSquare,
   Users,
   Wrench,
@@ -10,21 +11,23 @@ import {
 
 import { PageHeader } from "@/components/layout/page-header";
 import { prisma } from "@/lib/db";
+import { countOpenReports } from "@/lib/reports/queries";
 
 export const dynamic = "force-dynamic";
 
-// 阶段 11：管理后台首页 —— 展示最基础的几个核心数据。
+// 阶段 11 + Stage 5：管理后台首页 —— 核心数据 + 待处理举报。
 // guard 在 layout 里已经做过，这里直接查 DB 即可。
 
 async function getOverview() {
-  const [users, posts, works, collabs, tools] = await Promise.all([
+  const [users, posts, works, collabs, tools, openReports] = await Promise.all([
     prisma.user.count(),
     prisma.post.count(),
     prisma.work.count(),
     prisma.collaboration.count(),
     prisma.tool.count(),
+    countOpenReports().catch(() => 0),
   ]);
-  return { users, posts, works, collabs, tools };
+  return { users, posts, works, collabs, tools, openReports };
 }
 
 export default async function AdminPage() {
@@ -65,6 +68,13 @@ export default async function AdminPage() {
       href: "/admin/tools",
       icon: Wrench,
       tone: "text-violet-300",
+    },
+    {
+      label: "待处理举报",
+      value: overview.openReports,
+      href: "/admin/reports?status=PENDING",
+      icon: Flag,
+      tone: "text-rose-300",
     },
   ];
 
@@ -125,6 +135,11 @@ export default async function AdminPage() {
               href: "/admin/tools",
               title: "工具库管理",
               desc: "录入新工具、下架老工具。",
+            },
+            {
+              href: "/admin/reports?status=PENDING",
+              title: "举报处理",
+              desc: "审核用户提交的举报，处理或驳回。",
             },
           ].map((m) => (
             <Link

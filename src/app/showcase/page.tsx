@@ -216,6 +216,7 @@ export default async function ShowcasePage({
                 key={w.id}
                 work={w}
                 signedIn={signedIn}
+                viewerId={session?.userId ?? null}
                 liked={interactions.likedWorkIds.has(w.id)}
                 bookmarked={interactions.bookmarkedWorkIds.has(w.id)}
               />

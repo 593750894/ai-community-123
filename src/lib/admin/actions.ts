@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
+import { createAuditLog } from "@/lib/admin/audit";
 import {
   COLLAB_STATUS_VALUES,
   type CollabStatusValue,
@@ -15,25 +16,69 @@ import {
   type ToolPricingValue,
 } from "@/lib/tools/categories";
 
-// 阶段 11：管理后台的写操作。
+// 阶段 11 → Stage 5 扩展：管理后台写操作 + 审计日志。
 // 所有 action 都先 requireAdmin —— 普通用户即使猜到表单地址也会被踢去登录。
-// 不返回详细错误信息，避免给探测者过多反馈。
+// 每一次成功的变更都写入 AuditLog（IP / UA 走 getClientMeta）。
 
 export async function adminDeletePost(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = formData.get("id");
   if (typeof id !== "string" || !id) return;
-  await prisma.post.delete({ where: { id } }).catch(() => null);
+  const snapshot = await prisma.post
+    .findUnique({
+      where: { id },
+      select: { title: true, authorId: true, channelId: true },
+    })
+    .catch(() => null);
+  const deleted = await prisma.post
+    .delete({ where: { id } })
+    .then(() => true)
+    .catch(() => false);
+  if (deleted) {
+    await createAuditLog({
+      adminId: admin.id,
+      action: "DELETE_POST",
+      targetType: "Post",
+      targetId: id,
+      metadata: snapshot
+        ? {
+            title: snapshot.title,
+            authorId: snapshot.authorId,
+            channelId: snapshot.channelId,
+          }
+        : null,
+    });
+  }
   revalidatePath("/admin/posts");
   revalidatePath("/admin");
   revalidatePath("/community");
 }
 
 export async function adminDeleteWork(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = formData.get("id");
   if (typeof id !== "string" || !id) return;
-  await prisma.work.delete({ where: { id } }).catch(() => null);
+  const snapshot = await prisma.work
+    .findUnique({
+      where: { id },
+      select: { title: true, authorId: true },
+    })
+    .catch(() => null);
+  const deleted = await prisma.work
+    .delete({ where: { id } })
+    .then(() => true)
+    .catch(() => false);
+  if (deleted) {
+    await createAuditLog({
+      adminId: admin.id,
+      action: "DELETE_WORK",
+      targetType: "Work",
+      targetId: id,
+      metadata: snapshot
+        ? { title: snapshot.title, authorId: snapshot.authorId }
+        : null,
+    });
+  }
   revalidatePath("/admin/works");
   revalidatePath("/admin");
   revalidatePath("/showcase");
@@ -58,23 +103,106 @@ export async function adminUpdateCollabStatus(formData: FormData): Promise<void>
 }
 
 export async function adminDeleteCollab(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = formData.get("id");
   if (typeof id !== "string" || !id) return;
-  await prisma.collaboration.delete({ where: { id } }).catch(() => null);
+  const snapshot = await prisma.collaboration
+    .findUnique({
+      where: { id },
+      select: { title: true, authorId: true, status: true },
+    })
+    .catch(() => null);
+  const deleted = await prisma.collaboration
+    .delete({ where: { id } })
+    .then(() => true)
+    .catch(() => false);
+  if (deleted) {
+    await createAuditLog({
+      adminId: admin.id,
+      action: "DELETE_COLLAB",
+      targetType: "Collaboration",
+      targetId: id,
+      metadata: snapshot
+        ? {
+            title: snapshot.title,
+            authorId: snapshot.authorId,
+            statusBefore: snapshot.status,
+          }
+        : null,
+    });
+  }
   revalidatePath("/admin/collaborations");
   revalidatePath("/admin");
   revalidatePath("/collaboration");
 }
 
 export async function adminDeleteTool(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = formData.get("id");
   if (typeof id !== "string" || !id) return;
-  await prisma.tool.delete({ where: { id } }).catch(() => null);
+  const snapshot = await prisma.tool
+    .findUnique({ where: { id }, select: { name: true, slug: true } })
+    .catch(() => null);
+  const deleted = await prisma.tool
+    .delete({ where: { id } })
+    .then(() => true)
+    .catch(() => false);
+  if (deleted) {
+    await createAuditLog({
+      adminId: admin.id,
+      action: "DELETE_TOOL",
+      targetType: "Tool",
+      targetId: id,
+      metadata: snapshot ? { name: snapshot.name, slug: snapshot.slug } : null,
+    });
+  }
   revalidatePath("/admin/tools");
   revalidatePath("/admin");
   revalidatePath("/tools");
+}
+
+/** Admin 删除评论（评论详情页 / 帖子页 admin 视角）。 */
+export async function adminDeleteComment(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  const id = formData.get("id");
+  if (typeof id !== "string" || !id) return;
+  const snapshot = await prisma.comment
+    .findUnique({
+      where: { id },
+      select: {
+        postId: true,
+        authorId: true,
+        parentId: true,
+        content: true,
+      },
+    })
+    .catch(() => null);
+  if (!snapshot) return;
+  const ok = await prisma
+    .$transaction([
+      prisma.comment.delete({ where: { id } }),
+      prisma.post.update({
+        where: { id: snapshot.postId },
+        data: { commentCount: { decrement: 1 } },
+      }),
+    ])
+    .then(() => true)
+    .catch(() => false);
+  if (ok) {
+    await createAuditLog({
+      adminId: admin.id,
+      action: "DELETE_COMMENT",
+      targetType: "Comment",
+      targetId: id,
+      metadata: {
+        postId: snapshot.postId,
+        authorId: snapshot.authorId,
+        parentId: snapshot.parentId,
+        contentSnippet: snapshot.content.slice(0, 120),
+      },
+    });
+    revalidatePath(`/post/${snapshot.postId}`);
+  }
 }
 
 // 简单的 slug 生成：英文转 kebab-case，其他字符直接退化成随机后缀

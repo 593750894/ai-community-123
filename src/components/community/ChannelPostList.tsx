@@ -26,6 +26,7 @@ export function ChannelPostList({
   publishHref,
   channelSlug,
   signedIn,
+  viewerId = null,
   interactions,
 }: {
   posts: PostCardData[];
@@ -38,6 +39,7 @@ export function ChannelPostList({
   publishHref: string;
   channelSlug: string;
   signedIn: boolean;
+  viewerId?: string | null;
   interactions: {
     likedPostIds: Set<string>;
     bookmarkedPostIds: Set<string>;
@@ -112,6 +114,7 @@ export function ChannelPostList({
             <PostCard
               post={post}
               signedIn={signedIn}
+              viewerId={viewerId}
               liked={interactions.likedPostIds.has(post.id)}
               bookmarked={interactions.bookmarkedPostIds.has(post.id)}
             />

@@ -13,12 +13,14 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { CommentForm } from "@/components/feed/comment-form";
-import { CommentList, type CommentItem } from "@/components/feed/comment-list";
+import { CommentThread } from "@/components/feed/comment-thread";
 import {
   BookmarkButton,
   LikeButton,
 } from "@/components/feed/interaction-buttons";
+import { ReportButton } from "@/components/reports/report-button";
 import { getCurrentUser } from "@/lib/auth/session";
+import { collectCommentIds, getCommentThread } from "@/lib/comments/queries";
 import { prisma } from "@/lib/db";
 import { loadInteractionState } from "@/lib/interactions/queries";
 import { formatRelativeTime } from "@/lib/utils";
@@ -47,24 +49,6 @@ async function getPost(postId: string) {
   });
 }
 
-async function getComments(postId: string): Promise<CommentItem[]> {
-  const rows = await prisma.comment.findMany({
-    where: { postId, parentId: null },
-    orderBy: { createdAt: "asc" },
-    include: {
-      author: {
-        select: { id: true, name: true, username: true, avatar: true },
-      },
-    },
-  });
-  return rows.map((c) => ({
-    id: c.id,
-    content: c.content,
-    createdAt: c.createdAt,
-    author: c.author,
-  }));
-}
-
 export default async function PostDetailPage({
   params,
 }: {
@@ -77,12 +61,16 @@ export default async function PostDetailPage({
   ]);
   if (!post) notFound();
 
-  const [comments, interactions] = await Promise.all([
-    getComments(post.id),
-    loadInteractionState({ postIds: [post.id] }),
-  ]);
+  const thread = await getCommentThread(post.id);
+  const commentIds = collectCommentIds(thread);
+  const interactions = await loadInteractionState({
+    postIds: [post.id],
+    commentIds,
+  });
   const meta = postTypeMeta(post.type);
   const signedIn = Boolean(currentUser);
+  const viewerId = currentUser?.id ?? null;
+  const viewerIsAdmin = currentUser?.role === "ADMIN";
   const liked = interactions.likedPostIds.has(post.id);
   const bookmarked = interactions.bookmarkedPostIds.has(post.id);
 
@@ -194,6 +182,14 @@ export default async function PostDetailPage({
                   size="md"
                   variant="solid"
                 />
+                <ReportButton
+                  targetType="POST"
+                  targetId={post.id}
+                  ownerId={post.author.id}
+                  viewerId={viewerId}
+                  variant="icon"
+                  loginNext={`/post/${post.id}`}
+                />
               </div>
             </div>
 
@@ -273,7 +269,12 @@ export default async function PostDetailPage({
               />
             )}
 
-            <CommentList comments={comments} />
+            <CommentThread
+              thread={thread}
+              viewerId={viewerId}
+              viewerIsAdmin={viewerIsAdmin}
+              likedCommentIds={Array.from(interactions.likedCommentIds)}
+            />
           </section>
         </main>
 

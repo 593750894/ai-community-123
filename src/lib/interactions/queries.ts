@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { prisma, Prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
 
 /**
@@ -9,6 +9,7 @@ import { getSession } from "@/lib/auth/session";
 export type InteractionState = {
   likedPostIds: Set<string>;
   likedWorkIds: Set<string>;
+  likedCommentIds: Set<string>;
   bookmarkedPostIds: Set<string>;
   bookmarkedWorkIds: Set<string>;
 };
@@ -16,6 +17,7 @@ export type InteractionState = {
 const EMPTY: InteractionState = {
   likedPostIds: new Set(),
   likedWorkIds: new Set(),
+  likedCommentIds: new Set(),
   bookmarkedPostIds: new Set(),
   bookmarkedWorkIds: new Set(),
 };
@@ -23,6 +25,7 @@ const EMPTY: InteractionState = {
 export async function loadInteractionState(targets: {
   postIds?: string[];
   workIds?: string[];
+  commentIds?: string[];
 }): Promise<InteractionState> {
   const session = await getSession();
   if (!session) return EMPTY;
@@ -30,40 +33,43 @@ export async function loadInteractionState(targets: {
 
   const postIds = targets.postIds && targets.postIds.length > 0 ? targets.postIds : null;
   const workIds = targets.workIds && targets.workIds.length > 0 ? targets.workIds : null;
-  if (!postIds && !workIds) return EMPTY;
+  const commentIds =
+    targets.commentIds && targets.commentIds.length > 0 ? targets.commentIds : null;
+  if (!postIds && !workIds && !commentIds) return EMPTY;
+
+  const likeOr: Prisma.LikeWhereInput[] = [];
+  if (postIds) likeOr.push({ postId: { in: postIds } });
+  if (workIds) likeOr.push({ workId: { in: workIds } });
+  if (commentIds) likeOr.push({ commentId: { in: commentIds } });
+
+  const bookmarkOr: Prisma.BookmarkWhereInput[] = [];
+  if (postIds) bookmarkOr.push({ postId: { in: postIds } });
+  if (workIds) bookmarkOr.push({ workId: { in: workIds } });
 
   const [likes, bookmarks] = await Promise.all([
     prisma.like.findMany({
-      where: {
-        userId,
-        OR: [
-          postIds ? { postId: { in: postIds } } : { id: "__never__" },
-          workIds ? { workId: { in: workIds } } : { id: "__never__" },
-        ],
-      },
-      select: { postId: true, workId: true },
+      where: { userId, OR: likeOr },
+      select: { postId: true, workId: true, commentId: true },
     }),
-    prisma.bookmark.findMany({
-      where: {
-        userId,
-        OR: [
-          postIds ? { postId: { in: postIds } } : { id: "__never__" },
-          workIds ? { workId: { in: workIds } } : { id: "__never__" },
-        ],
-      },
-      select: { postId: true, workId: true },
-    }),
+    bookmarkOr.length > 0
+      ? prisma.bookmark.findMany({
+          where: { userId, OR: bookmarkOr },
+          select: { postId: true, workId: true },
+        })
+      : Promise.resolve([] as Array<{ postId: string | null; workId: string | null }>),
   ]);
 
   const state: InteractionState = {
     likedPostIds: new Set(),
     likedWorkIds: new Set(),
+    likedCommentIds: new Set(),
     bookmarkedPostIds: new Set(),
     bookmarkedWorkIds: new Set(),
   };
   for (const l of likes) {
     if (l.postId) state.likedPostIds.add(l.postId);
     if (l.workId) state.likedWorkIds.add(l.workId);
+    if (l.commentId) state.likedCommentIds.add(l.commentId);
   }
   for (const b of bookmarks) {
     if (b.postId) state.bookmarkedPostIds.add(b.postId);

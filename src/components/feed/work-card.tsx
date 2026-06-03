@@ -11,6 +11,7 @@ import {
   BookmarkButton,
   LikeButton,
 } from "@/components/feed/interaction-buttons";
+import { ReportButton } from "@/components/reports/report-button";
 
 // 兼容旧 demo 字段（页面上仍有 mock 占位），同时支持新的 DB 字段。
 export type Work = {
@@ -55,11 +56,13 @@ export function WorkCard({
   signedIn = false,
   liked = false,
   bookmarked = false,
+  viewerId = null,
 }: {
   work: Work;
   signedIn?: boolean;
   liked?: boolean;
   bookmarked?: boolean;
+  viewerId?: string | null;
 }) {
   const ratio = work.ratio ?? "16:9";
   const aspect =
@@ -180,20 +183,32 @@ export function WorkCard({
           </div>
         )}
 
-        <div className="flex items-center justify-between border-t border-border/30 pt-2 text-[11px] text-muted-foreground tabular-nums">
+        <div className="flex items-center justify-between gap-1 border-t border-border/30 pt-2 text-[11px] text-muted-foreground tabular-nums">
           <LikeButton
             target={{ kind: "work", id: work.id }}
             initialActive={liked}
             initialCount={likeCount}
             signedIn={signedIn}
           />
-          <BookmarkButton
-            target={{ kind: "work", id: work.id }}
-            initialActive={bookmarked}
-            initialCount={bookmarkCount}
-            signedIn={signedIn}
-            showCount
-          />
+          <div className="ml-auto flex items-center gap-1">
+            <BookmarkButton
+              target={{ kind: "work", id: work.id }}
+              initialActive={bookmarked}
+              initialCount={bookmarkCount}
+              signedIn={signedIn}
+              showCount
+            />
+            {work.authorId && (
+              <ReportButton
+                targetType="WORK"
+                targetId={work.id}
+                ownerId={work.authorId}
+                viewerId={viewerId}
+                variant="icon"
+                loginNext={`/showcase/${work.id}`}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

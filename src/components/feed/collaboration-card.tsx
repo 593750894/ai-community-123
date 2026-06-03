@@ -19,6 +19,7 @@ import {
   type CollabWorkModeValue,
 } from "@/lib/collaborations/categories";
 import { authorTintFromName } from "@/lib/work-categories";
+import { ReportButton } from "@/components/reports/report-button";
 
 export type CollabCardItem = {
   id: string;
@@ -50,20 +51,35 @@ function formatRelative(date: Date | string): string {
   return d.toLocaleDateString("zh-CN", { month: "numeric", day: "numeric" });
 }
 
-export function CollaborationCard({ item }: { item: CollabCardItem }) {
+export function CollaborationCard({
+  item,
+  viewerId = null,
+}: {
+  item: CollabCardItem;
+  viewerId?: string | null;
+}) {
   const meta = collabCategoryMeta(item.category);
   const tint = authorTintFromName(item.author.name);
   const isClosed = item.status === "CLOSED";
 
   return (
-    <Link
-      href={`/collaboration/${item.id}`}
-      className={cn(
-        "group block surface-card surface-card-hover p-4 transition-all hover:-translate-y-0.5",
-        isClosed && "opacity-60 hover:opacity-80",
-      )}
-    >
-      <div className="flex items-start gap-4">
+    <div className="relative">
+      <ReportButton
+        targetType="COLLABORATION"
+        targetId={item.id}
+        ownerId={item.author.id}
+        viewerId={viewerId}
+        variant="icon-floating"
+        loginNext={`/collaboration/${item.id}`}
+      />
+      <Link
+        href={`/collaboration/${item.id}`}
+        className={cn(
+          "group block surface-card surface-card-hover p-4 transition-all hover:-translate-y-0.5",
+          isClosed && "opacity-60 hover:opacity-80",
+        )}
+      >
+        <div className="flex items-start gap-4">
         {/* 分类色块 */}
         <span
           className={cn(
@@ -170,7 +186,8 @@ export function CollaborationCard({ item }: { item: CollabCardItem }) {
           </div>
         </div>
       </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
 

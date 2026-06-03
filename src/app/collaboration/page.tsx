@@ -19,6 +19,7 @@ import {
   CollaborationCard,
   type CollabCardItem,
 } from "@/components/feed/collaboration-card";
+import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
 import {
   COLLAB_CATEGORY_ORDER,
@@ -104,11 +105,13 @@ export default async function CollaborationPage({
       ? (rawStatus as CollabStatusValue)
       : null;
 
-  const [rows, counts, stats] = await Promise.all([
+  const [rows, counts, stats, session] = await Promise.all([
     getCollaborations(activeCategory, activeStatus),
     getCategoryCounts(),
     getStats(),
+    getSession(),
   ]);
+  const viewerId = session?.userId ?? null;
 
   const items: CollabCardItem[] = rows.map((r) => ({
     id: r.id,
@@ -302,7 +305,7 @@ export default async function CollaborationPage({
         ) : (
           <section className="grid gap-3 lg:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
             {items.map((item) => (
-              <CollaborationCard key={item.id} item={item} />
+              <CollaborationCard key={item.id} item={item} viewerId={viewerId} />
             ))}
           </section>
         )}

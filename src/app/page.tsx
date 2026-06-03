@@ -304,7 +304,13 @@ async function FollowingFeed({ userId }: { userId: string | null }) {
   return (
     <div className="grid gap-3 lg:grid-cols-2">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} showChannel />
+        <PostCard
+          key={post.id}
+          post={post}
+          showChannel
+          signedIn
+          viewerId={userId}
+        />
       ))}
     </div>
   );

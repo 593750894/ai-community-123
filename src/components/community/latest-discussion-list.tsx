@@ -4,7 +4,15 @@ import { PostCard, type PostCardData } from "@/components/feed/post-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { MessageSquare } from "lucide-react";
 
-export function LatestDiscussionList({ posts }: { posts: PostCardData[] }) {
+export function LatestDiscussionList({
+  posts,
+  signedIn = false,
+  viewerId = null,
+}: {
+  posts: PostCardData[];
+  signedIn?: boolean;
+  viewerId?: string | null;
+}) {
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
@@ -26,7 +34,13 @@ export function LatestDiscussionList({ posts }: { posts: PostCardData[] }) {
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} showChannel />
+            <PostCard
+              key={post.id}
+              post={post}
+              showChannel
+              signedIn={signedIn}
+              viewerId={viewerId}
+            />
           ))}
         </div>
       )}

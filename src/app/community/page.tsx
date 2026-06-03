@@ -86,6 +86,7 @@ export default async function CommunityPage({
           <LatestPostList
             posts={latestPostsResult.data ?? []}
             signedIn={signedIn}
+            viewerId={session?.userId ?? null}
             error={latestPostsResult.error}
           />
           <HotPostList

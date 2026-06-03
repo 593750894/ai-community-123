@@ -184,6 +184,35 @@ export async function notifyWorkBookmark(args: { workId: string; actorId: string
   }
 }
 
+/** 点赞评论 → 通知评论作者 */
+export async function notifyCommentLike(args: {
+  commentId: string;
+  actorId: string;
+}) {
+  try {
+    const [comment, actor] = await Promise.all([
+      prisma.comment.findUnique({
+        where: { id: args.commentId },
+        select: { authorId: true, content: true, postId: true },
+      }),
+      actorDisplay(args.actorId),
+    ]);
+    if (!comment || !actor) return;
+    await emitNotification({
+      recipientId: comment.authorId,
+      actorId: args.actorId,
+      type: "COMMENT_LIKE",
+      title: `${actor.name} 赞了你的评论`,
+      body: comment.content.slice(0, 80),
+      link: `/post/${comment.postId}#comment-${args.commentId}`,
+      targetType: "COMMENT",
+      targetId: args.commentId,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyCommentLike", err);
+  }
+}
+
 /** 帖子被评论 → 通知作者；若评论是 reply（parentId 存在），同时通知被回复的人 */
 export async function notifyPostReply(args: {
   postId: string;

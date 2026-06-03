@@ -19,6 +19,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { ProfileEditDialog } from "@/components/auth/profile-edit-dialog";
 import { startConversationAction } from "@/lib/messages/actions";
 import { FollowButton } from "@/components/follows/follow-button";
+import { ReportButton } from "@/components/reports/report-button";
 import {
   getFollowCounts,
   isFollowing as queryIsFollowing,
@@ -136,6 +137,14 @@ export default async function ProfilePage({
                   私信
                 </button>
               </form>
+              <ReportButton
+                targetType="USER"
+                targetId={user.id}
+                ownerId={user.id}
+                viewerId={session?.userId ?? null}
+                variant="menu-item"
+                loginNext={`/profile/${user.id}`}
+              />
             </div>
           )
         }
