@@ -8,8 +8,8 @@ import {
   Globe2,
   Hash,
   Heart,
-  History,
   Home,
+  LayoutDashboard,
   LayoutGrid,
   MessagesSquare,
   Settings,
@@ -47,11 +47,12 @@ const TOP_LINKS: LinkItem[] = [
   { href: "/messages", label: "消息中心", icon: MessagesSquare },
 ];
 
-const MY_LINKS: { label: string; icon: LinkItem["icon"] }[] = [
-  { label: "我的作品", icon: Film },
-  { label: "点赞收藏", icon: Heart },
-  { label: "稍后再看", icon: Bookmark },
-  { label: "浏览历史", icon: History },
+// Stage 7：/me 四个子页上线，浏览历史功能（PostView/WorkView）暂未实现，先从侧栏移除。
+const MY_LINKS: LinkItem[] = [
+  { href: "/me", label: "个人中心", icon: LayoutDashboard },
+  { href: "/me/works", label: "我的作品", icon: Film },
+  { href: "/me/likes", label: "点赞", icon: Heart },
+  { href: "/me/bookmarks", label: "稍后再看", icon: Bookmark },
 ];
 
 const ADMIN_LINK: LinkItem = { href: "/admin", label: "管理后台", icon: Shield };
@@ -85,8 +86,8 @@ export function Sidebar({
       <SectionTitle>我的</SectionTitle>
       <ul className="space-y-0.5">
         {MY_LINKS.map((item) => (
-          <li key={item.label}>
-            <DisabledItem icon={item.icon} label={item.label} />
+          <li key={item.href}>
+            <ActiveLink item={item} active={isActive(item.href)} />
           </li>
         ))}
       </ul>

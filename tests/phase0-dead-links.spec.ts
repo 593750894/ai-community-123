@@ -34,13 +34,9 @@ const STATIC_SHELL_ROUTES = [
 // (these are the routes deferred to future phases).
 // NOTE: footer labels (关于/社区公约/服务条款/隐私政策/联系我们) were placeholders
 // in Phase 0 and got their real destinations in Phase 6, so they no longer belong
-// here. /me/* + /settings remain deferred to Phases 7/9.
+// here. /me/* got real /me/* routes in Stage 7; 浏览历史 was removed from sidebar
+// (history feature deferred). Only /settings remains deferred to Stage 9.
 const DISABLED_LABELS = [
-  // /me/* (Phase 7)
-  "我的作品",
-  "点赞收藏",
-  "稍后再看",
-  "浏览历史",
   // /settings (Phase 9)
   "设置",
 ];
