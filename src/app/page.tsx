@@ -7,6 +7,7 @@ import {
   Heart,
   Sparkles,
   UserPlus,
+  Video,
   Wand2,
   Wrench,
 } from "lucide-react";
@@ -14,26 +15,77 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { DEMO_WORKS, WorkCard } from "@/components/feed/work-card";
+import { WorkCard, type Work } from "@/components/feed/work-card";
 import { PostCard, type PostCardData } from "@/components/feed/post-card";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
 import { getFollowingUserIds } from "@/lib/follows/queries";
+import { loadInteractionState } from "@/lib/interactions/queries";
+import {
+  getLatestWorks,
+  getRecommendedWorks,
+  getWorksByCategory,
+  getWorksByModel,
+  type FeedWorkRow,
+} from "@/lib/feeds/queries";
+import type {
+  WorkCategory,
+  WorkModel,
+} from "@/generated/prisma/client";
+import type { WorkCategoryValue } from "@/lib/work-categories";
 import { cn } from "@/lib/utils";
 
-// 阶段 2：先实现"关注" tab，其他 tab 暂保留 mock；阶段 8 会全部 URL-driven。
-const FEED_TABS = [
-  { key: "recommend", label: "推荐" },
-  { key: "following", label: "关注" },
-  { key: "latest", label: "最新" },
-  { key: "seedance-2", label: "Seedance 2.0", disabled: true },
-  { key: "drama", label: "短剧", disabled: true },
-  { key: "digital-human", label: "数字人", disabled: true },
-  { key: "tutorial", label: "教程", disabled: true },
-  { key: "review", label: "评测", disabled: true },
-] as const;
+// 阶段 8：所有 tab 真实切换 — URL 驱动 + DB 查询。
+type TabDef = {
+  key: string;
+  label: string;
+  /** 启用的 tab 必须给出 kind，告诉服务端怎么查 */
+  kind: "recommend" | "following" | "latest" | "category" | "model";
+  /** kind=category 时填 WorkCategory；kind=model 时填 WorkModel */
+  filter?: WorkCategory | WorkModel;
+  emptyHint?: string;
+};
 
-type TabKey = (typeof FEED_TABS)[number]["key"];
+const FEED_TABS: TabDef[] = [
+  { key: "recommend", label: "推荐", kind: "recommend" },
+  { key: "following", label: "关注", kind: "following" },
+  { key: "latest", label: "最新", kind: "latest" },
+  {
+    key: "seedance-2",
+    label: "Seedance 2.0",
+    kind: "model",
+    filter: "SEEDANCE_2_0",
+    emptyHint: "暂时还没有使用 Seedance 2.0 的公开作品，去发布第一个吧。",
+  },
+  {
+    key: "drama",
+    label: "短剧",
+    kind: "category",
+    filter: "AI_DRAMA",
+    emptyHint: "短剧分类下还没有作品，期待你的第一集。",
+  },
+  {
+    key: "digital-human",
+    label: "数字人",
+    kind: "category",
+    filter: "DIGITAL_HUMAN",
+    emptyHint: "数字人分类下还没有作品。",
+  },
+  {
+    key: "tutorial",
+    label: "教程",
+    kind: "category",
+    filter: "KNOWLEDGE",
+    emptyHint: "教程类作品还没上线，等你分享工作流。",
+  },
+  {
+    key: "review",
+    label: "评测",
+    kind: "category",
+    filter: "EXPERIMENT",
+    emptyHint: "评测/实验作品暂无，欢迎做模型横评。",
+  },
+];
 
 const QUICK_ENTRIES = [
   {
@@ -74,10 +126,8 @@ export default async function Home({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const sp = await searchParams;
-  const rawTab = (sp.tab ?? "recommend") as TabKey;
-  const activeKey: TabKey =
-    FEED_TABS.find((t) => t.key === rawTab && !("disabled" in t && t.disabled))
-      ?.key ?? "recommend";
+  const rawTab = sp.tab ?? "recommend";
+  const activeTab = FEED_TABS.find((t) => t.key === rawTab) ?? FEED_TABS[0];
 
   const session = await getSession();
 
@@ -150,33 +200,17 @@ export default async function Home({
       <section className="flex flex-col gap-4 px-4 py-6 sm:px-8">
         <div className="sticky top-14 z-20 -mx-4 flex items-center gap-1 overflow-x-auto border-b border-border/40 bg-background/85 px-4 py-2 backdrop-blur scroll-x-snap sm:-mx-8 sm:px-8">
           {FEED_TABS.map((t) => {
-            const active = activeKey === t.key;
-            const disabled = "disabled" in t && t.disabled;
-            const baseCls = cn(
-              "shrink-0 rounded-md px-3 py-1.5 text-sm transition-colors",
-              active
-                ? "bg-muted text-foreground"
-                : disabled
-                  ? "text-muted-foreground/40 cursor-not-allowed"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-            );
-            if (disabled) {
-              return (
-                <span
-                  key={t.key}
-                  className={baseCls}
-                  title="即将上线"
-                  aria-disabled="true"
-                >
-                  {t.label}
-                </span>
-              );
-            }
+            const active = activeTab.key === t.key;
             return (
               <Link
                 key={t.key}
                 href={t.key === "recommend" ? "/" : `/?tab=${t.key}`}
-                className={baseCls}
+                className={cn(
+                  "shrink-0 rounded-md px-3 py-1.5 text-sm transition-colors",
+                  active
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                )}
               >
                 {t.label}
               </Link>
@@ -184,22 +218,98 @@ export default async function Home({
           })}
         </div>
 
-        {activeKey === "following" ? (
+        {activeTab.kind === "following" ? (
           <FollowingFeed userId={session?.userId ?? null} />
         ) : (
-          <DefaultFeed />
+          <WorksFeed tab={activeTab} viewerId={session?.userId ?? null} />
         )}
       </section>
     </div>
   );
 }
 
-function DefaultFeed() {
+function toWorkProp(row: FeedWorkRow): Work {
+  return {
+    id: row.id,
+    title: row.title,
+    thumbnailUrl: row.thumbnailUrl,
+    category: row.category as WorkCategoryValue,
+    description: row.description,
+    tools: row.tools,
+    likeCount: row.likeCount,
+    bookmarkCount: row.bookmarkCount,
+    durationSec: row.durationSec,
+    ratio: ((row.ratio as Work["ratio"]) ?? "16:9"),
+    author: row.author.name,
+    authorId: row.author.id,
+  };
+}
+
+async function WorksFeed({
+  tab,
+  viewerId,
+}: {
+  tab: TabDef;
+  viewerId: string | null;
+}) {
+  let works: FeedWorkRow[] = [];
+  switch (tab.kind) {
+    case "recommend":
+      works = await getRecommendedWorks();
+      break;
+    case "latest":
+      works = await getLatestWorks();
+      break;
+    case "category":
+      works = await getWorksByCategory(tab.filter as WorkCategory);
+      break;
+    case "model":
+      works = await getWorksByModel(tab.filter as WorkModel);
+      break;
+    default:
+      works = [];
+  }
+
+  if (works.length === 0) {
+    return (
+      <EmptyState
+        icon={Video}
+        title="还没有作品"
+        description={
+          tab.emptyHint ??
+          "成为第一个发布作品的创作者，让你的 AI 视频被社区看到。"
+        }
+        action={
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={<Link href="/create-work" />}
+          >
+            发布作品
+          </Button>
+        }
+      />
+    );
+  }
+
+  const interactions = await loadInteractionState({
+    workIds: works.map((w) => w.id),
+  });
+  const signedIn = Boolean(viewerId);
+
   return (
     <>
       <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3 2xl:grid-cols-4">
-        {DEMO_WORKS.map((w) => (
-          <WorkCard key={w.id} work={w} />
+        {works.map((w) => (
+          <WorkCard
+            key={w.id}
+            work={toWorkProp(w)}
+            signedIn={signedIn}
+            viewerId={viewerId}
+            liked={interactions.likedWorkIds.has(w.id)}
+            bookmarked={interactions.bookmarkedWorkIds.has(w.id)}
+          />
         ))}
       </div>
 

@@ -90,6 +90,8 @@ export default async function ToolsPage({
     pricing: t.pricing as ToolPricingValue,
     tags: t.tags,
     isOfficial: t.isOfficial,
+    avgRating: t.avgRating,
+    ratingCount: t.ratingCount,
   }));
 
   const queryWithCategory = (cat: ToolCategoryValue | null) => {

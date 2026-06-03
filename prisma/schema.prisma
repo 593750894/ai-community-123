@@ -229,6 +229,7 @@ model User {
   works              Work[]
   collaborations     Collaboration[]
   toolsContributed   Tool[]          @relation("ToolContributor")
+  toolRatings        ToolRating[]
 
   // 私信
   conversations ConversationParticipant[]
@@ -437,13 +438,36 @@ model Tool {
   tags        String[]
   isOfficial  Boolean     @default(false) @map("is_official")
   createdById String?     @map("created_by_id")
+  // 阶段 8：评分聚合（写入时维护，避免读路径再 group by）
+  avgRating   Float?      @map("avg_rating")
+  ratingCount Int         @default(0) @map("rating_count")
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
 
-  createdBy User? @relation("ToolContributor", fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy User?        @relation("ToolContributor", fields: [createdById], references: [id], onDelete: SetNull)
+  ratings   ToolRating[]
 
   @@index([category])
   @@map("tools")
+}
+
+/// 阶段 8：工具评分（一个用户对一个工具只能有一条记录）
+model ToolRating {
+  id        String   @id @default(cuid())
+  toolId    String   @map("tool_id")
+  userId    String   @map("user_id")
+  stars     Int      // 1-5；上层校验
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tool Tool @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([toolId, userId])
+  @@index([toolId, createdAt])
+  @@index([userId])
+  @@map("tool_ratings")
 }
 
 /// 工作流商品（用户可上架/售卖 ComfyUI / 节点图 / Prompt 包等）
