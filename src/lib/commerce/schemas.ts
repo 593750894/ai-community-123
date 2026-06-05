@@ -1,0 +1,167 @@
+import { z } from "zod";
+
+/**
+ * 商业化模块 Zod 校验。
+ *
+ * - WorkflowItem (创作者上架商品): MVP 仅支持 ComfyUI 工作流 / Prompt 包 / 节点图 / 模板等单文件交付。
+ * - MembershipPlan: 用户订阅平台会员（VIP / Pro / Studio）。
+ * - Order: 抽象的购买记录，type ∈ {MEMBERSHIP, WORKFLOW_PURCHASE, ...}。
+ */
+
+// ───────────────────────────── WorkflowItem ─────────────────────────────
+
+export const WORKFLOW_ITEM_CATEGORIES = [
+  "COMFYUI_WORKFLOW", // ComfyUI 工作流
+  "PROMPT_PACK",      // Prompt 包
+  "NODE_GRAPH",       // 节点图
+  "LORA_MODEL",       // LoRA 模型
+  "TEMPLATE",         // 模板（剪辑 / 文案 / 项目工程）
+  "TUTORIAL_BUNDLE",  // 教程合集
+  "OTHER",
+] as const;
+export type WorkflowItemCategory = (typeof WORKFLOW_ITEM_CATEGORIES)[number];
+
+export const WORKFLOW_ITEM_CATEGORY_LABEL: Record<WorkflowItemCategory, string> = {
+  COMFYUI_WORKFLOW: "ComfyUI 工作流",
+  PROMPT_PACK: "Prompt 包",
+  NODE_GRAPH: "节点图",
+  LORA_MODEL: "LoRA 模型",
+  TEMPLATE: "模板素材",
+  TUTORIAL_BUNDLE: "教程合集",
+  OTHER: "其他",
+};
+
+export const WORKFLOW_ITEM_STATUSES = [
+  "DRAFT",
+  "PUBLISHED",
+  "SOLD_OUT",
+  "ARCHIVED",
+] as const;
+export type WorkflowItemStatusValue = (typeof WORKFLOW_ITEM_STATUSES)[number];
+
+export const WORKFLOW_ITEM_STATUS_LABEL: Record<WorkflowItemStatusValue, string> = {
+  DRAFT: "草稿",
+  PUBLISHED: "已上架",
+  SOLD_OUT: "已售罄",
+  ARCHIVED: "已下架",
+};
+
+// 价格上限 9999.99 元 = 999999 分（避免误填导致天文数字）
+const MAX_PRICE_CENTS = 999_999;
+
+export const CreateWorkflowItemSchema = z.object({
+  title: z.string().trim().min(2, "标题至少 2 个字").max(80, "标题最多 80 个字"),
+  description: z
+    .string()
+    .trim()
+    .min(10, "描述至少 10 个字")
+    .max(2000, "描述最多 2000 个字"),
+  coverUrl: z.string().url("封面必须是合法 URL").max(500).optional().nullable(),
+  downloadUrl: z
+    .string()
+    .url("下载链接必须是合法 URL")
+    .max(500)
+    .optional()
+    .nullable(),
+  priceCents: z
+    .number({ message: "价格必须是数字" })
+    .int("价格必须是整数（分）")
+    .min(0, "价格不能为负")
+    .max(MAX_PRICE_CENTS, "价格上限 9999.99 元"),
+  currency: z.literal("CNY").default("CNY"),
+  category: z.enum(WORKFLOW_ITEM_CATEGORIES),
+  tags: z
+    .array(z.string().trim().min(1).max(20))
+    .max(8, "最多 8 个标签")
+    .default([]),
+  toolStack: z
+    .array(z.string().trim().min(1).max(40))
+    .max(10, "最多 10 个工具")
+    .default([]),
+});
+export type CreateWorkflowItemInput = z.infer<typeof CreateWorkflowItemSchema>;
+
+export const UpdateWorkflowItemSchema = CreateWorkflowItemSchema.partial();
+export type UpdateWorkflowItemInput = z.infer<typeof UpdateWorkflowItemSchema>;
+
+export const WorkflowItemStatusActionSchema = z.object({
+  status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"], {
+    message: "状态非法",
+  }),
+});
+export type WorkflowItemStatusActionInput = z.infer<
+  typeof WorkflowItemStatusActionSchema
+>;
+
+// ───────────────────────────── MembershipPlan ─────────────────────────────
+
+export const BILLING_CYCLES = ["MONTHLY", "QUARTERLY", "ANNUAL", "LIFETIME"] as const;
+export type BillingCycleValue = (typeof BILLING_CYCLES)[number];
+
+export const BILLING_CYCLE_LABEL: Record<BillingCycleValue, string> = {
+  MONTHLY: "月付",
+  QUARTERLY: "季付",
+  ANNUAL: "年付",
+  LIFETIME: "买断",
+};
+
+// ───────────────────────────── Order ─────────────────────────────
+
+export const ORDER_TYPES = [
+  "MEMBERSHIP",
+  "WORKFLOW_PURCHASE",
+  "COLLABORATION_DEPOSIT",
+  "CUSTOM",
+] as const;
+export type OrderTypeValue = (typeof ORDER_TYPES)[number];
+
+export const ORDER_TYPE_LABEL: Record<OrderTypeValue, string> = {
+  MEMBERSHIP: "会员订阅",
+  WORKFLOW_PURCHASE: "工作流购买",
+  COLLABORATION_DEPOSIT: "合作定金",
+  CUSTOM: "自定义订单",
+};
+
+export const ORDER_STATUSES = [
+  "PENDING",
+  "PAID",
+  "CANCELED",
+  "REFUNDED",
+  "FAILED",
+] as const;
+export type OrderStatusValue = (typeof ORDER_STATUSES)[number];
+
+export const ORDER_STATUS_LABEL: Record<OrderStatusValue, string> = {
+  PENDING: "待付款",
+  PAID: "已付款",
+  CANCELED: "已取消",
+  REFUNDED: "已退款",
+  FAILED: "支付失败",
+};
+
+export const PAYMENT_METHODS = ["WECHAT_PAY", "ALIPAY", "STRIPE", "MANUAL"] as const;
+export type PaymentMethodValue = (typeof PAYMENT_METHODS)[number];
+
+export const PAYMENT_METHOD_LABEL: Record<PaymentMethodValue, string> = {
+  WECHAT_PAY: "微信支付",
+  ALIPAY: "支付宝",
+  STRIPE: "Stripe",
+  MANUAL: "线下转账",
+};
+
+// ───────────────────────────── 工具方法 ─────────────────────────────
+
+/** 价格分→元，避免到处乘除。 */
+export function formatPrice(
+  cents: number,
+  currency: string = "CNY",
+): string {
+  const symbol = currency === "CNY" ? "¥" : currency + " ";
+  return `${symbol}${(cents / 100).toFixed(2)}`;
+}
+
+/** 元→分（用户输入时反向转换；带 floor 防小数位误差）。 */
+export function priceToCents(yuan: number): number {
+  if (!Number.isFinite(yuan) || yuan < 0) return 0;
+  return Math.floor(yuan * 100 + 0.5);
+}

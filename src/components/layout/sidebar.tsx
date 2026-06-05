@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Bookmark,
+  Coins,
   Film,
   Globe2,
   Hash,
@@ -12,8 +13,10 @@ import {
   LayoutDashboard,
   LayoutGrid,
   MessagesSquare,
+  Package,
   Settings,
   Shield,
+  Store,
   Users,
   Wrench,
 } from "lucide-react";
@@ -44,13 +47,17 @@ const TOP_LINKS: LinkItem[] = [
   { href: "/showcase", label: "作品广场", icon: LayoutGrid, badge: "热" },
   { href: "/collaboration", label: "项目合作", icon: Users },
   { href: "/tools", label: "工具库", icon: Wrench },
+  { href: "/marketplace", label: "工作流市集", icon: Store, badge: "新" },
+  { href: "/pricing", label: "会员计划", icon: Coins },
   { href: "/messages", label: "消息中心", icon: MessagesSquare },
 ];
 
 // Stage 7：/me 四个子页上线，浏览历史功能（PostView/WorkView）暂未实现，先从侧栏移除。
+// Stage 10.1：新增「我的商品」入口（卖家管理上架工作流）。
 const MY_LINKS: LinkItem[] = [
   { href: "/me", label: "个人中心", icon: LayoutDashboard },
   { href: "/me/works", label: "我的作品", icon: Film },
+  { href: "/me/workflows", label: "我的商品", icon: Package },
   { href: "/me/likes", label: "点赞", icon: Heart },
   { href: "/me/bookmarks", label: "稍后再看", icon: Bookmark },
 ];

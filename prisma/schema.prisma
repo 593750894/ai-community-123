@@ -127,6 +127,8 @@ enum NotificationType {
   MESSAGE
   FOLLOW
   SYSTEM
+  ORDER_PAID         // 阶段 10：买家订单付款成功
+  WORKFLOW_SOLD      // 阶段 10：卖家工作流被买入
 }
 
 enum ReportTargetType {
@@ -174,6 +176,13 @@ enum OrderStatus {
   CANCELED
   REFUNDED
   FAILED
+}
+
+enum PayoutStatus {
+  PENDING          // 订单已付款，等待确认期结束
+  AVAILABLE        // 确认期已过，可结算
+  PAID             // 平台已打款给卖家
+  CANCELED         // 因订单退款而取消
 }
 
 enum PaymentMethod {
@@ -261,6 +270,7 @@ model User {
   subscriptions           Subscription[]
   orders                  Order[]
   workflowItemsAsSeller   WorkflowItem[]       @relation("WorkflowItemSeller")
+  payoutsAsSeller         Payout[]             @relation("PayoutSeller")
   organizationMemberships OrganizationMember[]
 
   @@index([status])
@@ -707,6 +717,7 @@ model MembershipPlan {
   currency    String       @default("CNY")
   cycle       BillingCycle @default(MONTHLY)
   features    String[]     @default([])
+  trialDays   Int          @default(0) @map("trial_days") // 阶段 10：试用天数
   isActive    Boolean      @default(true) @map("is_active")
   sortOrder   Int          @default(0) @map("sort_order")
   createdAt   DateTime     @default(now()) @map("created_at")
@@ -715,6 +726,7 @@ model MembershipPlan {
   subscriptions Subscription[]
   orders        Order[]
 
+  @@index([isActive, sortOrder])
   @@map("membership_plans")
 }
 
@@ -749,20 +761,53 @@ model Order {
   planId         String?        @map("plan_id")
   workflowItemId String?        @map("workflow_item_id")
   paymentMethod  PaymentMethod? @map("payment_method")
-  paidAt         DateTime?      @map("paid_at")
-  refundedAt     DateTime?      @map("refunded_at")
-  metadata       Json?
-  createdAt      DateTime       @default(now()) @map("created_at")
-  updatedAt      DateTime       @updatedAt @map("updated_at")
+  // 阶段 10：支付凭据与退款
+  transactionId    String?  @map("transaction_id")    // 第三方支付订单号
+  callbackPayload  Json?    @map("callback_payload")  // 验签后保存的回调原文
+  paidAt           DateTime? @map("paid_at")
+  expiresAt        DateTime? @map("expires_at")       // 订单超时时间，超过自动 CANCELED
+  refundCents      Int       @default(0) @map("refund_cents") // 累计退款金额（分），支持部分退款
+  refundReason     String?   @map("refund_reason")
+  refundedAt       DateTime? @map("refunded_at")
+  refundedById     String?   @map("refunded_by_id")   // 操作退款的 admin id
+  metadata         Json?
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
   user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan         MembershipPlan? @relation(fields: [planId], references: [id])
   workflowItem WorkflowItem?   @relation(fields: [workflowItemId], references: [id])
+  payout       Payout?
 
   @@index([userId, status])
   @@index([status, createdAt])
   @@index([type])
+  @@index([status, expiresAt])
   @@map("orders")
+}
+
+/// 阶段 10：创作者收益结算单。每个 PAID 订单生成一条；7 日确认期后变 AVAILABLE 可结算。
+model Payout {
+  id               String       @id @default(cuid())
+  orderId          String       @unique @map("order_id")
+  sellerId         String       @map("seller_id")
+  grossCents       Int          @map("gross_cents")           // 订单金额
+  platformFeeCents Int          @map("platform_fee_cents")    // 平台抽成
+  netCents         Int          @map("net_cents")             // 实际可结算
+  currency         String       @default("CNY")
+  status           PayoutStatus @default(PENDING)
+  availableAt      DateTime     @map("available_at")          // 确认期结束时间
+  paidAt           DateTime?    @map("paid_at")
+  metadata         Json?
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  order  Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  seller User  @relation("PayoutSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@index([sellerId, status])
+  @@index([status, availableAt])
+  @@map("payouts")
 }
 
 // ═════════════════════════════════════════════════════════════════
