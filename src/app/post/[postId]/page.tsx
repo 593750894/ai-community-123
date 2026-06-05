@@ -25,6 +25,10 @@ import { prisma } from "@/lib/db";
 import { loadInteractionState } from "@/lib/interactions/queries";
 import { formatRelativeTime } from "@/lib/utils";
 import { postTypeMeta } from "@/lib/post-types";
+import {
+  adminTogglePostLocked,
+  adminTogglePostPinned,
+} from "@/lib/admin/posts";
 
 export const dynamic = "force-dynamic";
 
@@ -95,6 +99,49 @@ export default async function PostDetailPage({
 
       <div className="grid gap-6 px-6 py-6 sm:px-8 lg:grid-cols-[1fr_280px]">
         <main className="space-y-6">
+          {viewerIsAdmin && (
+            <section
+              aria-label="管理员操作"
+              className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4"
+            >
+              <div className="mb-2 text-[11px] uppercase tracking-wide text-amber-300/80">
+                管理员操作
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <form action={adminTogglePostPinned}>
+                  <input type="hidden" name="postId" value={post.id} />
+                  <input
+                    type="hidden"
+                    name="pinned"
+                    value={post.pinned ? "false" : "true"}
+                  />
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-1 rounded-md border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-200 hover:bg-amber-500/20"
+                  >
+                    <Pin className="size-3.5" />
+                    {post.pinned ? "取消置顶" : "置顶"}
+                  </button>
+                </form>
+                <form action={adminTogglePostLocked}>
+                  <input type="hidden" name="postId" value={post.id} />
+                  <input
+                    type="hidden"
+                    name="locked"
+                    value={post.locked ? "false" : "true"}
+                  />
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-background/40 px-2.5 py-1 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  >
+                    <Lock className="size-3.5" />
+                    {post.locked ? "解锁评论" : "锁定评论"}
+                  </button>
+                </form>
+              </div>
+            </section>
+          )}
+
           <article className="rounded-2xl border border-border/60 bg-card/40 p-5 sm:p-6">
             <div className="flex flex-wrap items-center gap-2 text-[11px]">
               <span

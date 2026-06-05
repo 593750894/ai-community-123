@@ -19,8 +19,81 @@ export type AuditAction =
   | "DELETE_COMMENT"
   | "RESOLVE_REPORT"
   | "DISMISS_REPORT"
-  | "REVIEW_REPORT"
+  // Stage 9 新增
+  | "CREATE_TOOL"
+  | "UPDATE_TOOL"
+  | "UPDATE_COLLAB_STATUS"
+  | "USER_ROLE_CHANGE"
+  | "USER_STATUS_CHANGE"
+  | "FORCE_LOGOUT_USER"
+  | "POST_PIN"
+  | "POST_UNPIN"
+  | "POST_LOCK"
+  | "POST_UNLOCK"
   | (string & {});
+
+/** Stage 9：audit-logs 页面下拉用的常用 action 列表（顺序即展示顺序）。 */
+export const AUDIT_ACTIONS = [
+  "DELETE_POST",
+  "DELETE_WORK",
+  "DELETE_COLLAB",
+  "DELETE_TOOL",
+  "DELETE_COMMENT",
+  "CREATE_TOOL",
+  "UPDATE_TOOL",
+  "UPDATE_COLLAB_STATUS",
+  "USER_ROLE_CHANGE",
+  "USER_STATUS_CHANGE",
+  "FORCE_LOGOUT_USER",
+  "POST_PIN",
+  "POST_UNPIN",
+  "POST_LOCK",
+  "POST_UNLOCK",
+  "RESOLVE_REPORT",
+  "DISMISS_REPORT",
+] as const satisfies readonly AuditAction[];
+
+export const AUDIT_ACTION_LABEL: Record<string, string> = {
+  DELETE_POST: "删除帖子",
+  DELETE_WORK: "删除作品",
+  DELETE_COLLAB: "删除合作",
+  DELETE_TOOL: "删除工具",
+  DELETE_COMMENT: "删除评论",
+  CREATE_TOOL: "新增工具",
+  UPDATE_TOOL: "编辑工具",
+  UPDATE_COLLAB_STATUS: "调整合作状态",
+  USER_ROLE_CHANGE: "调整用户角色",
+  USER_STATUS_CHANGE: "调整用户状态",
+  FORCE_LOGOUT_USER: "强制下线用户",
+  POST_PIN: "置顶帖子",
+  POST_UNPIN: "取消置顶",
+  POST_LOCK: "锁定帖子",
+  POST_UNLOCK: "解锁帖子",
+  RESOLVE_REPORT: "处理举报",
+  DISMISS_REPORT: "驳回举报",
+};
+
+export const AUDIT_TARGET_TYPES = [
+  "Post",
+  "Work",
+  "Collaboration",
+  "Tool",
+  "Comment",
+  "Report",
+  "User",
+  "Message",
+] as const;
+
+export const AUDIT_TARGET_LABEL: Record<string, string> = {
+  Post: "帖子",
+  Work: "作品",
+  Collaboration: "合作",
+  Tool: "工具",
+  Comment: "评论",
+  Report: "举报",
+  User: "用户",
+  Message: "私信",
+};
 
 export interface CreateAuditLogInput {
   adminId: string;

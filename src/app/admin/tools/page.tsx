@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { CreateToolForm } from "@/components/admin/create-tool-form";
+import { EditToolDialog } from "@/components/admin/edit-tool-dialog";
 import { prisma } from "@/lib/db";
 import { adminDeleteTool } from "@/lib/admin/actions";
 import {
@@ -12,8 +13,8 @@ import {
 
 export const dynamic = "force-dynamic";
 
-// 阶段 11：工具库管理。看 + 新增 + 删除。
-// 修改工具属性 MVP 不做，要改先删再加。
+// Stage 9：工具库管理 = 看 + 新增 + 编辑 + 删除。
+// slug 不暴露编辑入口（routing key）。
 
 export default async function AdminToolsPage() {
   const tools = await prisma.tool.findMany({
@@ -23,9 +24,11 @@ export default async function AdminToolsPage() {
       id: true,
       slug: true,
       name: true,
+      description: true,
       url: true,
       category: true,
       pricing: true,
+      useCase: true,
       isOfficial: true,
       tags: true,
       createdAt: true,
@@ -117,15 +120,31 @@ export default async function AdminToolsPage() {
                       {t.createdAt.toISOString().slice(0, 10)}
                     </td>
                     <td className="px-4 py-2.5 text-right">
-                      <form action={adminDeleteTool}>
-                        <input type="hidden" name="id" value={t.id} />
-                        <button
-                          type="submit"
-                          className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-xs text-rose-300 transition-colors hover:bg-rose-500/20"
-                        >
-                          删除
-                        </button>
-                      </form>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <EditToolDialog
+                          tool={{
+                            id: t.id,
+                            slug: t.slug,
+                            name: t.name,
+                            description: t.description,
+                            url: t.url,
+                            category: t.category,
+                            pricing: t.pricing,
+                            useCase: t.useCase,
+                            tags: t.tags,
+                            isOfficial: t.isOfficial,
+                          }}
+                        />
+                        <form action={adminDeleteTool}>
+                          <input type="hidden" name="id" value={t.id} />
+                          <button
+                            type="submit"
+                            className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-xs text-rose-300 transition-colors hover:bg-rose-500/20"
+                          >
+                            删除
+                          </button>
+                        </form>
+                      </div>
                     </td>
                   </tr>
                 );

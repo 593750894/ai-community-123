@@ -218,6 +218,10 @@ model User {
   portfolioLinks String[] @default([]) @map("portfolio_links")
   contact        String?
 
+  // Stage 9：隐私 / 会话失效
+  isProfilePublic    Boolean   @default(true) @map("is_profile_public")
+  tokensValidAfter   DateTime? @map("tokens_valid_after") // 早于此时间签发的 JWT 视为失效
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -249,6 +253,9 @@ model User {
   // 关注关系（阶段 2）
   followers Follow[] @relation("UserFollowers")
   following Follow[] @relation("UserFollowing")
+
+  // Stage 9：通知偏好
+  notificationPreferences NotificationPreference[]
 
   // 商业化扩展
   subscriptions           Subscription[]
@@ -326,6 +333,7 @@ model Post {
   bookmarks Bookmark[]
 
   @@index([channelId, createdAt])
+  @@index([channelId, pinned, createdAt])
   @@index([authorId])
   @@index([type])
   @@map("posts")
@@ -627,6 +635,21 @@ model Notification {
   @@index([userId, createdAt])
   @@index([userId, actorId, type, targetType, targetId, createdAt(sort: Desc)])
   @@map("notifications")
+}
+
+/// Stage 9：通知偏好。缺省即开启，关闭某类型后 emitNotification 跳过对应 type。
+model NotificationPreference {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  enabled   Boolean          @default(true)
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@map("notification_preferences")
 }
 
 model Report {

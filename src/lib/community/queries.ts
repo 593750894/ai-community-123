@@ -292,14 +292,26 @@ export async function getChannelDetail(idOrSlug: string): Promise<ChannelDetail 
 }
 
 function buildPostOrderBy(sort: ChannelPostsQuery["sort"]) {
+  // Stage 9：所有排序都把 pinned 放前面，置顶帖在频道内永远顶部。
+  const pinnedFirst = { pinned: "desc" as const };
   switch (sort) {
     case "mostCommented":
-      return [{ commentCount: "desc" as const }, { createdAt: "desc" as const }];
+      return [
+        pinnedFirst,
+        { commentCount: "desc" as const },
+        { createdAt: "desc" as const },
+      ];
     case "mostLiked":
-      return [{ likeCount: "desc" as const }, { createdAt: "desc" as const }];
+      return [
+        pinnedFirst,
+        { likeCount: "desc" as const },
+        { createdAt: "desc" as const },
+      ];
+    case "latest":
+      return [pinnedFirst, { createdAt: "desc" as const }];
     case "hot":
     default:
-      return [{ pinned: "desc" as const }, { createdAt: "desc" as const }];
+      return [pinnedFirst, { createdAt: "desc" as const }];
   }
 }
 
@@ -324,7 +336,9 @@ export async function getChannelPosts(
       prisma.post.findMany({ where, select: postSelect }),
     ]);
 
+    // Stage 9：pinned 永远在前，组内再按热度分。
     const sorted = all.sort((a, b) => {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
       const scoreA = a.likeCount + a.commentCount * 2 + a.bookmarkCount;
       const scoreB = b.likeCount + b.commentCount * 2 + b.bookmarkCount;
       return scoreB - scoreA;
@@ -376,6 +390,8 @@ export async function getChannelHotPosts(
 
   return posts
     .sort((a, b) => {
+      // Stage 9：pinned 永远顶部，其余按热度。
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
       const scoreA = a.likeCount + a.commentCount * 2 + a.bookmarkCount;
       const scoreB = b.likeCount + b.commentCount * 2 + b.bookmarkCount;
       return scoreB - scoreA;
@@ -398,6 +414,7 @@ export async function getChannelHotPostsLite(
     select: {
       id: true,
       title: true,
+      pinned: true,
       likeCount: true,
       commentCount: true,
       bookmarkCount: true,
@@ -406,11 +423,17 @@ export async function getChannelHotPostsLite(
 
   return posts
     .sort((a, b) => {
+      // Stage 9：pinned 永远顶部，其余按热度。
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
       const scoreA = a.likeCount + a.commentCount * 2 + a.bookmarkCount;
       const scoreB = b.likeCount + b.commentCount * 2 + b.bookmarkCount;
       return scoreB - scoreA;
     })
-    .slice(0, limit);
+    .slice(0, limit)
+    .map(({ pinned: _pinned, ...rest }) => {
+      void _pinned;
+      return rest;
+    });
 }
 
 export async function getChannelStats(channelId: string): Promise<ChannelStats> {

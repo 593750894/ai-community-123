@@ -5,6 +5,7 @@ import { success, created, error } from "@/lib/response";
 import { CreateToolSchema } from "@/schemas/tool.schema";
 import { isToolCategoryValue } from "@/lib/tools/categories";
 import { parsePagination, paginatedResponse } from "@/lib/pagination";
+import { createAuditLog } from "@/lib/admin/audit";
 
 export async function GET(request: Request) {
   try {
@@ -105,6 +106,14 @@ export async function POST(request: Request) {
           select: { id: true, username: true, name: true, avatar: true },
         },
       },
+    });
+
+    await createAuditLog({
+      adminId: user.id,
+      action: "CREATE_TOOL",
+      targetType: "Tool",
+      targetId: tool.id,
+      metadata: { name, slug, category, pricing },
     });
 
     return created(tool, "工具添加成功");

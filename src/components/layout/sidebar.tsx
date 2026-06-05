@@ -130,7 +130,10 @@ export function Sidebar({
           <ActiveLink item={ADMIN_LINK} active={isActive(ADMIN_LINK.href)} />
         </li>
         <li>
-          <DisabledItem icon={Settings} label="设置" />
+          <ActiveLink
+            item={{ href: "/settings", label: "设置", icon: Settings }}
+            active={isActive("/settings")}
+          />
         </li>
       </ul>
     </aside>
@@ -204,26 +207,6 @@ function TagLink({ tag }: { tag: string }) {
       <Hash className="size-4 shrink-0 text-muted-foreground/80 group-hover:text-foreground" />
       <span className="truncate">{tag}</span>
     </Link>
-  );
-}
-
-function DisabledItem({
-  icon: Icon,
-  label,
-}: {
-  icon: LinkItem["icon"];
-  label: string;
-}) {
-  return (
-    <span
-      role="link"
-      aria-disabled="true"
-      title="即将上线"
-      className="flex cursor-not-allowed items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground/50"
-    >
-      <Icon className="size-4 shrink-0 text-muted-foreground/40" />
-      <span className="truncate">{label}</span>
-    </span>
   );
 }
 

@@ -21,6 +21,10 @@ const DEDUP_TYPES: Set<NotificationType> = new Set([
   "MENTION",
 ]);
 
+// Stage 9：用户可在 /settings/notifications 关闭通知类型；但 SYSTEM 永远直达
+// （admin 举报通知、强制下线提示等运维通道，不能被用户关掉）。
+const NON_GATEABLE_TYPES: Set<NotificationType> = new Set(["SYSTEM"]);
+
 export interface EmitNotificationInput {
   recipientId: string;
   actorId?: string | null;
@@ -52,6 +56,15 @@ export async function emitNotification(input: EmitNotificationInput) {
         select: { id: true },
       });
       if (existing) return null;
+    }
+
+    // Stage 9：用户关闭该类型通知则跳过；缺省记录或缺省 enabled=true 都放行。
+    if (!NON_GATEABLE_TYPES.has(type)) {
+      const pref = await prisma.notificationPreference.findUnique({
+        where: { userId_type: { userId: recipientId, type } },
+        select: { enabled: true },
+      });
+      if (pref && !pref.enabled) return null;
     }
 
     return await prisma.notification.create({

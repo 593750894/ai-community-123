@@ -31,15 +31,9 @@ const STATIC_SHELL_ROUTES = [
 ];
 
 // Labels that must exist on the homepage shell but must NOT be clickable links
-// (these are the routes deferred to future phases).
-// NOTE: footer labels (关于/社区公约/服务条款/隐私政策/联系我们) were placeholders
-// in Phase 0 and got their real destinations in Phase 6, so they no longer belong
-// here. /me/* got real /me/* routes in Stage 7; 浏览历史 was removed from sidebar
-// (history feature deferred). Only /settings remains deferred to Stage 9.
-const DISABLED_LABELS = [
-  // /settings (Phase 9)
-  "设置",
-];
+// (routes deferred to future phases). Stage 9 enabled /settings, so the list is
+// now empty — keep the array (and test below) for the next deferred label.
+const DISABLED_LABELS: string[] = [];
 
 // Mock strings deleted in Phase 0 — they must not appear anywhere on "/".
 const DELETED_MOCK_STRINGS = [
@@ -105,6 +99,10 @@ test.describe("Phase 0 · 死链清理验收", () => {
   });
 
   test("disabled placeholders render as non-anchor spans", async ({ page }) => {
+    if (DISABLED_LABELS.length === 0) {
+      test.skip(true, "no labels currently deferred");
+      return;
+    }
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
     // Each label should appear at least once inside the shell, but never inside

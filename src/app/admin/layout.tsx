@@ -5,6 +5,7 @@ import {
   Flag,
   LayoutDashboard,
   MessageSquare,
+  ScrollText,
   Users,
   Wrench,
 } from "lucide-react";
@@ -29,6 +30,7 @@ const NAV = [
     badgeKey: "reports" as const,
   },
   { href: "/admin/tools", label: "工具库", icon: Wrench },
+  { href: "/admin/audit-logs", label: "操作审计", icon: ScrollText },
 ];
 
 export default async function AdminLayout({

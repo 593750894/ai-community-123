@@ -85,18 +85,33 @@ export async function adminDeleteWork(formData: FormData): Promise<void> {
 }
 
 export async function adminUpdateCollabStatus(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = formData.get("id");
   const status = formData.get("status");
   if (typeof id !== "string" || !id) return;
   if (typeof status !== "string") return;
   if (!(COLLAB_STATUS_VALUES as readonly string[]).includes(status)) return;
-  await prisma.collaboration
+  const before = await prisma.collaboration
+    .findUnique({ where: { id }, select: { status: true, title: true } })
+    .catch(() => null);
+  const updated = await prisma.collaboration
     .update({
       where: { id },
       data: { status: status as CollabStatusValue },
     })
-    .catch(() => null);
+    .then(() => true)
+    .catch(() => false);
+  if (updated) {
+    await createAuditLog({
+      adminId: admin.id,
+      action: "UPDATE_COLLAB_STATUS",
+      targetType: "Collaboration",
+      targetId: id,
+      metadata: before
+        ? { title: before.title, statusBefore: before.status, statusAfter: status }
+        : { statusAfter: status },
+    });
+  }
   revalidatePath("/admin/collaborations");
   revalidatePath("/collaboration");
   revalidatePath(`/collaboration/${id}`);
@@ -269,8 +284,9 @@ export async function adminCreateTool(
     slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 6)}`;
   }
 
+  let createdId: string | null = null;
   try {
-    await prisma.tool.create({
+    const created = await prisma.tool.create({
       data: {
         slug,
         name,
@@ -284,13 +300,131 @@ export async function adminCreateTool(
         createdById: admin.id,
         logoUrl: `https://api.dicebear.com/9.x/icons/svg?seed=${encodeURIComponent(slug)}`,
       },
+      select: { id: true },
     });
+    createdId = created.id;
   } catch {
     return { ok: false, message: "新增失败，可能 slug 冲突，请改个名字重试" };
+  }
+
+  if (createdId) {
+    await createAuditLog({
+      adminId: admin.id,
+      action: "CREATE_TOOL",
+      targetType: "Tool",
+      targetId: createdId,
+      metadata: { name, slug, category, pricing, isOfficial },
+    });
   }
 
   revalidatePath("/admin/tools");
   revalidatePath("/admin");
   revalidatePath("/tools");
   return { ok: true, message: "已添加" };
+}
+
+// ─── Stage 9: 编辑工具 ─────────────────────────────────────────────
+// slug 在 MVP 内不允许改：是 /tools/[slug] 唯一 routing key，没有 301 兜底。
+
+export type AdminUpdateToolState = AdminCreateToolState;
+
+export async function adminUpdateTool(
+  _state: AdminUpdateToolState | undefined,
+  formData: FormData,
+): Promise<AdminUpdateToolState> {
+  const admin = await requireAdmin();
+
+  const id = (formData.get("id") ?? "").toString().trim();
+  if (!id) return { ok: false, message: "缺少工具 ID" };
+
+  const name = (formData.get("name") ?? "").toString().trim();
+  const description = (formData.get("description") ?? "").toString().trim();
+  const url = (formData.get("url") ?? "").toString().trim();
+  const category = (formData.get("category") ?? "").toString().trim();
+  const pricing = (formData.get("pricing") ?? "FREE").toString().trim();
+  const useCase = (formData.get("useCase") ?? "").toString().trim();
+  const tagsRaw = (formData.get("tags") ?? "").toString();
+  const isOfficial = formData.get("isOfficial") === "on";
+
+  const fieldErrors: Record<string, string[]> = {};
+  if (!name) fieldErrors.name = ["请输入工具名称"];
+  if (!description) fieldErrors.description = ["请输入工具描述"];
+  if (!url) fieldErrors.url = ["请输入官网/链接"];
+  if (!(TOOL_CATEGORY_VALUES as readonly string[]).includes(category)) {
+    fieldErrors.category = ["分类不合法"];
+  }
+  if (!(TOOL_PRICING_VALUES as readonly string[]).includes(pricing)) {
+    fieldErrors.pricing = ["计费类型不合法"];
+  }
+  if (Object.keys(fieldErrors).length > 0) {
+    return { ok: false, fieldErrors };
+  }
+
+  const tags = tagsRaw
+    .split(/[,，\n]/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 12);
+
+  const before = await prisma.tool
+    .findUnique({
+      where: { id },
+      select: {
+        name: true,
+        description: true,
+        url: true,
+        category: true,
+        pricing: true,
+        useCase: true,
+        tags: true,
+        isOfficial: true,
+        slug: true,
+      },
+    })
+    .catch(() => null);
+  if (!before) return { ok: false, message: "工具不存在或已被删除" };
+
+  try {
+    await prisma.tool.update({
+      where: { id },
+      data: {
+        name,
+        description,
+        url,
+        category: category as ToolCategoryValue,
+        pricing: pricing as ToolPricingValue,
+        useCase: useCase || null,
+        tags,
+        isOfficial,
+      },
+    });
+  } catch {
+    return { ok: false, message: "更新失败，请稍后重试" };
+  }
+
+  await createAuditLog({
+    adminId: admin.id,
+    action: "UPDATE_TOOL",
+    targetType: "Tool",
+    targetId: id,
+    metadata: {
+      slug: before.slug,
+      before: {
+        name: before.name,
+        url: before.url,
+        category: before.category,
+        pricing: before.pricing,
+        useCase: before.useCase,
+        tags: before.tags,
+        isOfficial: before.isOfficial,
+      },
+      after: { name, url, category, pricing, useCase: useCase || null, tags, isOfficial },
+    },
+  });
+
+  revalidatePath("/admin/tools");
+  revalidatePath("/admin");
+  revalidatePath("/tools");
+  revalidatePath(`/tools/${before.slug}`);
+  return { ok: true, message: "已保存" };
 }

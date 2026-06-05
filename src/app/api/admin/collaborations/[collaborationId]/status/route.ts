@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth/guard";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
+import { createAuditLog } from "@/lib/admin/audit";
 
 const VALID_STATUSES = ["OPEN", "IN_PROGRESS", "CLOSED"] as const;
 
@@ -28,7 +29,7 @@ export async function PATCH(
 
     const collab = await prisma.collaboration.findUnique({
       where: { id: collaborationId },
-      select: { id: true },
+      select: { id: true, title: true, status: true },
     });
     if (!collab) throw new NotFoundError("合作需求");
 
@@ -41,6 +42,20 @@ export async function PATCH(
         },
       },
     });
+
+    if (collab.status !== status) {
+      await createAuditLog({
+        adminId: user.id,
+        action: "UPDATE_COLLAB_STATUS",
+        targetType: "Collaboration",
+        targetId: collaborationId,
+        metadata: {
+          title: collab.title,
+          statusBefore: collab.status,
+          statusAfter: status,
+        },
+      });
+    }
 
     return success(updated, "状态更新成功");
   } catch (err) {

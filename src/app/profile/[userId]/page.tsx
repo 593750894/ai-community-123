@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 import { prisma } from "@/lib/db";
-import { getSession } from "@/lib/auth/session";
+import { getCurrentUser, getSession } from "@/lib/auth/session";
 import { PageHeader } from "@/components/layout/page-header";
 import { ProfileEditDialog } from "@/components/auth/profile-edit-dialog";
 import { startConversationAction } from "@/lib/messages/actions";
@@ -33,8 +33,9 @@ export default async function ProfilePage({
   params: Promise<{ userId: string }>;
 }) {
   const { userId } = await params;
-  const session = await getSession();
+  const [session, viewer] = await Promise.all([getSession(), getCurrentUser()]);
   const isOwner = session?.userId === userId;
+  const viewerIsAdmin = viewer?.role === "ADMIN";
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -46,17 +47,50 @@ export default async function ProfilePage({
       avatar: true,
       bio: true,
       role: true,
+      status: true,
       industryRole: true,
       expertise: true,
       favoriteTools: true,
       portfolioLinks: true,
       contact: true,
+      isProfilePublic: true,
       createdAt: true,
       _count: { select: { works: true, posts: true, collaborations: true } },
     },
   });
 
   if (!user) notFound();
+
+  // Stage 9：隐私 + 状态拦截。
+  // - DELETED：所有人都看到「已注销」简化版（admin 仍可看 raw 数据用于审计）。
+  // - isProfilePublic=false 且匿名访客 → 显示「主页已隐藏」。
+  if (user.status === "DELETED" && !viewerIsAdmin) {
+    return (
+      <div className="flex flex-1 items-center justify-center px-6 py-16 text-center">
+        <div className="rounded-2xl border border-border/60 bg-card/40 px-6 py-10">
+          <h1 className="text-lg font-medium">该账号已注销</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            用户已主动删除账号。已发布的内容仍由社区保留。
+          </p>
+        </div>
+      </div>
+    );
+  }
+  if (!user.isProfilePublic && !isOwner && !viewer && !viewerIsAdmin) {
+    return (
+      <div className="flex flex-1 items-center justify-center px-6 py-16 text-center">
+        <div className="rounded-2xl border border-border/60 bg-card/40 px-6 py-10">
+          <h1 className="text-lg font-medium">该主页已隐藏</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            <Link href="/auth/login" className="text-primary hover:underline">
+              登录
+            </Link>{" "}
+            后可能可以查看。
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const [followCounts, viewerIsFollowing] = await Promise.all([
     getFollowCounts(user.id),
