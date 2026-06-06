@@ -30,6 +30,9 @@ export type AuditAction =
   | "POST_UNPIN"
   | "POST_LOCK"
   | "POST_UNLOCK"
+  // Stage 10.4 新增
+  | "ORDER_REFUND_FULL"
+  | "ORDER_REFUND_PARTIAL"
   | (string & {});
 
 /** Stage 9：audit-logs 页面下拉用的常用 action 列表（顺序即展示顺序）。 */
@@ -51,6 +54,8 @@ export const AUDIT_ACTIONS = [
   "POST_UNLOCK",
   "RESOLVE_REPORT",
   "DISMISS_REPORT",
+  "ORDER_REFUND_FULL",
+  "ORDER_REFUND_PARTIAL",
 ] as const satisfies readonly AuditAction[];
 
 export const AUDIT_ACTION_LABEL: Record<string, string> = {
@@ -71,6 +76,8 @@ export const AUDIT_ACTION_LABEL: Record<string, string> = {
   POST_UNLOCK: "解锁帖子",
   RESOLVE_REPORT: "处理举报",
   DISMISS_REPORT: "驳回举报",
+  ORDER_REFUND_FULL: "订单全额退款",
+  ORDER_REFUND_PARTIAL: "订单部分退款",
 };
 
 export const AUDIT_TARGET_TYPES = [
@@ -82,6 +89,7 @@ export const AUDIT_TARGET_TYPES = [
   "Report",
   "User",
   "Message",
+  "Order",
 ] as const;
 
 export const AUDIT_TARGET_LABEL: Record<string, string> = {
@@ -93,6 +101,7 @@ export const AUDIT_TARGET_LABEL: Record<string, string> = {
   Report: "举报",
   User: "用户",
   Message: "私信",
+  Order: "订单",
 };
 
 export interface CreateAuditLogInput {

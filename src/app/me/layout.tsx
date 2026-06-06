@@ -1,15 +1,24 @@
 import Link from "next/link";
-import { Bookmark, Film, Heart, LayoutDashboard, Package } from "lucide-react";
+import {
+  Bookmark,
+  Film,
+  Heart,
+  LayoutDashboard,
+  Package,
+  Receipt,
+} from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guard";
 
 // Stage 7 · /me 个人中心：layout 集中处理 (a) 鉴权 (b) 顶部 tab nav。
 // 子路由再各自跳 `?next=/me/...` 不必要 —— 任何 /me/* 都经过此 layout 鉴权。
 // Stage 10.1：新增「我的商品」tab，对应卖家中心。
+// Stage 10.4：新增「我的订单」tab，买家可查看历史订单与退款状态。
 const NAV = [
   { href: "/me", label: "概览", icon: LayoutDashboard, exact: true },
   { href: "/me/works", label: "我的作品", icon: Film },
   { href: "/me/workflows", label: "我的商品", icon: Package },
+  { href: "/me/orders", label: "我的订单", icon: Receipt },
   { href: "/me/likes", label: "点赞收藏", icon: Heart },
   { href: "/me/bookmarks", label: "稍后再看", icon: Bookmark },
 ];

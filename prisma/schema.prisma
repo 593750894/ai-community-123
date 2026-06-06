@@ -129,6 +129,7 @@ enum NotificationType {
   SYSTEM
   ORDER_PAID         // 阶段 10：买家订单付款成功
   WORKFLOW_SOLD      // 阶段 10：卖家工作流被买入
+  ORDER_REFUNDED     // 阶段 10.4：买家订单退款成功（含全额 / 部分）
 }
 
 enum ReportTargetType {
@@ -183,6 +184,12 @@ enum PayoutStatus {
   AVAILABLE        // 确认期已过，可结算
   PAID             // 平台已打款给卖家
   CANCELED         // 因订单退款而取消
+}
+
+enum RefundStatus {
+  PENDING          // 已创建未提交 PSP
+  SUCCESS          // PSP 已受理
+  FAILED           // PSP 拒绝
 }
 
 enum PaymentMethod {
@@ -271,6 +278,7 @@ model User {
   orders                  Order[]
   workflowItemsAsSeller   WorkflowItem[]       @relation("WorkflowItemSeller")
   payoutsAsSeller         Payout[]             @relation("PayoutSeller")
+  refundsInitiated        Refund[]             @relation("RefundCreator")
   organizationMemberships OrganizationMember[]
 
   @@index([status])
@@ -778,12 +786,35 @@ model Order {
   plan         MembershipPlan? @relation(fields: [planId], references: [id])
   workflowItem WorkflowItem?   @relation(fields: [workflowItemId], references: [id])
   payout       Payout?
+  refunds      Refund[]
 
   @@index([userId, status])
   @@index([status, createdAt])
   @@index([type])
   @@index([status, expiresAt])
   @@map("orders")
+}
+
+/// 阶段 10.4：退款记录。一笔订单可以有多次部分退款 → 多行；累计金额回写到 Order.refundCents。
+/// 每行对应一次对 PSP 的 refund 调用；out_refund_no / out_request_no = `R{id}`，保证 PSP 端幂等。
+model Refund {
+  id               String       @id @default(cuid())
+  orderId          String       @map("order_id")
+  amountCents      Int          @map("amount_cents")
+  reason           String?
+  status           RefundStatus @default(PENDING)
+  providerResponse Json?        @map("provider_response")
+  providerError    String?      @map("provider_error")
+  createdById      String       @map("created_by_id")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  finishedAt       DateTime?    @map("finished_at")
+
+  order     Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdBy User  @relation("RefundCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+  @@index([status, createdAt])
+  @@map("refunds")
 }
 
 /// 阶段 10：创作者收益结算单。每个 PAID 订单生成一条；7 日确认期后变 AVAILABLE 可结算。

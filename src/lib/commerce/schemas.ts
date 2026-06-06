@@ -190,3 +190,27 @@ export const CreateOrderSchema = z.discriminatedUnion("type", [
   }),
 ]);
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;
+
+// ───────────────────────── 退款（Stage 10.4） ─────────────────────────
+
+/**
+ * 退款入参：
+ * - amountCents 省略 → 全额退剩余可退金额；
+ *   - amountCents 显式给 0 / 负数 / 超额 → ValidationError，落地在 refundOrder。
+ * - reason 透传到 PSP 与 AuditLog 元数据；为空字符串视为 undefined。
+ */
+export const RefundOrderSchema = z.object({
+  amountCents: z
+    .number({ message: "金额必须是数字" })
+    .int("金额必须是整数（分）")
+    .positive("金额必须大于 0")
+    .max(999_999_99, "退款金额上限 999999.99 元")
+    .optional(),
+  reason: z
+    .string()
+    .trim()
+    .max(200, "原因最多 200 字")
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined)),
+});
+export type RefundOrderInput = z.infer<typeof RefundOrderSchema>;

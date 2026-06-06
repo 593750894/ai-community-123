@@ -5,6 +5,7 @@ import {
   Flag,
   LayoutDashboard,
   MessageSquare,
+  Receipt,
   ScrollText,
   Users,
   Wrench,
@@ -30,6 +31,8 @@ const NAV = [
     badgeKey: "reports" as const,
   },
   { href: "/admin/tools", label: "工具库", icon: Wrench },
+  // Stage 10.4：商业化订单管理（含退款入口）。
+  { href: "/admin/orders", label: "订单", icon: Receipt },
   { href: "/admin/audit-logs", label: "操作审计", icon: ScrollText },
 ];
 

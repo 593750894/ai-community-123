@@ -1,24 +1,27 @@
 import type { PaymentMethod } from "@/generated/prisma/client";
 
+import { IS_ALIPAY_ENABLED, alipayProvider } from "./alipay";
 import { IS_MOCK_ENABLED, mockProvider } from "./mock";
+import { IS_WECHAT_ENABLED, wechatProvider } from "./wechat";
 import type { PaymentProvider, ProviderId } from "./types";
 
 /**
  * 渠道 → provider 路由表。
  *
- * Stage 10.2：仅 mock 注册在路由表中，且只有当 IS_MOCK_ENABLED=true 时才注册。
- * 生产环境若未显式开启 PAYMENT_MOCK_ENABLED，则下单会因为没有 provider 直接 fail-fast，
- * 避免 fallback secret 被攻击者利用。
+ * Stage 10.3：
+ * - Mock 仍可注册（开发态默认启用 / 生产显式 PAYMENT_MOCK_ENABLED=true）。
+ * - 微信 / 支付宝在凭据齐全时各自注册一条。
+ * - 下单走 getProviderForMethod 分发；webhook 走 providerSlug 反查（path 段 lowercase）。
  *
- * Stage 10.3 将注册 wechat / alipay provider。
+ * 优先级：真实渠道凭据存在 → 走真实；否则若 mock 启用 → 走 mock；都没 → 返回 null（API 友好报错）。
  */
 
 const WEBHOOK_REGISTRY = new Map<string, PaymentProvider>();
-if (IS_MOCK_ENABLED) {
-  WEBHOOK_REGISTRY.set("MOCK", mockProvider);
-}
+if (IS_MOCK_ENABLED) WEBHOOK_REGISTRY.set("MOCK", mockProvider);
+if (IS_WECHAT_ENABLED) WEBHOOK_REGISTRY.set("WECHAT_PAY", wechatProvider);
+if (IS_ALIPAY_ENABLED) WEBHOOK_REGISTRY.set("ALIPAY", alipayProvider);
 
-/** 给前端选支付方式时用：Stage 10.2 仅放微信 / 支付宝（统一走 mock）。 */
+/** 前端可选的支付方式（Stage 10.3：始终是微信 + 支付宝；底层会按需 fallback 到 mock）。 */
 export const SELECTABLE_PAYMENT_METHODS = ["WECHAT_PAY", "ALIPAY"] as const;
 export type SelectablePaymentMethod = (typeof SELECTABLE_PAYMENT_METHODS)[number];
 
@@ -36,9 +39,18 @@ export function getProvider(id: ProviderId | string): PaymentProvider | null {
 export function getProviderForMethod(
   method: PaymentMethod,
 ): PaymentProvider | null {
-  // Stage 10.2：所有渠道暂时统一走 mock；Stage 10.3 后改成 switch(method) → wechat / alipay。
-  void method;
-  return IS_MOCK_ENABLED ? mockProvider : null;
+  switch (method) {
+    case "WECHAT_PAY":
+      if (IS_WECHAT_ENABLED) return wechatProvider;
+      return IS_MOCK_ENABLED ? mockProvider : null;
+    case "ALIPAY":
+      if (IS_ALIPAY_ENABLED) return alipayProvider;
+      return IS_MOCK_ENABLED ? mockProvider : null;
+    case "STRIPE":
+    case "MANUAL":
+    default:
+      return null;
+  }
 }
 
 /** Webhook URL 段（小写）。 */

@@ -327,6 +327,37 @@ export async function notifyOrderPaid(args: {
   }
 }
 
+/** Stage 10.4：订单退款成功 → 通知买家 */
+export async function notifyOrderRefunded(args: {
+  buyerId: string;
+  orderNo: string;
+  refundCents: number;
+  currency: string;
+  /** 已格式化的金额（带 ¥）。 */
+  refundDisplay: string;
+  /** 是否全额退款；用于标题区分文案。 */
+  fullyRefunded: boolean;
+}) {
+  try {
+    void args.refundCents;
+    void args.currency;
+    await emitNotification({
+      recipientId: args.buyerId,
+      actorId: null,
+      type: "ORDER_REFUNDED",
+      title: args.fullyRefunded
+        ? `订单已全额退款`
+        : `订单已部分退款`,
+      body: `订单 ${args.orderNo} · 退款 ${args.refundDisplay}`,
+      link: `/me/orders`,
+      targetType: "ORDER",
+      targetId: args.orderNo,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyOrderRefunded", err);
+  }
+}
+
 /** Stage 10.2：工作流商品被买入 → 通知卖家 */
 export async function notifyWorkflowSold(args: {
   sellerId: string;

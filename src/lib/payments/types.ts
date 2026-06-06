@@ -39,6 +39,20 @@ export interface CreateChargeResult {
   transactionId: string;
   /** 可选：原始响应，落 callback_payload 备查。 */
   raw?: unknown;
+  /**
+   * WeChat Pay JSAPI 唤起 SDK 所需的 6 字段签名负载（仅 JSAPI 场景下出现）。
+   * 前端需直接传给 WeixinJSBridge.invoke("getBrandWCPayRequest", payload)
+   * 或 wx.requestPayment（小程序）。paySign 是 base64。
+   * 不要把这个 payload 落库 / 不要透传到 URL（会泄漏 paySign）。
+   */
+  jsapiInvoke?: {
+    appId: string;
+    timeStamp: string;
+    nonceStr: string;
+    package: string;
+    signType: "RSA";
+    paySign: string;
+  };
 }
 
 export interface QueryChargeResult {
@@ -52,7 +66,20 @@ export interface QueryChargeResult {
 export interface RefundInput {
   orderNo: string;
   transactionId: string | null;
+  /** 本次退款金额（分）；可小于原订单金额支持部分退款。 */
   amountCents: number;
+  /**
+   * Stage 10.4：原订单金额（分）。
+   * 微信 v3 refund 要求 `amount.total` 必须等于原订单金额（部分退款时 `amount.refund` 才是本次额度）；
+   * 之前 Stage 10.3 临时把 total 当成 refund 传，部分退款会被微信拒。
+   */
+  originalAmountCents: number;
+  /**
+   * Stage 10.4：调用方传入的去重 key（= `R{Refund.id}`）。
+   * 微信 → out_refund_no；支付宝 → out_request_no。
+   * 同一 key 对 PSP 重发返回原结果，跨次部分退款用不同 key 即可。
+   */
+  idempotencyKey: string;
   reason?: string;
 }
 

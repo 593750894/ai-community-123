@@ -16,6 +16,7 @@ export const NOTIFICATION_TYPES = [
   "MESSAGE",
   "ORDER_PAID",
   "WORKFLOW_SOLD",
+  "ORDER_REFUNDED",
   "SYSTEM",
 ] as const satisfies readonly NotificationType[];
 
@@ -34,6 +35,7 @@ export const NOTIFICATION_TYPE_LABEL: Record<NotificationType, string> = {
   MESSAGE: "我收到了私信",
   ORDER_PAID: "我的订单付款成功",
   WORKFLOW_SOLD: "我的工作流被购买",
+  ORDER_REFUNDED: "我的订单已退款",
   SYSTEM: "系统 / 管理员通知",
 };
 
@@ -50,6 +52,7 @@ export const NOTIFICATION_TYPE_DESCRIPTION: Record<NotificationType, string> = {
   MESSAGE: "新私信即推；会话内已读后不会重复提醒。",
   ORDER_PAID: "你的订单完成付款时提醒。",
   WORKFLOW_SOLD: "你的市集商品被买入时提醒（含金额）。",
+  ORDER_REFUNDED: "你的订单被管理员发起退款时提醒（含金额）。",
   SYSTEM: "举报处理、强制下线等运维通知，无法关闭。",
 };
 

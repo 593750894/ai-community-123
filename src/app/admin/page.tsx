@@ -5,6 +5,7 @@ import {
   Film,
   Flag,
   MessageSquare,
+  Receipt,
   Users,
   Wrench,
 } from "lucide-react";
@@ -19,15 +20,20 @@ export const dynamic = "force-dynamic";
 // guard 在 layout 里已经做过，这里直接查 DB 即可。
 
 async function getOverview() {
-  const [users, posts, works, collabs, tools, openReports] = await Promise.all([
-    prisma.user.count(),
-    prisma.post.count(),
-    prisma.work.count(),
-    prisma.collaboration.count(),
-    prisma.tool.count(),
-    countOpenReports().catch(() => 0),
-  ]);
-  return { users, posts, works, collabs, tools, openReports };
+  const [users, posts, works, collabs, tools, openReports, paidOrders] =
+    await Promise.all([
+      prisma.user.count(),
+      prisma.post.count(),
+      prisma.work.count(),
+      prisma.collaboration.count(),
+      prisma.tool.count(),
+      countOpenReports().catch(() => 0),
+      // Stage 10.4：已付款订单数（含 REFUNDED 仍计入历史付款数）。
+      prisma.order
+        .count({ where: { status: { in: ["PAID", "REFUNDED"] } } })
+        .catch(() => 0),
+    ]);
+  return { users, posts, works, collabs, tools, openReports, paidOrders };
 }
 
 export default async function AdminPage() {
@@ -75,6 +81,13 @@ export default async function AdminPage() {
       href: "/admin/reports?status=PENDING",
       icon: Flag,
       tone: "text-rose-300",
+    },
+    {
+      label: "已付款订单",
+      value: overview.paidOrders,
+      href: "/admin/orders?status=PAID",
+      icon: Receipt,
+      tone: "text-emerald-300",
     },
   ];
 
@@ -140,6 +153,11 @@ export default async function AdminPage() {
               href: "/admin/reports?status=PENDING",
               title: "举报处理",
               desc: "审核用户提交的举报，处理或驳回。",
+            },
+            {
+              href: "/admin/orders",
+              title: "订单管理",
+              desc: "查看订单 / 发起退款 / 追踪结算。",
             },
           ].map((m) => (
             <Link

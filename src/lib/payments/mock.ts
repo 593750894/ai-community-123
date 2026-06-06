@@ -74,9 +74,18 @@ export const mockProvider: PaymentProvider = {
     // mock 不维护服务端态；状态推动由 markOrderPaid 完成。
     return { status: "PENDING" };
   },
-  async refund(_input: RefundInput): Promise<RefundResult> {
-    void _input;
-    return { ok: true, raw: { mock: true, refundedAt: new Date().toISOString() } };
+  async refund(input: RefundInput): Promise<RefundResult> {
+    // Stage 10.4：mock 不做实际转账，仅回声 refund 元数据用于测试断言。
+    return {
+      ok: true,
+      raw: {
+        mock: true,
+        refundedAt: new Date().toISOString(),
+        idempotencyKey: input.idempotencyKey,
+        amountCents: input.amountCents,
+        originalAmountCents: input.originalAmountCents,
+      },
+    };
   },
   async verifyWebhook(raw: string, headers: Headers): Promise<WebhookEvent | null> {
     if (!MOCK_SECRET) return null;

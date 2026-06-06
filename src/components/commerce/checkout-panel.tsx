@@ -197,21 +197,25 @@ export function CheckoutPanel({ order: initial, provider, mockEnabled }: Props) 
           {order.status === "PENDING" && (
             <>
               {order.paymentUrl ? (
-                <Button
-                  className="w-full"
-                  size="lg"
-                  nativeButton={false}
-                  render={
-                    <a
-                      href={order.paymentUrl}
-                      target={isMock ? "_self" : "_blank"}
-                      rel="noopener noreferrer"
-                    />
-                  }
-                >
-                  <ExternalLink className="size-4" />
-                  打开{methodLabel}付款
-                </Button>
+                isWechatCodeUrl(order.paymentUrl) ? (
+                  <WechatScanPanel codeUrl={order.paymentUrl} />
+                ) : (
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    nativeButton={false}
+                    render={
+                      <a
+                        href={order.paymentUrl}
+                        target={isMock ? "_self" : "_blank"}
+                        rel="noopener noreferrer"
+                      />
+                    }
+                  >
+                    <ExternalLink className="size-4" />
+                    打开{methodLabel}付款
+                  </Button>
+                )
               ) : (
                 <Button className="w-full" size="lg" disabled aria-disabled>
                   支付链接生成中…
@@ -351,6 +355,54 @@ export function CheckoutPanel({ order: initial, provider, mockEnabled }: Props) 
           )}
         </div>
       </aside>
+    </div>
+  );
+}
+
+/**
+ * weixin:// 协议的 code_url 浏览器无法直接打开（只有微信 app 能解析），
+ * 必须把它编码成二维码让用户用微信扫一扫扫码完成支付。
+ *
+ * Stage 10.3 暂时把 URL 文本 + 提示渲染出来，并提供「复制链接」按钮；
+ * Stage 10.4 接 qrcode-svg / 内联 QR 渲染器后这里直接画二维码即可。
+ */
+function isWechatCodeUrl(url: string): boolean {
+  return url.startsWith("weixin://");
+}
+
+function WechatScanPanel({ codeUrl }: { codeUrl: string }) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(codeUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCopied(false);
+    }
+  }
+  return (
+    <div className="space-y-3 rounded-md border border-emerald-500/30 bg-emerald-500/5 p-4">
+      <div className="flex items-center gap-2 text-sm font-semibold text-emerald-300">
+        <ExternalLink className="size-4" />
+        请使用微信扫一扫支付
+      </div>
+      <p className="text-[11px] leading-relaxed text-muted-foreground">
+        浏览器无法直接唤起微信付款；请把下方链接编码为二维码后用「微信 · 扫一扫」扫描，或在微信
+        PC 端粘贴链接打开。
+      </p>
+      <code className="block break-all rounded bg-background/40 p-2 text-[11px] text-foreground">
+        {codeUrl}
+      </code>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="w-full"
+        onClick={copy}
+      >
+        {copied ? "已复制" : "复制支付链接"}
+      </Button>
     </div>
   );
 }

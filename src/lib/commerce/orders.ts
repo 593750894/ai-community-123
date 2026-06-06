@@ -37,6 +37,10 @@ const PLATFORM_FEE_BPS = 3000; // 30%
 
 export const ORDER_TTL_MINUTES = ORDER_TTL_MS / 60_000;
 
+function stripTrailingSlash(s: string): string {
+  return s.endsWith("/") ? s.slice(0, -1) : s;
+}
+
 /**
  * 订单号：YYYYMMDDHHMMSS（UTC）+ 8 位随机 hex；总长度 22。
  * 与 cuid 长度区间不重叠，方便正则区分。
@@ -173,6 +177,15 @@ export async function createOrder(
   // ── 3. 调 provider 拿付款链接 ───────────────────────────────
   // createCharge 失败 → 把已建的 PENDING 单标 FAILED，避免遗留无法支付的僵尸订单；
   // 第三方网络异常会被向上抛出，由 API 路由翻译成 5xx。
+  //
+  // returnUrl：用户付完跳回；可走 baseUrl（request host），对 host 伪造容忍。
+  // notifyUrl：PSP → 我们；必须用 PUBLIC_APP_URL 锁定（不接受 Host 伪造）。
+  // 当 PUBLIC_APP_URL 未配置时 fallback 到 baseUrl，仅适用于 dev tunnel 场景；
+  // 生产部署 / 沙箱联调强烈建议显式配置。
+  const publicBase = stripTrailingSlash(
+    process.env.NEXT_PUBLIC_APP_URL ?? process.env.PUBLIC_APP_URL ?? "",
+  );
+  const notifyBase = publicBase || baseUrl;
   let charge;
   try {
     charge = await provider.createCharge({
@@ -181,7 +194,7 @@ export async function createOrder(
       currency,
       subject,
       returnUrl: `${baseUrl}/checkout/${orderNo}`,
-      notifyUrl: `${baseUrl}/api/payments/webhook/${providerSlug(provider)}`,
+      notifyUrl: `${notifyBase}/api/payments/webhook/${providerSlug(provider)}`,
       expiresAt,
     });
   } catch (err) {
@@ -194,11 +207,16 @@ export async function createOrder(
     throw err;
   }
 
-  const metadata: Record<string, string> = {
+  const metadata: Record<string, unknown> = {
     paymentUrl: charge.paymentUrl,
     providerId: String(provider.id),
   };
   if (sellerIdForMetadata) metadata.sellerId = sellerIdForMetadata;
+  // JSAPI 6 字段签名 payload 落 metadata（仅本人 GET /api/orders/{orderNo}/jsapi-invoke 可读）。
+  // 不能进 URL 或 GET /api/orders 主响应 — paySign 在 referer / 访问日志里会泄漏。
+  if (charge.jsapiInvoke) {
+    metadata.jsapiInvoke = charge.jsapiInvoke;
+  }
 
   await prisma.order.update({
     where: { id: orderId },
@@ -227,10 +245,58 @@ export async function createOrder(
  * 也可能有迟到回调。为消除这条丢钱路径，过期判定改在 UI / 查询展示层做（不写库）。
  *
  * 后续清理 PENDING + expiresAt 过期的订单交给 admin / cron 处理，那里可以
- * 在批处理外搭配 `paid_at IS NULL AND transaction_id IS NULL` 做防御。
+ * 在批处理外搭配 `paid_at IS NULL AND transaction_id IS NULL` 做防御 — 见 expireStalePendingOrders。
  */
 export async function refreshOrderStatus(orderNo: string): Promise<void> {
   void orderNo;
+}
+
+/**
+ * Stage 10.3：批量将过期 PENDING 单标记 CANCELED。
+ *
+ * 调用方：admin 手动触发 / cron。前置条件（防丢钱）：
+ *   - status = PENDING
+ *   - expiresAt < now - graceMs（默认 5min 防御冗余，避免临界回调被截胡）
+ *   - paidAt IS NULL → webhook 还没到（status=PENDING 已隐含，做双重防御）
+ *
+ * 注意：不能用 `transactionId IS NULL` 做防御 — createOrder 在初始 update 阶段就会写
+ * provider 返回的 transactionId（mock_xxx / prepay_id / orderNo 占位），实际 PENDING 单
+ * 几乎都有非空 transactionId；用它过滤 → 此 cron 退化为 no-op。
+ *
+ * 竞态保护：findMany → updateMany 二阶段中间若 webhook 抢先把行落 PAID，
+ * updateMany WHERE id IN AND status='PENDING' AND paidAt IS NULL 不会命中 → 安全。
+ *
+ * 返回受影响行数；调用方可入库 AuditLog（Stage 10.4 做）。
+ */
+export async function expireStalePendingOrders(args?: {
+  /** 额外宽限时间（毫秒），默认 5 分钟。 */
+  graceMs?: number;
+  /** 单次最大扫描行数，默认 500，避免大事务。 */
+  limit?: number;
+}): Promise<{ canceled: number }> {
+  const graceMs = args?.graceMs ?? 5 * 60 * 1000;
+  const limit = args?.limit ?? 500;
+  const cutoff = new Date(Date.now() - graceMs);
+  const stale = await prisma.order.findMany({
+    where: {
+      status: "PENDING",
+      expiresAt: { lt: cutoff },
+      paidAt: null,
+    },
+    select: { id: true },
+    orderBy: { expiresAt: "asc" },
+    take: limit,
+  });
+  if (stale.length === 0) return { canceled: 0 };
+  const result = await prisma.order.updateMany({
+    where: {
+      id: { in: stale.map((o) => o.id) },
+      status: "PENDING",
+      paidAt: null,
+    },
+    data: { status: "CANCELED" },
+  });
+  return { canceled: result.count };
 }
 
 export interface MarkPaidInput {
