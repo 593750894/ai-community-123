@@ -3,10 +3,12 @@ import { Check, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { PurchaseButton } from "@/components/commerce/purchase-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { getCurrentUser } from "@/lib/auth/session";
 import { listActiveMembershipPlans } from "@/lib/commerce/queries";
 import {
   BILLING_CYCLE_LABEL,
@@ -22,7 +24,10 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function PricingPage() {
-  const plans = await listActiveMembershipPlans();
+  const [plans, viewer] = await Promise.all([
+    listActiveMembershipPlans(),
+    getCurrentUser(),
+  ]);
   const hasPlans = plans.length > 0;
 
   return (
@@ -36,7 +41,12 @@ export default async function PricingPage() {
         {hasPlans ? (
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {plans.map((p, idx) => (
-              <PlanCard key={p.id} plan={p} highlight={idx === 1} />
+              <PlanCard
+                key={p.id}
+                plan={p}
+                highlight={idx === 1}
+                unauthenticated={!viewer}
+              />
             ))}
           </section>
         ) : (
@@ -77,11 +87,13 @@ interface PlanProps {
     trialDays: number;
   };
   highlight?: boolean;
+  unauthenticated: boolean;
 }
 
-function PlanCard({ plan, highlight }: PlanProps) {
+function PlanCard({ plan, highlight, unauthenticated }: PlanProps) {
   const cycleLabel =
     BILLING_CYCLE_LABEL[plan.cycle as BillingCycleValue] ?? plan.cycle;
+  const isFree = plan.priceCents <= 0;
   return (
     <Card
       variant={highlight ? "accent" : "default"}
@@ -123,15 +135,24 @@ function PlanCard({ plan, highlight }: PlanProps) {
       )}
 
       <div className="mt-auto pt-6">
-        {/* Stage 10.1 仅展示计划；下单 / 支付集成在 10.2 / 10.3 阶段补齐 */}
-        <Button
-          variant={highlight ? "default" : "outline"}
-          className="w-full"
-          disabled
-          aria-disabled
-        >
-          支付开通（即将上线）
-        </Button>
+        {isFree ? (
+          <Button
+            variant="outline"
+            className="w-full"
+            disabled
+            aria-disabled
+            title="免费会员无需付费"
+          >
+            免费档位（默认开通）
+          </Button>
+        ) : (
+          <PurchaseButton
+            payload={{ type: "MEMBERSHIP", planSlug: plan.slug }}
+            unauthenticated={unauthenticated}
+            label={`开通${plan.name}`}
+            variant={highlight ? "default" : "outline"}
+          />
+        )}
       </div>
     </Card>
   );

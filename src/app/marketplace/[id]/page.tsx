@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Coins, Layers, Sparkles, Tag, User } from "lucide-react";
+import { Layers, Sparkles, Tag, User } from "lucide-react";
 import type { Metadata } from "next";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { PurchaseButton } from "@/components/commerce/purchase-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getCurrentUser } from "@/lib/auth/session";
 import { getPublicWorkflowItem } from "@/lib/commerce/queries";
 import {
   WORKFLOW_ITEM_CATEGORY_LABEL,
@@ -37,13 +39,23 @@ export const dynamic = "force-dynamic";
 export default async function WorkflowItemDetailPage({ params }: PageProps) {
   const { id } = await params;
   if (!CUID_RE.test(id)) notFound();
-  const item = await getPublicWorkflowItem(id);
+  const [item, viewer] = await Promise.all([
+    getPublicWorkflowItem(id),
+    getCurrentUser(),
+  ]);
   if (!item) notFound();
 
   const categoryLabel =
     WORKFLOW_ITEM_CATEGORY_LABEL[item.category as WorkflowItemCategory] ??
     item.category;
   const isSoldOut = item.status === "SOLD_OUT";
+  const isOwnItem = !!viewer && viewer.id === item.seller.id;
+  const purchaseDisabled = isSoldOut || isOwnItem;
+  const disabledReason = isSoldOut
+    ? "商品已售罄"
+    : isOwnItem
+      ? "无法购买自己的商品"
+      : undefined;
 
   return (
     <>
@@ -131,18 +143,16 @@ export default async function WorkflowItemDetailPage({ params }: PageProps) {
                 {formatPrice(item.priceCents, item.currency)}
               </span>
             </div>
-            <Button
-              className="w-full"
+            <PurchaseButton
+              payload={{ type: "WORKFLOW_PURCHASE", workflowItemId: item.id }}
+              unauthenticated={!viewer}
+              disabled={purchaseDisabled}
+              disabledReason={disabledReason}
+              label="立即购买"
               size="lg"
-              disabled
-              aria-disabled
-              title="下单流程将在下一阶段（10.2）上线"
-            >
-              <Coins className="size-4" />
-              立即购买（即将上线）
-            </Button>
+            />
             <p className="text-[11px] text-muted-foreground">
-              已售出 {item.salesCount} 份 · 支付方式将支持微信支付 / 支付宝
+              已售出 {item.salesCount} 份 · 30 分钟内未付款订单将自动取消
             </p>
           </div>
 

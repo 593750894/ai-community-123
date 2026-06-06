@@ -165,3 +165,28 @@ export function priceToCents(yuan: number): number {
   if (!Number.isFinite(yuan) || yuan < 0) return 0;
   return Math.floor(yuan * 100 + 0.5);
 }
+
+// ───────────────────────── 下单（Stage 10.2） ─────────────────────────
+
+/** 用户可选的支付方式（与 src/lib/payments/registry SELECTABLE_PAYMENT_METHODS 同源）。 */
+export const ORDER_PAYMENT_METHODS = ["WECHAT_PAY", "ALIPAY"] as const;
+export type OrderPaymentMethodValue = (typeof ORDER_PAYMENT_METHODS)[number];
+
+/**
+ * 创建订单的入参。
+ * Stage 10.2 仅支持 MEMBERSHIP（按 planSlug）+ WORKFLOW_PURCHASE（按 workflowItemId）。
+ * COLLABORATION_DEPOSIT / CUSTOM 留待后续。
+ */
+export const CreateOrderSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("MEMBERSHIP"),
+    planSlug: z.string().trim().min(1, "缺少计划标识").max(64),
+    paymentMethod: z.enum(ORDER_PAYMENT_METHODS),
+  }),
+  z.object({
+    type: z.literal("WORKFLOW_PURCHASE"),
+    workflowItemId: z.string().trim().min(1, "缺少商品 ID").max(64),
+    paymentMethod: z.enum(ORDER_PAYMENT_METHODS),
+  }),
+]);
+export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;

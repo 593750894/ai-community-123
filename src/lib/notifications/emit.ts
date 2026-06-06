@@ -300,6 +300,56 @@ export async function notifyFollow(args: {
   }
 }
 
+/** Stage 10.2：订单付款成功 → 通知买家 */
+export async function notifyOrderPaid(args: {
+  buyerId: string;
+  orderNo: string;
+  amountCents: number;
+  currency: string;
+  /** 已格式化的金额（带 ¥），调用方计算后传入，避免把 commerce 工具下推到 emit。 */
+  amountDisplay: string;
+}) {
+  try {
+    void args.amountCents;
+    void args.currency;
+    await emitNotification({
+      recipientId: args.buyerId,
+      actorId: null,
+      type: "ORDER_PAID",
+      title: `订单付款成功`,
+      body: `订单 ${args.orderNo} · ${args.amountDisplay}`,
+      link: `/checkout/${args.orderNo}`,
+      targetType: "ORDER",
+      targetId: args.orderNo,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyOrderPaid", err);
+  }
+}
+
+/** Stage 10.2：工作流商品被买入 → 通知卖家 */
+export async function notifyWorkflowSold(args: {
+  sellerId: string;
+  itemTitle: string;
+  orderNo: string;
+  amountDisplay: string;
+}) {
+  try {
+    await emitNotification({
+      recipientId: args.sellerId,
+      actorId: null,
+      type: "WORKFLOW_SOLD",
+      title: `你的工作流被购买`,
+      body: `${args.itemTitle} · ${args.amountDisplay}`,
+      link: `/me/workflows`,
+      targetType: "ORDER",
+      targetId: args.orderNo,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyWorkflowSold", err);
+  }
+}
+
 /** 私信 → 通知会话中所有非发送者的参与者 */
 export async function notifyMessage(args: {
   conversationId: string;
