@@ -214,3 +214,52 @@ export const RefundOrderSchema = z.object({
     .transform((v) => (v && v.length > 0 ? v : undefined)),
 });
 export type RefundOrderInput = z.infer<typeof RefundOrderSchema>;
+
+// ───────────────────────── 结算 / Payout（Stage 10.5） ────────────────
+
+export const PAYOUT_STATUSES = ["PENDING", "AVAILABLE", "PAID", "CANCELED"] as const;
+export type PayoutStatusValue = (typeof PAYOUT_STATUSES)[number];
+
+export const PAYOUT_STATUS_LABEL: Record<PayoutStatusValue, string> = {
+  PENDING: "冷藏期中",
+  AVAILABLE: "可申请提现",
+  PAID: "已打款",
+  CANCELED: "已取消（退款）",
+};
+
+/** 卖家可绑定的收款方式。MVP 只支持 3 种：支付宝 / 微信 / 银行卡。 */
+export const PAYOUT_METHODS = ["ALIPAY", "WECHAT_PAY", "BANK"] as const;
+export type PayoutMethodValue = (typeof PAYOUT_METHODS)[number];
+
+export const PAYOUT_METHOD_LABEL: Record<PayoutMethodValue, string> = {
+  ALIPAY: "支付宝",
+  WECHAT_PAY: "微信",
+  BANK: "银行卡",
+};
+
+/** 绑定 / 更新卖家收款账号；三字段同时给（全部必填，避免半填状态）。 */
+export const UpdatePayoutAccountSchema = z.object({
+  payoutMethod: z.enum(PAYOUT_METHODS),
+  payoutAccount: z
+    .string()
+    .trim()
+    .min(2, "收款账号至少 2 字")
+    .max(64, "收款账号最多 64 字"),
+  payoutName: z
+    .string()
+    .trim()
+    .min(2, "收款人姓名至少 2 字")
+    .max(64, "收款人姓名最多 64 字"),
+});
+export type UpdatePayoutAccountInput = z.infer<typeof UpdatePayoutAccountSchema>;
+
+/** admin 标记打款；备注最长 200 字，可空。 */
+export const MarkPayoutPaidSchema = z.object({
+  note: z
+    .string()
+    .trim()
+    .max(200, "备注最多 200 字")
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined)),
+});
+export type MarkPayoutPaidInput = z.infer<typeof MarkPayoutPaidSchema>;

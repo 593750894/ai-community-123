@@ -381,6 +381,55 @@ export async function notifyWorkflowSold(args: {
   }
 }
 
+/** Stage 10.5：结算单冷藏期结束 → 通知卖家可申请提现。聚合按 sellerId 发一条。 */
+export async function notifyPayoutAvailable(args: {
+  sellerId: string;
+  count: number;
+  netCents: number;
+  currency: string;
+}) {
+  try {
+    const symbol = args.currency === "CNY" ? "¥" : args.currency + " ";
+    const display = `${symbol}${(args.netCents / 100).toFixed(2)}`;
+    await emitNotification({
+      recipientId: args.sellerId,
+      actorId: null,
+      type: "PAYOUT_AVAILABLE",
+      title: `结算单已可申请提现`,
+      body: `${args.count} 笔订单 · 合计 ${display}`,
+      link: `/me/earnings`,
+      targetType: "PAYOUT",
+      targetId: null,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyPayoutAvailable", err);
+  }
+}
+
+/** Stage 10.5：admin 标记结算单已打款 → 通知卖家。 */
+export async function notifyPayoutPaid(args: {
+  sellerId: string;
+  netCents: number;
+  currency: string;
+}) {
+  try {
+    const symbol = args.currency === "CNY" ? "¥" : args.currency + " ";
+    const display = `${symbol}${(args.netCents / 100).toFixed(2)}`;
+    await emitNotification({
+      recipientId: args.sellerId,
+      actorId: null,
+      type: "PAYOUT_PAID",
+      title: `结算款项已打款`,
+      body: `本笔结算 ${display} 已完成打款，请查收`,
+      link: `/me/earnings`,
+      targetType: "PAYOUT",
+      targetId: null,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyPayoutPaid", err);
+  }
+}
+
 /** 私信 → 通知会话中所有非发送者的参与者 */
 export async function notifyMessage(args: {
   conversationId: string;

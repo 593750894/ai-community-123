@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   Bookmark,
+  Coins,
   Film,
   Heart,
   LayoutDashboard,
@@ -14,11 +15,13 @@ import { requireUser } from "@/lib/auth/guard";
 // 子路由再各自跳 `?next=/me/...` 不必要 —— 任何 /me/* 都经过此 layout 鉴权。
 // Stage 10.1：新增「我的商品」tab，对应卖家中心。
 // Stage 10.4：新增「我的订单」tab，买家可查看历史订单与退款状态。
+// Stage 10.5：新增「我的收益」tab，卖家可查看结算单 / 申请提现 / 绑定收款账号。
 const NAV = [
   { href: "/me", label: "概览", icon: LayoutDashboard, exact: true },
   { href: "/me/works", label: "我的作品", icon: Film },
   { href: "/me/workflows", label: "我的商品", icon: Package },
   { href: "/me/orders", label: "我的订单", icon: Receipt },
+  { href: "/me/earnings", label: "我的收益", icon: Coins },
   { href: "/me/likes", label: "点赞收藏", icon: Heart },
   { href: "/me/bookmarks", label: "稍后再看", icon: Bookmark },
 ];

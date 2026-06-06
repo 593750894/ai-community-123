@@ -54,10 +54,12 @@ const TOP_LINKS: LinkItem[] = [
 
 // Stage 7：/me 四个子页上线，浏览历史功能（PostView/WorkView）暂未实现，先从侧栏移除。
 // Stage 10.1：新增「我的商品」入口（卖家管理上架工作流）。
+// Stage 10.5：新增「我的收益」入口（卖家结算 / 提现）。
 const MY_LINKS: LinkItem[] = [
   { href: "/me", label: "个人中心", icon: LayoutDashboard },
   { href: "/me/works", label: "我的作品", icon: Film },
   { href: "/me/workflows", label: "我的商品", icon: Package },
+  { href: "/me/earnings", label: "我的收益", icon: Coins },
   { href: "/me/likes", label: "点赞", icon: Heart },
   { href: "/me/bookmarks", label: "稍后再看", icon: Bookmark },
 ];

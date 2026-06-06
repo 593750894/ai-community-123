@@ -130,6 +130,8 @@ enum NotificationType {
   ORDER_PAID         // 阶段 10：买家订单付款成功
   WORKFLOW_SOLD      // 阶段 10：卖家工作流被买入
   ORDER_REFUNDED     // 阶段 10.4：买家订单退款成功（含全额 / 部分）
+  PAYOUT_AVAILABLE   // 阶段 10.5：冷藏期结束，结算单可申请提现
+  PAYOUT_PAID        // 阶段 10.5：admin 已完成线下打款
 }
 
 enum ReportTargetType {
@@ -237,6 +239,11 @@ model User {
   // Stage 9：隐私 / 会话失效
   isProfilePublic    Boolean   @default(true) @map("is_profile_public")
   tokensValidAfter   DateTime? @map("tokens_valid_after") // 早于此时间签发的 JWT 视为失效
+
+  // Stage 10.5：卖家收款账号（提现绑定）。三个字段同时为空 = 未绑定。
+  payoutMethod   String? @map("payout_method")    // ALIPAY / WECHAT_PAY / BANK
+  payoutAccount  String? @map("payout_account")   // 支付宝账号 / 微信号 / 银行卡号
+  payoutName     String? @map("payout_name")      // 收款人姓名（用于核对）
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -818,6 +825,7 @@ model Refund {
 }
 
 /// 阶段 10：创作者收益结算单。每个 PAID 订单生成一条；7 日确认期后变 AVAILABLE 可结算。
+/// Stage 10.5：加 requestedAt / paidBy / 收款快照，承载「卖家申请提现 → admin 线下打款」流程。
 model Payout {
   id               String       @id @default(cuid())
   orderId          String       @unique @map("order_id")
@@ -828,7 +836,15 @@ model Payout {
   currency         String       @default("CNY")
   status           PayoutStatus @default(PENDING)
   availableAt      DateTime     @map("available_at")          // 确认期结束时间
+  // Stage 10.5：提现申请
+  requestedAt      DateTime?    @map("requested_at")          // 卖家点「申请提现」时间；与 AVAILABLE 一同筛选可看出待处理队列
+  // Stage 10.5：admin 标记打款时的快照
   paidAt           DateTime?    @map("paid_at")
+  paidById         String?      @map("paid_by_id")            // 操作 admin id
+  paidMethod       String?      @map("paid_method")           // 打款时快照（ALIPAY / WECHAT_PAY / BANK）
+  paidAccount      String?      @map("paid_account")          // 打款时快照账号
+  paidName         String?      @map("paid_name")             // 打款时快照姓名
+  paidNote         String?      @map("paid_note")             // admin 备注（流水号 / 备忘）
   metadata         Json?
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @updatedAt @map("updated_at")
@@ -838,6 +854,7 @@ model Payout {
 
   @@index([sellerId, status])
   @@index([status, availableAt])
+  @@index([sellerId, requestedAt])
   @@map("payouts")
 }
 

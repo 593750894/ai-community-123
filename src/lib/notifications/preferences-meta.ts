@@ -17,6 +17,8 @@ export const NOTIFICATION_TYPES = [
   "ORDER_PAID",
   "WORKFLOW_SOLD",
   "ORDER_REFUNDED",
+  "PAYOUT_AVAILABLE",
+  "PAYOUT_PAID",
   "SYSTEM",
 ] as const satisfies readonly NotificationType[];
 
@@ -36,6 +38,8 @@ export const NOTIFICATION_TYPE_LABEL: Record<NotificationType, string> = {
   ORDER_PAID: "我的订单付款成功",
   WORKFLOW_SOLD: "我的工作流被购买",
   ORDER_REFUNDED: "我的订单已退款",
+  PAYOUT_AVAILABLE: "我的结算单可申请提现",
+  PAYOUT_PAID: "我的结算单已打款",
   SYSTEM: "系统 / 管理员通知",
 };
 
@@ -53,6 +57,8 @@ export const NOTIFICATION_TYPE_DESCRIPTION: Record<NotificationType, string> = {
   ORDER_PAID: "你的订单完成付款时提醒。",
   WORKFLOW_SOLD: "你的市集商品被买入时提醒（含金额）。",
   ORDER_REFUNDED: "你的订单被管理员发起退款时提醒（含金额）。",
+  PAYOUT_AVAILABLE: "冷藏期结束、结算款可申请提现时提醒。",
+  PAYOUT_PAID: "管理员完成线下打款后提醒。",
   SYSTEM: "举报处理、强制下线等运维通知，无法关闭。",
 };
 

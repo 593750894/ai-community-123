@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   Banknote,
   ChevronRight,
+  Coins,
   Film,
   Flag,
   MessageSquare,
@@ -12,7 +13,9 @@ import {
 
 import { PageHeader } from "@/components/layout/page-header";
 import { prisma } from "@/lib/db";
+import { getAdminPayoutOverview } from "@/lib/commerce/payouts";
 import { countOpenReports } from "@/lib/reports/queries";
+import { formatPrice } from "@/lib/commerce/schemas";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +23,7 @@ export const dynamic = "force-dynamic";
 // guard 在 layout 里已经做过，这里直接查 DB 即可。
 
 async function getOverview() {
-  const [users, posts, works, collabs, tools, openReports, paidOrders] =
+  const [users, posts, works, collabs, tools, openReports, paidOrders, payouts] =
     await Promise.all([
       prisma.user.count(),
       prisma.post.count(),
@@ -32,8 +35,26 @@ async function getOverview() {
       prisma.order
         .count({ where: { status: { in: ["PAID", "REFUNDED"] } } })
         .catch(() => 0),
+      // Stage 10.5：结算单总览（含待处理提现笔数）。
+      getAdminPayoutOverview().catch(() => ({
+        pendingNetCents: 0,
+        availableNetCents: 0,
+        requestedNetCents: 0,
+        paidNetCents: 0,
+        canceledNetCents: 0,
+        pendingRequestCount: 0,
+      })),
     ]);
-  return { users, posts, works, collabs, tools, openReports, paidOrders };
+  return {
+    users,
+    posts,
+    works,
+    collabs,
+    tools,
+    openReports,
+    paidOrders,
+    payouts,
+  };
 }
 
 export default async function AdminPage() {
@@ -88,6 +109,13 @@ export default async function AdminPage() {
       href: "/admin/orders?status=PAID",
       icon: Receipt,
       tone: "text-emerald-300",
+    },
+    {
+      label: "待处理提现",
+      value: overview.payouts.pendingRequestCount,
+      href: "/admin/payouts?pendingRequest=1",
+      icon: Coins,
+      tone: "text-rose-300",
     },
   ];
 
@@ -158,6 +186,11 @@ export default async function AdminPage() {
               href: "/admin/orders",
               title: "订单管理",
               desc: "查看订单 / 发起退款 / 追踪结算。",
+            },
+            {
+              href: "/admin/payouts?pendingRequest=1",
+              title: "结算管理",
+              desc: `处理待提现 ${formatPrice(overview.payouts.requestedNetCents)} · 标记线下打款`,
             },
           ].map((m) => (
             <Link

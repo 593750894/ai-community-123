@@ -18,6 +18,7 @@ import type { PaymentMethod } from "@/generated/prisma/client";
 
 import type { CreateOrderInput } from "./schemas";
 import { formatPrice } from "./schemas";
+import { calcAvailableAt, calcNetCents, calcPlatformFeeCents } from "./config";
 
 /**
  * Stage 10.2：订单中枢。
@@ -28,12 +29,10 @@ import { formatPrice } from "./schemas";
  * - markOrderPaid：webhook / 模拟支付落 PAID + 副作用（Subscription / Payout / 通知 / salesCount）。
  *   通过 updateMany WHERE status=PENDING 保证回调重放幂等。
  *
- * 订单超时 30min；Payout 确认期 7d；平台抽成 30%。
+ * 订单超时 30min；Payout 确认期 + 平台抽成都从 config.ts 读，可通过 PAYOUT_HOLD_DAYS / PLATFORM_FEE_BPS env 覆盖。
  */
 
 const ORDER_TTL_MS = 30 * 60 * 1000;
-const PAYOUT_WINDOW_DAYS = 7;
-const PLATFORM_FEE_BPS = 3000; // 30%
 
 export const ORDER_TTL_MINUTES = ORDER_TTL_MS / 60_000;
 
@@ -377,13 +376,9 @@ export async function markOrderPaid(
         where: { id: workflow.id },
         data: { salesCount: { increment: 1 } },
       });
-      const platformFee = Math.floor(
-        (order.amountCents * PLATFORM_FEE_BPS) / 10_000,
-      );
-      const net = order.amountCents - platformFee;
-      const availableAt = new Date(
-        input.paidAt.getTime() + PAYOUT_WINDOW_DAYS * 24 * 60 * 60 * 1000,
-      );
+      const platformFee = calcPlatformFeeCents(order.amountCents);
+      const net = calcNetCents(order.amountCents);
+      const availableAt = calcAvailableAt(input.paidAt);
       await tx.payout.create({
         data: {
           orderId: order.id,

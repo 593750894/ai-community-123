@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   Banknote,
+  Coins,
   Film,
   Flag,
   LayoutDashboard,
@@ -33,6 +34,8 @@ const NAV = [
   { href: "/admin/tools", label: "工具库", icon: Wrench },
   // Stage 10.4：商业化订单管理（含退款入口）。
   { href: "/admin/orders", label: "订单", icon: Receipt },
+  // Stage 10.5：结算管理（卖家提现 / 标记打款）。
+  { href: "/admin/payouts", label: "结算", icon: Coins },
   { href: "/admin/audit-logs", label: "操作审计", icon: ScrollText },
 ];
 
