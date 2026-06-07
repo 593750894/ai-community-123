@@ -430,6 +430,128 @@ export async function notifyPayoutPaid(args: {
   }
 }
 
+/** Stage 11.1：被邀请加入企业 → 通知被邀请人 */
+export async function notifyOrgInvite(args: {
+  inviteeId: string;
+  inviterId: string;
+  organizationName: string;
+  organizationSlug: string;
+}) {
+  try {
+    const inviter = await actorDisplay(args.inviterId);
+    if (!inviter) return;
+    await emitNotification({
+      recipientId: args.inviteeId,
+      actorId: args.inviterId,
+      type: "ORG_INVITE",
+      title: `${inviter.name} 邀请你加入 ${args.organizationName}`,
+      body: null,
+      link: `/me/organizations/invites`,
+      targetType: "ORGANIZATION",
+      targetId: args.organizationSlug,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyOrgInvite", err);
+  }
+}
+
+/** Stage 11.1：邀请被接受 / 拒绝 → 通知邀请人 */
+export async function notifyOrgInviteResponse(args: {
+  inviterId: string;
+  responderId: string;
+  organizationName: string;
+  organizationSlug: string;
+  accepted: boolean;
+}) {
+  try {
+    const responder = await actorDisplay(args.responderId);
+    if (!responder) return;
+    await emitNotification({
+      recipientId: args.inviterId,
+      actorId: args.responderId,
+      type: "ORG_INVITE_RESPONSE",
+      title: args.accepted
+        ? `${responder.name} 已接受加入 ${args.organizationName}`
+        : `${responder.name} 拒绝了加入 ${args.organizationName}`,
+      body: null,
+      link: `/organizations/${args.organizationSlug}/members`,
+      targetType: "ORGANIZATION",
+      targetId: args.organizationSlug,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyOrgInviteResponse", err);
+  }
+}
+
+/** Stage 11.2：企业认证通过 → 通知申请人（owner） */
+export async function notifyOrgVerificationApproved(args: {
+  recipientId: string;
+  organizationName: string;
+  organizationSlug: string;
+  reviewNote?: string | null;
+}) {
+  try {
+    await emitNotification({
+      recipientId: args.recipientId,
+      actorId: null,
+      type: "ORG_VERIFICATION_APPROVED",
+      title: `企业「${args.organizationName}」认证已通过`,
+      body: args.reviewNote ?? null,
+      link: `/organizations/${args.organizationSlug}`,
+      targetType: "ORGANIZATION",
+      targetId: args.organizationSlug,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyOrgVerificationApproved", err);
+  }
+}
+
+/** Stage 11.2：企业认证驳回 → 通知申请人，body 含驳回原因 */
+export async function notifyOrgVerificationRejected(args: {
+  recipientId: string;
+  organizationName: string;
+  organizationSlug: string;
+  reviewNote: string;
+}) {
+  try {
+    await emitNotification({
+      recipientId: args.recipientId,
+      actorId: null,
+      type: "ORG_VERIFICATION_REJECTED",
+      title: `企业「${args.organizationName}」认证未通过`,
+      body: args.reviewNote,
+      link: `/organizations/${args.organizationSlug}/settings`,
+      targetType: "ORGANIZATION",
+      targetId: args.organizationSlug,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyOrgVerificationRejected", err);
+  }
+}
+
+/** Stage 11.1：被企业移除 → 通知被移除人 */
+export async function notifyOrgMemberRemoved(args: {
+  memberId: string;
+  actorId: string;
+  organizationName: string;
+  organizationSlug: string;
+}) {
+  try {
+    await emitNotification({
+      recipientId: args.memberId,
+      actorId: args.actorId,
+      type: "ORG_MEMBER_REMOVED",
+      title: `你已被移出 ${args.organizationName}`,
+      body: null,
+      link: `/organizations/${args.organizationSlug}`,
+      targetType: "ORGANIZATION",
+      targetId: args.organizationSlug,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyOrgMemberRemoved", err);
+  }
+}
+
 /** 私信 → 通知会话中所有非发送者的参与者 */
 export async function notifyMessage(args: {
   conversationId: string;

@@ -132,6 +132,11 @@ enum NotificationType {
   ORDER_REFUNDED     // 阶段 10.4：买家订单退款成功（含全额 / 部分）
   PAYOUT_AVAILABLE   // 阶段 10.5：冷藏期结束，结算单可申请提现
   PAYOUT_PAID        // 阶段 10.5：admin 已完成线下打款
+  ORG_INVITE         // 阶段 11.1：被邀请加入企业
+  ORG_INVITE_RESPONSE // 阶段 11.1：邀请被接受 / 拒绝（发送给邀请人）
+  ORG_MEMBER_REMOVED  // 阶段 11.1：被企业移除
+  ORG_VERIFICATION_APPROVED // 阶段 11.2：企业认证通过
+  ORG_VERIFICATION_REJECTED // 阶段 11.2：企业认证驳回
 }
 
 enum ReportTargetType {
@@ -214,6 +219,21 @@ enum OrgRole {
   MEMBER
 }
 
+enum OrgInviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELED
+}
+
+// Stage 11.2：企业认证状态。NONE = 从未提交；其他三个为申请生命周期。
+enum OrgVerificationStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // ═════════════════════════════════════════════════════════════════
 //                           User & Auth
 // ═════════════════════════════════════════════════════════════════
@@ -287,6 +307,14 @@ model User {
   payoutsAsSeller         Payout[]             @relation("PayoutSeller")
   refundsInitiated        Refund[]             @relation("RefundCreator")
   organizationMemberships OrganizationMember[]
+
+  // Stage 11.1：企业 / Organization
+  organizationsOwned       Organization[]         @relation("OrganizationOwner")
+  organizationInvitesSent  OrganizationInvite[]   @relation("OrgInviteInviter")
+  organizationInvitesGot   OrganizationInvite[]   @relation("OrgInviteInvitee")
+
+  // Stage 11.2：企业认证审核
+  organizationsReviewed    Organization[]         @relation("OrgVerificationReviewer")
 
   @@index([status])
   @@index([role])
@@ -870,11 +898,37 @@ model Organization {
   logo        String?
   website     String?
   isVerified  Boolean  @default(false) @map("is_verified")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  members OrganizationMember[]
+  // Stage 11.1：基础企业属性 + 创建者
+  ownerId      String  @map("owner_id")
+  industry     String? // 行业（影视 / 游戏 / 广告 / 自媒体 / 其他）
+  size         String? // 规模（1-10 / 11-50 / 51-200 / 201+）
+  contactEmail String? @map("contact_email")
 
+  // Stage 11.2：企业认证。verificationStatus 与 isVerified 由审核动作同步：APPROVED ⇒ isVerified=true，
+  // 其他状态对 isVerified 不做隐式修改（admin 可手动改）。提交资料字段为 nullable，未提交时为空。
+  verificationStatus     OrgVerificationStatus @default(NONE) @map("verification_status")
+  verificationName       String?               @map("verification_name")        // 营业执照上的法定企业名称
+  verificationRegNo      String?               @map("verification_reg_no")      // 统一社会信用代码 / 注册号
+  verificationRep        String?               @map("verification_rep")         // 法定代表人姓名
+  verificationLicenseUrl String?               @map("verification_license_url") // 营业执照扫描件 URL
+  verificationContact    String?               @map("verification_contact")     // 申请方联系电话 / 邮箱
+  verificationNote       String?               @map("verification_note")        // 申请方补充说明
+  verificationReviewNote String?               @map("verification_review_note") // 管理员审核结论 / 驳回原因
+  verificationSubmittedAt DateTime?            @map("verification_submitted_at")
+  verificationReviewedAt  DateTime?            @map("verification_reviewed_at")
+  verificationReviewedBy  String?              @map("verification_reviewed_by")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  owner            User                 @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  verificationAdmin User?               @relation("OrgVerificationReviewer", fields: [verificationReviewedBy], references: [id])
+  members          OrganizationMember[]
+  invites          OrganizationInvite[]
+
+  @@index([ownerId])
+  @@index([verificationStatus, verificationSubmittedAt])
   @@map("organizations")
 }
 
@@ -890,4 +944,25 @@ model OrganizationMember {
   @@id([organizationId, userId])
   @@index([userId])
   @@map("organization_members")
+}
+
+// Stage 11.1：邀请加入企业。同一 inviteeId 对同一 org 最多一条 PENDING 行（业务层保证 + 部分唯一索引）。
+model OrganizationInvite {
+  id             String          @id @default(cuid())
+  organizationId String          @map("organization_id")
+  inviterId      String          @map("inviter_id")
+  inviteeId      String          @map("invitee_id")
+  role           OrgRole         @default(MEMBER)
+  status         OrgInviteStatus @default(PENDING)
+  message        String?
+  createdAt      DateTime        @default(now()) @map("created_at")
+  respondedAt    DateTime?       @map("responded_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  inviter      User         @relation("OrgInviteInviter", fields: [inviterId], references: [id])
+  invitee      User         @relation("OrgInviteInvitee", fields: [inviteeId], references: [id])
+
+  @@index([organizationId, status])
+  @@index([inviteeId, status])
+  @@map("organization_invites")
 }

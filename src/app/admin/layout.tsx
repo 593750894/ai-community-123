@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   Banknote,
+  BadgeCheck,
   Coins,
   Film,
   Flag,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { requireAdmin } from "@/lib/auth/guard";
+import { prisma } from "@/lib/db";
 import { countOpenReports } from "@/lib/reports/queries";
 
 // 阶段 11 + Stage 5：管理后台 layout + 举报未结数 badge。
@@ -36,6 +38,13 @@ const NAV = [
   { href: "/admin/orders", label: "订单", icon: Receipt },
   // Stage 10.5：结算管理（卖家提现 / 标记打款）。
   { href: "/admin/payouts", label: "结算", icon: Coins },
+  // Stage 11.2：企业认证审核。
+  {
+    href: "/admin/organizations/verifications",
+    label: "企业认证",
+    icon: BadgeCheck,
+    badgeKey: "orgVerifications" as const,
+  },
   { href: "/admin/audit-logs", label: "操作审计", icon: ScrollText },
 ];
 
@@ -44,9 +53,12 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [admin, openReports] = await Promise.all([
+  const [admin, openReports, pendingVerifications] = await Promise.all([
     requireAdmin("/admin"),
     countOpenReports().catch(() => 0),
+    prisma.organization
+      .count({ where: { verificationStatus: "PENDING" } })
+      .catch(() => 0),
   ]);
 
   return (
@@ -54,7 +66,13 @@ export default async function AdminLayout({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-card/30 px-6 py-3 sm:px-8">
         <nav className="flex flex-wrap items-center gap-1">
           {NAV.map(({ href, label, icon: Icon, badgeKey }) => {
-            const showBadge = badgeKey === "reports" && openReports > 0;
+            const badgeCount =
+              badgeKey === "reports"
+                ? openReports
+                : badgeKey === "orgVerifications"
+                  ? pendingVerifications
+                  : 0;
+            const showBadge = badgeCount > 0;
             return (
               <Link
                 key={href}
@@ -65,7 +83,7 @@ export default async function AdminLayout({
                 {label}
                 {showBadge && (
                   <span className="ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500/90 px-1 text-[10px] font-semibold text-white tabular-nums">
-                    {openReports > 99 ? "99+" : openReports}
+                    {badgeCount > 99 ? "99+" : badgeCount}
                   </span>
                 )}
               </Link>

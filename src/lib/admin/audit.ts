@@ -35,6 +35,9 @@ export type AuditAction =
   | "ORDER_REFUND_PARTIAL"
   // Stage 10.5 新增
   | "PAYOUT_MARK_PAID"
+  // Stage 11.2 新增
+  | "ORG_VERIFICATION_APPROVE"
+  | "ORG_VERIFICATION_REJECT"
   | (string & {});
 
 /** Stage 9：audit-logs 页面下拉用的常用 action 列表（顺序即展示顺序）。 */
@@ -59,6 +62,8 @@ export const AUDIT_ACTIONS = [
   "ORDER_REFUND_FULL",
   "ORDER_REFUND_PARTIAL",
   "PAYOUT_MARK_PAID",
+  "ORG_VERIFICATION_APPROVE",
+  "ORG_VERIFICATION_REJECT",
 ] as const satisfies readonly AuditAction[];
 
 export const AUDIT_ACTION_LABEL: Record<string, string> = {
@@ -82,6 +87,8 @@ export const AUDIT_ACTION_LABEL: Record<string, string> = {
   ORDER_REFUND_FULL: "订单全额退款",
   ORDER_REFUND_PARTIAL: "订单部分退款",
   PAYOUT_MARK_PAID: "结算单标记打款",
+  ORG_VERIFICATION_APPROVE: "通过企业认证",
+  ORG_VERIFICATION_REJECT: "驳回企业认证",
 };
 
 export const AUDIT_TARGET_TYPES = [
@@ -95,6 +102,7 @@ export const AUDIT_TARGET_TYPES = [
   "Message",
   "Order",
   "Payout",
+  "Organization",
 ] as const;
 
 export const AUDIT_TARGET_LABEL: Record<string, string> = {
@@ -108,6 +116,7 @@ export const AUDIT_TARGET_LABEL: Record<string, string> = {
   Message: "私信",
   Order: "订单",
   Payout: "结算单",
+  Organization: "企业",
 };
 
 export interface CreateAuditLogInput {

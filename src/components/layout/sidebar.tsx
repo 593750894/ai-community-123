@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Bookmark,
+  Building2,
   Coins,
   Film,
   Globe2,
@@ -46,8 +47,9 @@ const TOP_LINKS: LinkItem[] = [
   { href: "/community", label: "社区总览", icon: Globe2 },
   { href: "/showcase", label: "作品广场", icon: LayoutGrid, badge: "热" },
   { href: "/collaboration", label: "项目合作", icon: Users },
+  { href: "/organizations", label: "企业账号", icon: Building2, badge: "新" },
   { href: "/tools", label: "工具库", icon: Wrench },
-  { href: "/marketplace", label: "工作流市集", icon: Store, badge: "新" },
+  { href: "/marketplace", label: "工作流市集", icon: Store },
   { href: "/pricing", label: "会员计划", icon: Coins },
   { href: "/messages", label: "消息中心", icon: MessagesSquare },
 ];
@@ -60,6 +62,7 @@ const MY_LINKS: LinkItem[] = [
   { href: "/me/works", label: "我的作品", icon: Film },
   { href: "/me/workflows", label: "我的商品", icon: Package },
   { href: "/me/earnings", label: "我的收益", icon: Coins },
+  { href: "/me/organizations", label: "我的企业", icon: Building2 },
   { href: "/me/likes", label: "点赞", icon: Heart },
   { href: "/me/bookmarks", label: "稍后再看", icon: Bookmark },
 ];

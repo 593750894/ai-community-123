@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   Bookmark,
+  Building2,
   Coins,
   Film,
   Heart,
@@ -22,6 +23,7 @@ const NAV = [
   { href: "/me/workflows", label: "我的商品", icon: Package },
   { href: "/me/orders", label: "我的订单", icon: Receipt },
   { href: "/me/earnings", label: "我的收益", icon: Coins },
+  { href: "/me/organizations", label: "我的企业", icon: Building2 },
   { href: "/me/likes", label: "点赞收藏", icon: Heart },
   { href: "/me/bookmarks", label: "稍后再看", icon: Bookmark },
 ];

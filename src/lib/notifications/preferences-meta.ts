@@ -19,6 +19,11 @@ export const NOTIFICATION_TYPES = [
   "ORDER_REFUNDED",
   "PAYOUT_AVAILABLE",
   "PAYOUT_PAID",
+  "ORG_INVITE",
+  "ORG_INVITE_RESPONSE",
+  "ORG_MEMBER_REMOVED",
+  "ORG_VERIFICATION_APPROVED",
+  "ORG_VERIFICATION_REJECTED",
   "SYSTEM",
 ] as const satisfies readonly NotificationType[];
 
@@ -40,6 +45,11 @@ export const NOTIFICATION_TYPE_LABEL: Record<NotificationType, string> = {
   ORDER_REFUNDED: "我的订单已退款",
   PAYOUT_AVAILABLE: "我的结算单可申请提现",
   PAYOUT_PAID: "我的结算单已打款",
+  ORG_INVITE: "我收到企业邀请",
+  ORG_INVITE_RESPONSE: "我发送的邀请有了回应",
+  ORG_MEMBER_REMOVED: "我被企业移除成员资格",
+  ORG_VERIFICATION_APPROVED: "我的企业认证通过",
+  ORG_VERIFICATION_REJECTED: "我的企业认证被驳回",
   SYSTEM: "系统 / 管理员通知",
 };
 
@@ -59,6 +69,11 @@ export const NOTIFICATION_TYPE_DESCRIPTION: Record<NotificationType, string> = {
   ORDER_REFUNDED: "你的订单被管理员发起退款时提醒（含金额）。",
   PAYOUT_AVAILABLE: "冷藏期结束、结算款可申请提现时提醒。",
   PAYOUT_PAID: "管理员完成线下打款后提醒。",
+  ORG_INVITE: "有企业管理员邀请你加入时提醒。",
+  ORG_INVITE_RESPONSE: "你发出的邀请被接受或拒绝时提醒。",
+  ORG_MEMBER_REMOVED: "你被企业移除时提醒。",
+  ORG_VERIFICATION_APPROVED: "你提交的企业认证通过时提醒。",
+  ORG_VERIFICATION_REJECTED: "企业认证被驳回时提醒（含驳回原因）。",
   SYSTEM: "举报处理、强制下线等运维通知，无法关闭。",
 };
 
