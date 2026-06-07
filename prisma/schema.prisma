@@ -49,20 +49,20 @@ enum WorkMode {
 }
 
 enum WorkCategory {
-  AI_COMIC        // AI 漫剧
-  AI_DRAMA        // AI 短剧
-  AI_ANIMATION    // AI 动画
-  DIGITAL_HUMAN   // 数字人视频
-  ECOMMERCE_AD    // 电商广告视频
-  PRODUCT_SHOW    // 产品展示视频
-  KNOWLEDGE       // 知识讲解视频
-  STORY           // 故事类视频
-  EXPERIMENT      // 实验短片
+  AI_COMIC // AI 漫剧
+  AI_DRAMA // AI 短剧
+  AI_ANIMATION // AI 动画
+  DIGITAL_HUMAN // 数字人视频
+  ECOMMERCE_AD // 电商广告视频
+  PRODUCT_SHOW // 产品展示视频
+  KNOWLEDGE // 知识讲解视频
+  STORY // 故事类视频
+  EXPERIMENT // 实验短片
 }
 
 enum CollaborationType {
   LOOKING_FOR // 我正在找
-  OFFERING    // 我可以提供
+  OFFERING // 我可以提供
 }
 
 enum CollaborationStatus {
@@ -72,31 +72,31 @@ enum CollaborationStatus {
 }
 
 enum CollaborationCategory {
-  AI_VIDEO_TEAM      // 找 AI 视频制作团队
-  AI_COMIC_CREATOR   // 找 AI 漫剧创作者
-  AI_DRAMA_TEAM      // 找 AI 短剧团队
-  DIGITAL_HUMAN      // 找数字人制作
-  PROMPT_ENGINEER    // 找提示词工程师
-  COMFYUI_WORKFLOW   // 找 ComfyUI 工作流搭建
-  EDITOR             // 找剪辑师
-  COFOUNDER          // 找联合创始人
-  INVEST_BIZ         // 找投资 / 商务合作
-  OTHER              // 其他
+  AI_VIDEO_TEAM // 找 AI 视频制作团队
+  AI_COMIC_CREATOR // 找 AI 漫剧创作者
+  AI_DRAMA_TEAM // 找 AI 短剧团队
+  DIGITAL_HUMAN // 找数字人制作
+  PROMPT_ENGINEER // 找提示词工程师
+  COMFYUI_WORKFLOW // 找 ComfyUI 工作流搭建
+  EDITOR // 找剪辑师
+  COFOUNDER // 找联合创始人
+  INVEST_BIZ // 找投资 / 商务合作
+  OTHER // 其他
 }
 
 enum CollaborationWorkMode {
-  PROJECT    // 项目制
-  FULL_TIME  // 全职
-  PART_TIME  // 兼职
-  FREELANCE  // 外包
-  EQUITY     // 合伙 / 股权
-  ONE_OFF    // 一次性单子
+  PROJECT // 项目制
+  FULL_TIME // 全职
+  PART_TIME // 兼职
+  FREELANCE // 外包
+  EQUITY // 合伙 / 股权
+  ONE_OFF // 一次性单子
 }
 
 enum CollaborationLocation {
-  REMOTE  // 远程
-  ONSITE  // 线下
-  HYBRID  // 远程 + 线下
+  REMOTE // 远程
+  ONSITE // 线下
+  HYBRID // 远程 + 线下
 }
 
 enum ToolPricing {
@@ -106,13 +106,13 @@ enum ToolPricing {
 }
 
 enum PostType {
-  DISCUSSION    // 普通交流
-  SHOWCASE      // 作品展示
+  DISCUSSION // 普通交流
+  SHOWCASE // 作品展示
   COLLABORATION // 项目合作
   TOOL_RECOMMEND // 工具推荐
-  TUTORIAL      // 教程经验
-  QUESTION      // 提问求助
-  NEWS          // 行业资讯
+  TUTORIAL // 教程经验
+  QUESTION // 提问求助
+  NEWS // 行业资讯
 }
 
 enum NotificationType {
@@ -127,14 +127,14 @@ enum NotificationType {
   MESSAGE
   FOLLOW
   SYSTEM
-  ORDER_PAID         // 阶段 10：买家订单付款成功
-  WORKFLOW_SOLD      // 阶段 10：卖家工作流被买入
-  ORDER_REFUNDED     // 阶段 10.4：买家订单退款成功（含全额 / 部分）
-  PAYOUT_AVAILABLE   // 阶段 10.5：冷藏期结束，结算单可申请提现
-  PAYOUT_PAID        // 阶段 10.5：admin 已完成线下打款
-  ORG_INVITE         // 阶段 11.1：被邀请加入企业
+  ORDER_PAID // 阶段 10：买家订单付款成功
+  WORKFLOW_SOLD // 阶段 10：卖家工作流被买入
+  ORDER_REFUNDED // 阶段 10.4：买家订单退款成功（含全额 / 部分）
+  PAYOUT_AVAILABLE // 阶段 10.5：冷藏期结束，结算单可申请提现
+  PAYOUT_PAID // 阶段 10.5：admin 已完成线下打款
+  ORG_INVITE // 阶段 11.1：被邀请加入企业
   ORG_INVITE_RESPONSE // 阶段 11.1：邀请被接受 / 拒绝（发送给邀请人）
-  ORG_MEMBER_REMOVED  // 阶段 11.1：被企业移除
+  ORG_MEMBER_REMOVED // 阶段 11.1：被企业移除
   ORG_VERIFICATION_APPROVED // 阶段 11.2：企业认证通过
   ORG_VERIFICATION_REJECTED // 阶段 11.2：企业认证驳回
 }
@@ -187,16 +187,16 @@ enum OrderStatus {
 }
 
 enum PayoutStatus {
-  PENDING          // 订单已付款，等待确认期结束
-  AVAILABLE        // 确认期已过，可结算
-  PAID             // 平台已打款给卖家
-  CANCELED         // 因订单退款而取消
+  PENDING // 订单已付款，等待确认期结束
+  AVAILABLE // 确认期已过，可结算
+  PAID // 平台已打款给卖家
+  CANCELED // 因订单退款而取消
 }
 
 enum RefundStatus {
-  PENDING          // 已创建未提交 PSP
-  SUCCESS          // PSP 已受理
-  FAILED           // PSP 拒绝
+  PENDING // 已创建未提交 PSP
+  SUCCESS // PSP 已受理
+  FAILED // PSP 拒绝
 }
 
 enum PaymentMethod {
@@ -250,20 +250,20 @@ model User {
   status       UserStatus @default(ACTIVE)
 
   // 个人主页字段
-  industryRole   String?  @map("industry_role")            // 行业角色，例如 "导演 / 编剧"
-  expertise      String[] @default([])                     // 擅长领域
+  industryRole   String?  @map("industry_role") // 行业角色，例如 "导演 / 编剧"
+  expertise      String[] @default([]) // 擅长领域
   favoriteTools  String[] @default([]) @map("favorite_tools") // 常用 AI 视频工具
   portfolioLinks String[] @default([]) @map("portfolio_links")
   contact        String?
 
   // Stage 9：隐私 / 会话失效
-  isProfilePublic    Boolean   @default(true) @map("is_profile_public")
-  tokensValidAfter   DateTime? @map("tokens_valid_after") // 早于此时间签发的 JWT 视为失效
+  isProfilePublic  Boolean   @default(true) @map("is_profile_public")
+  tokensValidAfter DateTime? @map("tokens_valid_after") // 早于此时间签发的 JWT 视为失效
 
   // Stage 10.5：卖家收款账号（提现绑定）。三个字段同时为空 = 未绑定。
-  payoutMethod   String? @map("payout_method")    // ALIPAY / WECHAT_PAY / BANK
-  payoutAccount  String? @map("payout_account")   // 支付宝账号 / 微信号 / 银行卡号
-  payoutName     String? @map("payout_name")      // 收款人姓名（用于核对）
+  payoutMethod  String? @map("payout_method") // ALIPAY / WECHAT_PAY / BANK
+  payoutAccount String? @map("payout_account") // 支付宝账号 / 微信号 / 银行卡号
+  payoutName    String? @map("payout_name") // 收款人姓名（用于核对）
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -311,12 +311,12 @@ model User {
   organizationMemberships OrganizationMember[]
 
   // Stage 11.1：企业 / Organization
-  organizationsOwned       Organization[]         @relation("OrganizationOwner")
-  organizationInvitesSent  OrganizationInvite[]   @relation("OrgInviteInviter")
-  organizationInvitesGot   OrganizationInvite[]   @relation("OrgInviteInvitee")
+  organizationsOwned      Organization[]       @relation("OrganizationOwner")
+  organizationInvitesSent OrganizationInvite[] @relation("OrgInviteInviter")
+  organizationInvitesGot  OrganizationInvite[] @relation("OrgInviteInvitee")
 
   // Stage 11.2：企业认证审核
-  organizationsReviewed    Organization[]         @relation("OrgVerificationReviewer")
+  organizationsReviewed Organization[] @relation("OrgVerificationReviewer")
 
   @@index([status])
   @@index([role])
@@ -364,25 +364,25 @@ model ChannelMember {
 // ═════════════════════════════════════════════════════════════════
 
 model Post {
-  id            String   @id @default(cuid())
-  channelId     String   @map("channel_id")
-  authorId      String   @map("author_id")
+  id             String   @id @default(cuid())
+  channelId      String   @map("channel_id")
+  authorId       String   @map("author_id")
   // Stage 11.3：企业身份发布。null = 个人身份。非空时表示「以企业身份发帖」，
   // 卡片/详情页主标识切换为企业，但 authorId 仍指向真实操作者，便于审计/通知/对账。
-  organizationId String? @map("organization_id")
-  title         String
-  content       String
-  type          PostType @default(DISCUSSION)
-  videoUrl      String?  @map("video_url")
-  imageUrl      String?  @map("image_url")
-  views         Int      @default(0)
-  likeCount     Int      @default(0) @map("like_count")
-  commentCount  Int      @default(0) @map("comment_count")
-  bookmarkCount Int      @default(0) @map("bookmark_count")
-  pinned        Boolean  @default(false)
-  locked        Boolean  @default(false)
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  organizationId String?  @map("organization_id")
+  title          String
+  content        String
+  type           PostType @default(DISCUSSION)
+  videoUrl       String?  @map("video_url")
+  imageUrl       String?  @map("image_url")
+  views          Int      @default(0)
+  likeCount      Int      @default(0) @map("like_count")
+  commentCount   Int      @default(0) @map("comment_count")
+  bookmarkCount  Int      @default(0) @map("bookmark_count")
+  pinned         Boolean  @default(false)
+  locked         Boolean  @default(false)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   channel      Channel       @relation(fields: [channelId], references: [id], onDelete: Cascade)
   author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -429,28 +429,28 @@ model Comment {
 // ═════════════════════════════════════════════════════════════════
 
 model Work {
-  id            String       @id @default(cuid())
-  authorId      String       @map("author_id")
+  id             String       @id @default(cuid())
+  authorId       String       @map("author_id")
   // Stage 11.3：企业身份发布作品
-  organizationId String?     @map("organization_id")
-  title         String
-  description   String?
-  videoUrl      String       @map("video_url")
-  thumbnailUrl  String?      @map("thumbnail_url")
-  category      WorkCategory @default(STORY)
-  tools         String[]     @default([])
-  model         WorkModel    @default(SEEDANCE_2_0)
-  mode          WorkMode     @default(TEXT_TO_VIDEO)
-  prompt        String?
-  durationSec   Int?         @map("duration_sec")
-  resolution    String?
-  ratio         String?
-  views         Int          @default(0)
-  likeCount     Int          @default(0) @map("like_count")
-  bookmarkCount Int          @default(0) @map("bookmark_count")
-  isPublic      Boolean      @default(true) @map("is_public")
-  createdAt     DateTime     @default(now()) @map("created_at")
-  updatedAt     DateTime     @updatedAt @map("updated_at")
+  organizationId String?      @map("organization_id")
+  title          String
+  description    String?
+  videoUrl       String       @map("video_url")
+  thumbnailUrl   String?      @map("thumbnail_url")
+  category       WorkCategory @default(STORY)
+  tools          String[]     @default([])
+  model          WorkModel    @default(SEEDANCE_2_0)
+  mode           WorkMode     @default(TEXT_TO_VIDEO)
+  prompt         String?
+  durationSec    Int?         @map("duration_sec")
+  resolution     String?
+  ratio          String?
+  views          Int          @default(0)
+  likeCount      Int          @default(0) @map("like_count")
+  bookmarkCount  Int          @default(0) @map("bookmark_count")
+  isPublic       Boolean      @default(true) @map("is_public")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
 
   author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
   organization Organization? @relation("OrgWorks", fields: [organizationId], references: [id], onDelete: SetNull)
@@ -469,23 +469,23 @@ model Work {
 // ═════════════════════════════════════════════════════════════════
 
 model Collaboration {
-  id          String                @id @default(cuid())
-  authorId    String                @map("author_id")
+  id             String                @id @default(cuid())
+  authorId       String                @map("author_id")
   // Stage 11.3：企业身份发布合作。常见用例：企业 HR 招募 / 团队接单。
-  organizationId String?            @map("organization_id")
-  title       String
-  description String
-  type        CollaborationType     @default(LOOKING_FOR)
-  category    CollaborationCategory @default(OTHER)
-  workMode    CollaborationWorkMode @default(PROJECT) @map("work_mode")
-  location    CollaborationLocation @default(REMOTE)
-  status      CollaborationStatus   @default(OPEN)
-  budget      String?
-  contact     String?
-  deadline    DateTime?
-  tags        String[]
-  createdAt   DateTime              @default(now()) @map("created_at")
-  updatedAt   DateTime              @updatedAt @map("updated_at")
+  organizationId String?               @map("organization_id")
+  title          String
+  description    String
+  type           CollaborationType     @default(LOOKING_FOR)
+  category       CollaborationCategory @default(OTHER)
+  workMode       CollaborationWorkMode @default(PROJECT) @map("work_mode")
+  location       CollaborationLocation @default(REMOTE)
+  status         CollaborationStatus   @default(OPEN)
+  budget         String?
+  contact        String?
+  deadline       DateTime?
+  tags           String[]
+  createdAt      DateTime              @default(now()) @map("created_at")
+  updatedAt      DateTime              @updatedAt @map("updated_at")
 
   author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
   organization Organization? @relation("OrgCollaborations", fields: [organizationId], references: [id], onDelete: SetNull)
@@ -532,7 +532,7 @@ model ToolRating {
   id        String   @id @default(cuid())
   toolId    String   @map("tool_id")
   userId    String   @map("user_id")
-  stars     Int      // 1-5；上层校验
+  stars     Int // 1-5；上层校验
   comment   String?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -548,25 +548,25 @@ model ToolRating {
 
 /// 工作流商品（用户可上架/售卖 ComfyUI / 节点图 / Prompt 包等）
 model WorkflowItem {
-  id          String             @id @default(cuid())
-  sellerId    String             @map("seller_id")
+  id             String             @id @default(cuid())
+  sellerId       String             @map("seller_id")
   // Stage 11.3：以企业身份上架商品。收款仍记到 sellerId（操作者），
   // 卡片/详情页主标识切换为企业，结算单 Payout 仍按 sellerId 计入个人收益。
   // MVP 暂不做「企业账户结算」，只做「企业品牌展示」。
-  organizationId String?         @map("organization_id")
-  title       String
-  description String
-  coverUrl    String?            @map("cover_url")
-  downloadUrl String?            @map("download_url")
-  priceCents  Int                @default(0) @map("price_cents")
-  currency    String             @default("CNY")
-  category    String
-  tags        String[]           @default([])
-  toolStack   String[]           @default([]) @map("tool_stack")
-  salesCount  Int                @default(0) @map("sales_count")
-  status      WorkflowItemStatus @default(DRAFT)
-  createdAt   DateTime           @default(now()) @map("created_at")
-  updatedAt   DateTime           @updatedAt @map("updated_at")
+  organizationId String?            @map("organization_id")
+  title          String
+  description    String
+  coverUrl       String?            @map("cover_url")
+  downloadUrl    String?            @map("download_url")
+  priceCents     Int                @default(0) @map("price_cents")
+  currency       String             @default("CNY")
+  category       String
+  tags           String[]           @default([])
+  toolStack      String[]           @default([]) @map("tool_stack")
+  salesCount     Int                @default(0) @map("sales_count")
+  status         WorkflowItemStatus @default(DRAFT)
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
 
   seller       User          @relation("WorkflowItemSeller", fields: [sellerId], references: [id], onDelete: Cascade)
   organization Organization? @relation("OrgWorkflowItems", fields: [organizationId], references: [id], onDelete: SetNull)
@@ -854,28 +854,28 @@ model Subscription {
 }
 
 model Order {
-  id             String         @id @default(cuid())
-  userId         String         @map("user_id")
-  orderNo        String         @unique @map("order_no")
-  type           OrderType
-  status         OrderStatus    @default(PENDING)
-  amountCents    Int            @map("amount_cents")
-  currency       String         @default("CNY")
-  planId         String?        @map("plan_id")
-  workflowItemId String?        @map("workflow_item_id")
-  paymentMethod  PaymentMethod? @map("payment_method")
+  id              String         @id @default(cuid())
+  userId          String         @map("user_id")
+  orderNo         String         @unique @map("order_no")
+  type            OrderType
+  status          OrderStatus    @default(PENDING)
+  amountCents     Int            @map("amount_cents")
+  currency        String         @default("CNY")
+  planId          String?        @map("plan_id")
+  workflowItemId  String?        @map("workflow_item_id")
+  paymentMethod   PaymentMethod? @map("payment_method")
   // 阶段 10：支付凭据与退款
-  transactionId    String?  @map("transaction_id")    // 第三方支付订单号
-  callbackPayload  Json?    @map("callback_payload")  // 验签后保存的回调原文
-  paidAt           DateTime? @map("paid_at")
-  expiresAt        DateTime? @map("expires_at")       // 订单超时时间，超过自动 CANCELED
-  refundCents      Int       @default(0) @map("refund_cents") // 累计退款金额（分），支持部分退款
-  refundReason     String?   @map("refund_reason")
-  refundedAt       DateTime? @map("refunded_at")
-  refundedById     String?   @map("refunded_by_id")   // 操作退款的 admin id
-  metadata         Json?
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  transactionId   String?        @map("transaction_id") // 第三方支付订单号
+  callbackPayload Json?          @map("callback_payload") // 验签后保存的回调原文
+  paidAt          DateTime?      @map("paid_at")
+  expiresAt       DateTime?      @map("expires_at") // 订单超时时间，超过自动 CANCELED
+  refundCents     Int            @default(0) @map("refund_cents") // 累计退款金额（分），支持部分退款
+  refundReason    String?        @map("refund_reason")
+  refundedAt      DateTime?      @map("refunded_at")
+  refundedById    String?        @map("refunded_by_id") // 操作退款的 admin id
+  metadata        Json?
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
 
   user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan         MembershipPlan? @relation(fields: [planId], references: [id])
@@ -918,21 +918,21 @@ model Payout {
   id               String       @id @default(cuid())
   orderId          String       @unique @map("order_id")
   sellerId         String       @map("seller_id")
-  grossCents       Int          @map("gross_cents")           // 订单金额
-  platformFeeCents Int          @map("platform_fee_cents")    // 平台抽成
-  netCents         Int          @map("net_cents")             // 实际可结算
+  grossCents       Int          @map("gross_cents") // 订单金额
+  platformFeeCents Int          @map("platform_fee_cents") // 平台抽成
+  netCents         Int          @map("net_cents") // 实际可结算
   currency         String       @default("CNY")
   status           PayoutStatus @default(PENDING)
-  availableAt      DateTime     @map("available_at")          // 确认期结束时间
+  availableAt      DateTime     @map("available_at") // 确认期结束时间
   // Stage 10.5：提现申请
-  requestedAt      DateTime?    @map("requested_at")          // 卖家点「申请提现」时间；与 AVAILABLE 一同筛选可看出待处理队列
+  requestedAt      DateTime?    @map("requested_at") // 卖家点「申请提现」时间；与 AVAILABLE 一同筛选可看出待处理队列
   // Stage 10.5：admin 标记打款时的快照
   paidAt           DateTime?    @map("paid_at")
-  paidById         String?      @map("paid_by_id")            // 操作 admin id
-  paidMethod       String?      @map("paid_method")           // 打款时快照（ALIPAY / WECHAT_PAY / BANK）
-  paidAccount      String?      @map("paid_account")          // 打款时快照账号
-  paidName         String?      @map("paid_name")             // 打款时快照姓名
-  paidNote         String?      @map("paid_note")             // admin 备注（流水号 / 备忘）
+  paidById         String?      @map("paid_by_id") // 操作 admin id
+  paidMethod       String?      @map("paid_method") // 打款时快照（ALIPAY / WECHAT_PAY / BANK）
+  paidAccount      String?      @map("paid_account") // 打款时快照账号
+  paidName         String?      @map("paid_name") // 打款时快照姓名
+  paidNote         String?      @map("paid_note") // admin 备注（流水号 / 备忘）
   metadata         Json?
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @updatedAt @map("updated_at")
@@ -951,13 +951,13 @@ model Payout {
 // ═════════════════════════════════════════════════════════════════
 
 model Organization {
-  id          String   @id @default(cuid())
-  slug        String   @unique
+  id          String  @id @default(cuid())
+  slug        String  @unique
   name        String
   description String?
   logo        String?
   website     String?
-  isVerified  Boolean  @default(false) @map("is_verified")
+  isVerified  Boolean @default(false) @map("is_verified")
 
   // Stage 11.1：基础企业属性 + 创建者
   ownerId      String  @map("owner_id")
@@ -967,31 +967,31 @@ model Organization {
 
   // Stage 11.2：企业认证。verificationStatus 与 isVerified 由审核动作同步：APPROVED ⇒ isVerified=true，
   // 其他状态对 isVerified 不做隐式修改（admin 可手动改）。提交资料字段为 nullable，未提交时为空。
-  verificationStatus     OrgVerificationStatus @default(NONE) @map("verification_status")
-  verificationName       String?               @map("verification_name")        // 营业执照上的法定企业名称
-  verificationRegNo      String?               @map("verification_reg_no")      // 统一社会信用代码 / 注册号
-  verificationRep        String?               @map("verification_rep")         // 法定代表人姓名
-  verificationLicenseUrl String?               @map("verification_license_url") // 营业执照扫描件 URL
-  verificationContact    String?               @map("verification_contact")     // 申请方联系电话 / 邮箱
-  verificationNote       String?               @map("verification_note")        // 申请方补充说明
-  verificationReviewNote String?               @map("verification_review_note") // 管理员审核结论 / 驳回原因
-  verificationSubmittedAt DateTime?            @map("verification_submitted_at")
-  verificationReviewedAt  DateTime?            @map("verification_reviewed_at")
-  verificationReviewedBy  String?              @map("verification_reviewed_by")
+  verificationStatus      OrgVerificationStatus @default(NONE) @map("verification_status")
+  verificationName        String?               @map("verification_name") // 营业执照上的法定企业名称
+  verificationRegNo       String?               @map("verification_reg_no") // 统一社会信用代码 / 注册号
+  verificationRep         String?               @map("verification_rep") // 法定代表人姓名
+  verificationLicenseUrl  String?               @map("verification_license_url") // 营业执照扫描件 URL
+  verificationContact     String?               @map("verification_contact") // 申请方联系电话 / 邮箱
+  verificationNote        String?               @map("verification_note") // 申请方补充说明
+  verificationReviewNote  String?               @map("verification_review_note") // 管理员审核结论 / 驳回原因
+  verificationSubmittedAt DateTime?             @map("verification_submitted_at")
+  verificationReviewedAt  DateTime?             @map("verification_reviewed_at")
+  verificationReviewedBy  String?               @map("verification_reviewed_by")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  owner            User                 @relation("OrganizationOwner", fields: [ownerId], references: [id])
-  verificationAdmin User?               @relation("OrgVerificationReviewer", fields: [verificationReviewedBy], references: [id])
-  members          OrganizationMember[]
-  invites          OrganizationInvite[]
+  owner             User                 @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  verificationAdmin User?                @relation("OrgVerificationReviewer", fields: [verificationReviewedBy], references: [id])
+  members           OrganizationMember[]
+  invites           OrganizationInvite[]
 
   // Stage 11.3：企业归属的内容（以企业身份发布）
-  posts            Post[]               @relation("OrgPosts")
-  works            Work[]               @relation("OrgWorks")
-  collaborations   Collaboration[]      @relation("OrgCollaborations")
-  workflowItems    WorkflowItem[]       @relation("OrgWorkflowItems")
+  posts          Post[]          @relation("OrgPosts")
+  works          Work[]          @relation("OrgWorks")
+  collaborations Collaboration[] @relation("OrgCollaborations")
+  workflowItems  WorkflowItem[]  @relation("OrgWorkflowItems")
 
   @@index([ownerId])
   @@index([verificationStatus, verificationSubmittedAt])
