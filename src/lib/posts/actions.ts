@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
 import { CreatePostSchema } from "@/lib/posts/schemas";
+import { resolveOrgAttribution } from "@/lib/organizations/content-attribution";
+import { AppError } from "@/lib/errors";
 import type { PostType } from "@/generated/prisma/client";
 
 export type CreatePostFormState = {
@@ -42,13 +44,15 @@ export async function createPostAction(
     content: formData.get("content"),
     videoUrl: formData.get("videoUrl"),
     imageUrl: formData.get("imageUrl"),
+    organizationId: formData.get("organizationId"),
   });
 
   if (!parsed.success) {
     return { ok: false, fieldErrors: flattenZodError(parsed.error) };
   }
 
-  const { channelId, type, title, content, videoUrl, imageUrl } = parsed.data;
+  const { channelId, type, title, content, videoUrl, imageUrl, organizationId } =
+    parsed.data;
 
   const channel = await prisma.channel.findUnique({
     where: { id: channelId },
@@ -61,10 +65,25 @@ export async function createPostAction(
     };
   }
 
+  let resolvedOrgId: string | null;
+  try {
+    resolvedOrgId = await resolveOrgAttribution(session.userId, organizationId);
+  } catch (err) {
+    if (err instanceof AppError) {
+      return {
+        ok: false,
+        message: err.message,
+        fieldErrors: { organizationId: [err.message] },
+      };
+    }
+    throw err;
+  }
+
   const created = await prisma.post.create({
     data: {
       channelId,
       authorId: session.userId,
+      organizationId: resolvedOrgId,
       title,
       content,
       type: type as PostType,

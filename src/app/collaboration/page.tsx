@@ -61,6 +61,9 @@ async function getCollaborations(
           industryRole: true,
         },
       },
+      organization: {
+        select: { id: true, slug: true, name: true, logo: true, isVerified: true },
+      },
     },
     take: 80,
   });
@@ -125,6 +128,7 @@ export default async function CollaborationPage({
     tags: r.tags,
     createdAt: r.createdAt,
     author: r.author,
+    organization: r.organization,
   }));
 
   const totalForCategory = activeCategory

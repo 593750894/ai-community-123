@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import {
   Building2,
   Globe2,
+  LayoutGrid,
   Mail,
   Settings as SettingsIcon,
   Users,
@@ -15,6 +16,7 @@ import {
   getOrganizationBySlug,
   getViewerMembership,
 } from "@/lib/organizations/queries";
+import { getOrganizationContentCounts } from "@/lib/organizations/content-attribution";
 import {
   ORG_INDUSTRY_LABEL,
   ORG_ROLE_LABEL,
@@ -35,11 +37,14 @@ export default async function OrganizationDetailPage({ params }: PageProps) {
   ]);
   if (!org) notFound();
 
-  const membership = session
-    ? await getViewerMembership(org.id, session.userId)
-    : null;
+  const [membership, contentCounts] = await Promise.all([
+    session ? getViewerMembership(org.id, session.userId) : Promise.resolve(null),
+    getOrganizationContentCounts(org.id),
+  ]);
   const canManage =
     membership && (membership.role === "OWNER" || membership.role === "ADMIN");
+  const totalContent =
+    contentCounts.posts + contentCounts.works + contentCounts.collaborations + contentCounts.workflowItems;
 
   return (
     <div className="px-4 py-5 sm:px-8 sm:py-6">
@@ -86,9 +91,21 @@ export default async function OrganizationDetailPage({ params }: PageProps) {
               )}
               {org.size && <span>规模 · {org.size}</span>}
               <span>成员 · {org._count.members}</span>
+              <span>发布 · {totalContent}</span>
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
+            {totalContent > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                nativeButton={false}
+                render={<Link href={`/organizations/${org.slug}/feed`} />}
+              >
+                <LayoutGrid className="size-3.5" />
+                企业内容
+              </Button>
+            )}
             {membership ? (
               <Button
                 size="sm"

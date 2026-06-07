@@ -9,6 +9,10 @@ import {
   LikeButton,
 } from "@/components/feed/interaction-buttons";
 import { ReportButton } from "@/components/reports/report-button";
+import {
+  OrgAttributionBadge,
+  type OrgAttribution,
+} from "@/components/publish/org-attribution-badge";
 
 const ROLE_META: Record<string, { label: string; icon: typeof Shield; className: string } | undefined> = {
   MOD: { label: "版主", icon: Shield, className: "text-blue-400" },
@@ -42,6 +46,7 @@ export type PostCardData = {
     icon: string | null;
     color: string;
   };
+  organization?: OrgAttribution | null;
 };
 
 export function PostCard({
@@ -159,6 +164,7 @@ export function PostCard({
               </span>
             );
           })()}
+          {post.organization && <OrgAttributionBadge org={post.organization} size="xs" />}
         </div>
         <div className="ml-auto flex items-center gap-2.5 tabular-nums">
           <span className="inline-flex items-center gap-1 text-muted-foreground/60">

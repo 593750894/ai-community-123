@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth/guard";
 import { ValidationError } from "@/lib/errors";
 import { success, created, error } from "@/lib/response";
 import { CreateCollaborationSchema } from "@/lib/collaborations/schemas";
+import { resolveOrgAttribution } from "@/lib/organizations/content-attribution";
 import { parsePagination, paginatedResponse } from "@/lib/pagination";
 import { COLLAB_CATEGORY_VALUES, COLLAB_STATUS_VALUES, COLLAB_TYPE_VALUES } from "@/lib/collaborations/categories";
 
@@ -44,6 +45,9 @@ export async function GET(request: Request) {
           author: {
             select: { id: true, username: true, name: true, avatar: true },
           },
+          organization: {
+            select: { id: true, slug: true, name: true, logo: true, isVerified: true },
+          },
         },
       }),
       prisma.collaboration.count({ where }),
@@ -64,11 +68,15 @@ export async function POST(request: Request) {
       throw new ValidationError("参数校验失败", parsed.error.flatten().fieldErrors);
     }
 
-    const { category, type, workMode, location, title, description, budget, contact, tags } = parsed.data;
+    const { category, type, workMode, location, title, description, budget, contact, tags, organizationId } =
+      parsed.data;
+
+    const resolvedOrgId = await resolveOrgAttribution(user.id, organizationId);
 
     const collaboration = await prisma.collaboration.create({
       data: {
         authorId: user.id,
+        organizationId: resolvedOrgId,
         category,
         type,
         workMode,
@@ -82,6 +90,9 @@ export async function POST(request: Request) {
       include: {
         author: {
           select: { id: true, username: true, name: true, avatar: true },
+        },
+        organization: {
+          select: { id: true, slug: true, name: true, logo: true, isVerified: true },
         },
       },
     });

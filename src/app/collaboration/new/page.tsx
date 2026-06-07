@@ -5,11 +5,13 @@ import { requireUser } from "@/lib/auth/guard";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { CreateCollaborationForm } from "@/components/feed/create-collaboration-form";
+import { listMyPostableOrganizations } from "@/lib/organizations/content-attribution";
 
 export const dynamic = "force-dynamic";
 
 export default async function CollaborationNewPage() {
   const user = await requireUser("/collaboration/new");
+  const organizations = await listMyPostableOrganizations(user.id);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -39,7 +41,7 @@ export default async function CollaborationNewPage() {
             </span>
           </div>
           <div className="rounded-2xl border border-border/60 bg-card/30 p-6 sm:p-8">
-            <CreateCollaborationForm />
+            <CreateCollaborationForm organizations={organizations} />
           </div>
         </div>
       </div>

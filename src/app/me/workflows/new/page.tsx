@@ -4,11 +4,13 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { WorkflowItemForm } from "@/components/commerce/workflow-item-form";
 import { requireUser } from "@/lib/auth/guard";
+import { listMyPostableOrganizations } from "@/lib/organizations/content-attribution";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewWorkflowItemPage() {
-  await requireUser("/me/workflows/new");
+  const user = await requireUser("/me/workflows/new");
+  const organizations = await listMyPostableOrganizations(user.id);
 
   return (
     <>
@@ -29,7 +31,7 @@ export default async function NewWorkflowItemPage() {
       />
       <div className="px-4 py-6 sm:px-8 sm:py-8">
         <div className="surface-card mx-auto max-w-3xl p-6">
-          <WorkflowItemForm />
+          <WorkflowItemForm organizations={organizations} />
         </div>
       </div>
     </>

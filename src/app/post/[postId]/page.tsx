@@ -19,6 +19,7 @@ import {
   LikeButton,
 } from "@/components/feed/interaction-buttons";
 import { ReportButton } from "@/components/reports/report-button";
+import { OrgAttributionBadge } from "@/components/publish/org-attribution-badge";
 import { getCurrentUser } from "@/lib/auth/session";
 import { collectCommentIds, getCommentThread } from "@/lib/comments/queries";
 import { prisma } from "@/lib/db";
@@ -48,6 +49,9 @@ async function getPost(postId: string) {
       },
       channel: {
         select: { id: true, name: true, slug: true, icon: true, color: true },
+      },
+      organization: {
+        select: { id: true, slug: true, name: true, logo: true, isVerified: true },
       },
     },
   });
@@ -204,6 +208,9 @@ export default async function PostDetailPage({
                       : ""}
                   </div>
                 </div>
+                {post.organization && (
+                  <OrgAttributionBadge org={post.organization} size="xs" />
+                )}
               </div>
               <div className="ml-auto flex items-center gap-2 tabular-nums">
                 <span className="inline-flex items-center gap-1">

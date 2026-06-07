@@ -365,6 +365,9 @@ model Post {
   id            String   @id @default(cuid())
   channelId     String   @map("channel_id")
   authorId      String   @map("author_id")
+  // Stage 11.3：企业身份发布。null = 个人身份。非空时表示「以企业身份发帖」，
+  // 卡片/详情页主标识切换为企业，但 authorId 仍指向真实操作者，便于审计/通知/对账。
+  organizationId String? @map("organization_id")
   title         String
   content       String
   type          PostType @default(DISCUSSION)
@@ -379,16 +382,18 @@ model Post {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  channel   Channel    @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  comments  Comment[]
-  likes     Like[]
-  bookmarks Bookmark[]
+  channel      Channel       @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  organization Organization? @relation("OrgPosts", fields: [organizationId], references: [id], onDelete: SetNull)
+  comments     Comment[]
+  likes        Like[]
+  bookmarks    Bookmark[]
 
   @@index([channelId, createdAt])
   @@index([channelId, pinned, createdAt])
   @@index([authorId])
   @@index([type])
+  @@index([organizationId, createdAt])
   @@map("posts")
 }
 
@@ -424,6 +429,8 @@ model Comment {
 model Work {
   id            String       @id @default(cuid())
   authorId      String       @map("author_id")
+  // Stage 11.3：企业身份发布作品
+  organizationId String?     @map("organization_id")
   title         String
   description   String?
   videoUrl      String       @map("video_url")
@@ -443,13 +450,15 @@ model Work {
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
 
-  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  likes     Like[]
-  bookmarks Bookmark[]
+  author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  organization Organization? @relation("OrgWorks", fields: [organizationId], references: [id], onDelete: SetNull)
+  likes        Like[]
+  bookmarks    Bookmark[]
 
   @@index([authorId])
   @@index([createdAt])
   @@index([category])
+  @@index([organizationId, createdAt])
   @@map("works")
 }
 
@@ -460,6 +469,8 @@ model Work {
 model Collaboration {
   id          String                @id @default(cuid())
   authorId    String                @map("author_id")
+  // Stage 11.3：企业身份发布合作。常见用例：企业 HR 招募 / 团队接单。
+  organizationId String?            @map("organization_id")
   title       String
   description String
   type        CollaborationType     @default(LOOKING_FOR)
@@ -474,11 +485,13 @@ model Collaboration {
   createdAt   DateTime              @default(now()) @map("created_at")
   updatedAt   DateTime              @updatedAt @map("updated_at")
 
-  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  organization Organization? @relation("OrgCollaborations", fields: [organizationId], references: [id], onDelete: SetNull)
 
   @@index([status, createdAt])
   @@index([category])
   @@index([type])
+  @@index([organizationId, createdAt])
   @@map("collaborations")
 }
 
@@ -535,6 +548,10 @@ model ToolRating {
 model WorkflowItem {
   id          String             @id @default(cuid())
   sellerId    String             @map("seller_id")
+  // Stage 11.3：以企业身份上架商品。收款仍记到 sellerId（操作者），
+  // 卡片/详情页主标识切换为企业，结算单 Payout 仍按 sellerId 计入个人收益。
+  // MVP 暂不做「企业账户结算」，只做「企业品牌展示」。
+  organizationId String?         @map("organization_id")
   title       String
   description String
   coverUrl    String?            @map("cover_url")
@@ -549,12 +566,14 @@ model WorkflowItem {
   createdAt   DateTime           @default(now()) @map("created_at")
   updatedAt   DateTime           @updatedAt @map("updated_at")
 
-  seller User    @relation("WorkflowItemSeller", fields: [sellerId], references: [id], onDelete: Cascade)
-  orders Order[]
+  seller       User          @relation("WorkflowItemSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  organization Organization? @relation("OrgWorkflowItems", fields: [organizationId], references: [id], onDelete: SetNull)
+  orders       Order[]
 
   @@index([sellerId])
   @@index([status, createdAt])
   @@index([category])
+  @@index([organizationId, createdAt])
   @@map("workflow_items")
 }
 
@@ -926,6 +945,12 @@ model Organization {
   verificationAdmin User?               @relation("OrgVerificationReviewer", fields: [verificationReviewedBy], references: [id])
   members          OrganizationMember[]
   invites          OrganizationInvite[]
+
+  // Stage 11.3：企业归属的内容（以企业身份发布）
+  posts            Post[]               @relation("OrgPosts")
+  works            Work[]               @relation("OrgWorks")
+  collaborations   Collaboration[]      @relation("OrgCollaborations")
+  workflowItems    WorkflowItem[]       @relation("OrgWorkflowItems")
 
   @@index([ownerId])
   @@index([verificationStatus, verificationSubmittedAt])

@@ -55,6 +55,14 @@ export interface PostOverview {
     icon: string | null;
     color: string;
   };
+  /** Stage 11.3：以企业身份发布时携带企业归属，UI 上展示企业徽章 + V badge。 */
+  organization: {
+    id: string;
+    slug: string;
+    name: string;
+    logo: string | null;
+    isVerified: boolean;
+  } | null;
 }
 
 // ---------- Creator ----------

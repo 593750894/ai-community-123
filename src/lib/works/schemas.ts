@@ -18,6 +18,16 @@ const optionalUrl = z
   .or(z.literal(""))
   .transform((v) => (v && v.length > 0 ? v : null));
 
+/** Stage 11.3：企业身份发布。详见 src/lib/posts/schemas.ts 同名字段。 */
+const orgAttribution = z
+  .string()
+  .trim()
+  .max(64)
+  .optional()
+  .or(z.literal(""))
+  .or(z.null())
+  .transform((v) => (v && v !== "PERSONAL" ? v : null));
+
 export const CreateWorkSchema = z.object({
   title: z
     .string()
@@ -50,6 +60,7 @@ export const CreateWorkSchema = z.object({
       }
       return Array.from(seen).slice(0, 10);
     }),
+  organizationId: orgAttribution,
 });
 
 export type CreateWorkInput = z.infer<typeof CreateWorkSchema>;

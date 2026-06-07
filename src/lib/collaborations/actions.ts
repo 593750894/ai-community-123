@@ -9,6 +9,8 @@ import {
   CreateCollaborationSchema,
   UpdateCollabStatusSchema,
 } from "@/lib/collaborations/schemas";
+import { resolveOrgAttribution } from "@/lib/organizations/content-attribution";
+import { AppError } from "@/lib/errors";
 import type {
   CollaborationCategory,
   CollaborationLocation,
@@ -54,6 +56,7 @@ export async function createCollaborationAction(
     budget: formData.get("budget"),
     contact: formData.get("contact"),
     tags: formData.get("tags"),
+    organizationId: formData.get("organizationId"),
   });
 
   if (!parsed.success) {
@@ -70,11 +73,27 @@ export async function createCollaborationAction(
     budget,
     contact,
     tags,
+    organizationId,
   } = parsed.data;
+
+  let resolvedOrgId: string | null;
+  try {
+    resolvedOrgId = await resolveOrgAttribution(session.userId, organizationId);
+  } catch (err) {
+    if (err instanceof AppError) {
+      return {
+        ok: false,
+        message: err.message,
+        fieldErrors: { organizationId: [err.message] },
+      };
+    }
+    throw err;
+  }
 
   const created = await prisma.collaboration.create({
     data: {
       authorId: session.userId,
+      organizationId: resolvedOrgId,
       title,
       description,
       type: type as CollaborationType,

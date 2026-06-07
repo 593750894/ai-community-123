@@ -6,6 +6,10 @@ import { FormError, FormField } from "@/components/ui/field";
 import { Input, Textarea } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/loading";
 import { MediaUploader } from "@/components/uploads/media-uploader";
+import {
+  PublishAsSelector,
+  type PublishOrgOption,
+} from "@/components/publish/publish-as-selector";
 import { cn } from "@/lib/utils";
 import {
   WORK_CATEGORY_META,
@@ -34,7 +38,13 @@ const COMMON_TOOLS = [
   "ElevenLabs",
 ];
 
-export function CreateWorkForm() {
+export function CreateWorkForm({
+  organizations = [],
+  defaultOrgId,
+}: {
+  organizations?: PublishOrgOption[];
+  defaultOrgId?: string | null;
+} = {}) {
   const [state, action, pending] = useActionState(createWorkAction, initial);
   const [selectedCategory, setSelectedCategory] =
     useState<WorkCategoryValue>("STORY");
@@ -59,6 +69,11 @@ export function CreateWorkForm() {
 
   return (
     <form action={action} className="space-y-5">
+      <PublishAsSelector
+        organizations={organizations}
+        defaultOrgId={defaultOrgId}
+      />
+
       <FormField
         label="作品类型"
         required

@@ -15,6 +15,7 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { WorkCard, type Work } from "@/components/feed/work-card";
+import { OrgAttributionBadge } from "@/components/publish/org-attribution-badge";
 import {
   BookmarkButton,
   LikeButton,
@@ -44,6 +45,9 @@ async function getWork(workId: string) {
           bio: true,
           industryRole: true,
         },
+      },
+      organization: {
+        select: { id: true, slug: true, name: true, logo: true, isVerified: true },
       },
     },
   });
@@ -379,6 +383,14 @@ export default async function WorkDetailPage({
             >
               查看作者主页 →
             </Link>
+            {work.organization && (
+              <div className="mt-3 border-t border-border/40 pt-3">
+                <p className="mb-1.5 text-[11px] uppercase tracking-wide text-muted-foreground/80">
+                  企业发布
+                </p>
+                <OrgAttributionBadge org={work.organization} size="sm" />
+              </div>
+            )}
           </section>
 
           {/* 互动数据 */}

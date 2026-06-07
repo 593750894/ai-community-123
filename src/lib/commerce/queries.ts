@@ -56,6 +56,16 @@ const LIST_SELECT = {
       avatar: true,
     },
   },
+  // Stage 11.3：企业归属（null = 个人卖家身份）
+  organization: {
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      logo: true,
+      isVerified: true,
+    },
+  },
 } as const;
 
 // ───────────────────────── MembershipPlan ─────────────────────────

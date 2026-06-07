@@ -34,6 +34,7 @@ import {
 } from "@/lib/collaborations/categories";
 import { authorTintFromName } from "@/lib/work-categories";
 import { updateCollaborationStatusAction } from "@/lib/collaborations/actions";
+import { OrgAttributionBadge } from "@/components/publish/org-attribution-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,9 @@ async function getCollaboration(id: string) {
           industryRole: true,
           contact: true,
         },
+      },
+      organization: {
+        select: { id: true, slug: true, name: true, logo: true, isVerified: true },
       },
     },
   });
@@ -360,6 +364,14 @@ export default async function CollaborationDetailPage({
             >
               查看 {collab.author.name} 主页 →
             </Link>
+            {collab.organization && (
+              <div className="mt-3 border-t border-border/40 pt-3">
+                <p className="mb-1.5 text-[11px] uppercase tracking-wide text-muted-foreground/80">
+                  企业发布
+                </p>
+                <OrgAttributionBadge org={collab.organization} size="sm" />
+              </div>
+            )}
           </section>
 
           {/* 提示 */}

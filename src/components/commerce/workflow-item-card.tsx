@@ -10,6 +10,10 @@ import {
   type WorkflowItemCategory,
   type WorkflowItemStatusValue,
 } from "@/lib/commerce/schemas";
+import {
+  OrgAttributionBadge,
+  type OrgAttribution,
+} from "@/components/publish/org-attribution-badge";
 
 export interface WorkflowItemCardProps {
   item: {
@@ -30,6 +34,7 @@ export interface WorkflowItemCardProps {
       name: string;
       avatar: string | null;
     };
+    organization?: OrgAttribution | null;
   };
   /** 卖家自己看时显示 DRAFT/ARCHIVED 状态徽章，公共场不显示。 */
   showStatus?: boolean;
@@ -102,14 +107,19 @@ export function WorkflowItemCard({
             </div>
           )}
 
-          <div className="mt-auto flex items-center justify-between border-t border-border/40 pt-2 text-xs">
-            <span className="text-muted-foreground">
-              by{" "}
-              <span className="text-foreground/80">
-                @{item.seller.username}
+          <div className="mt-auto flex items-center justify-between gap-2 border-t border-border/40 pt-2 text-xs">
+            <div className="flex min-w-0 flex-1 items-center gap-1.5 text-muted-foreground">
+              <span className="truncate">
+                by{" "}
+                <span className="text-foreground/80">
+                  @{item.seller.username}
+                </span>
               </span>
-            </span>
-            <span className="inline-flex items-center gap-1 font-semibold text-primary">
+              {item.organization && (
+                <OrgAttributionBadge org={item.organization} size="xs" />
+              )}
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-1 font-semibold text-primary">
               <Coins className="size-3" />
               {formatPrice(item.priceCents, item.currency)}
             </span>

@@ -31,6 +31,9 @@ async function getWorks(category?: WorkCategoryValue) {
       author: {
         select: { id: true, name: true, username: true, avatar: true },
       },
+      organization: {
+        select: { id: true, slug: true, name: true, logo: true, isVerified: true },
+      },
     },
     take: 60,
   });
@@ -86,6 +89,7 @@ export default async function ShowcasePage({
     ratio: (w.ratio as Work["ratio"]) ?? "16:9",
     author: w.author.name,
     authorId: w.author.id,
+    organization: w.organization,
   }));
 
   return (

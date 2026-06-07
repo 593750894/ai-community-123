@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth/guard";
 import { ValidationError } from "@/lib/errors";
 import { success, created, error } from "@/lib/response";
 import { CreatePostSchema } from "@/lib/posts/schemas";
+import { resolveOrgAttribution } from "@/lib/organizations/content-attribution";
 import { parsePagination, paginatedResponse } from "@/lib/pagination";
 import { POST_TYPE_VALUES } from "@/lib/post-types";
 
@@ -41,6 +42,9 @@ export async function GET(request: Request) {
           channel: {
             select: { id: true, slug: true, name: true, icon: true, color: true },
           },
+          organization: {
+            select: { id: true, slug: true, name: true, logo: true, isVerified: true },
+          },
         },
       }),
       prisma.post.count({ where }),
@@ -61,7 +65,8 @@ export async function POST(request: Request) {
       throw new ValidationError("参数校验失败", parsed.error.flatten().fieldErrors);
     }
 
-    const { channelId, type, title, content, videoUrl, imageUrl } = parsed.data;
+    const { channelId, type, title, content, videoUrl, imageUrl, organizationId } =
+      parsed.data;
 
     const channel = await prisma.channel.findUnique({
       where: { id: channelId },
@@ -71,10 +76,13 @@ export async function POST(request: Request) {
       throw new ValidationError("频道不存在");
     }
 
+    const resolvedOrgId = await resolveOrgAttribution(user.id, organizationId);
+
     const post = await prisma.post.create({
       data: {
         channelId,
         authorId: user.id,
+        organizationId: resolvedOrgId,
         type,
         title,
         content,
@@ -87,6 +95,9 @@ export async function POST(request: Request) {
         },
         channel: {
           select: { id: true, slug: true, name: true, icon: true, color: true },
+        },
+        organization: {
+          select: { id: true, slug: true, name: true, logo: true, isVerified: true },
         },
       },
     });

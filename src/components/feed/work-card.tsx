@@ -12,6 +12,10 @@ import {
   LikeButton,
 } from "@/components/feed/interaction-buttons";
 import { ReportButton } from "@/components/reports/report-button";
+import {
+  OrgAttributionBadge,
+  type OrgAttribution,
+} from "@/components/publish/org-attribution-badge";
 
 // 兼容旧 demo 字段（页面上仍有 mock 占位），同时支持新的 DB 字段。
 export type Work = {
@@ -40,6 +44,7 @@ export type Work = {
   model?: string;
   tag?: string;
   ratio?: "16:9" | "9:16" | "1:1";
+  organization?: OrgAttribution | null;
 };
 
 function formatDuration(sec?: number | null, fallback?: string): string {
@@ -162,6 +167,7 @@ export function WorkCard({
               <span className="truncate text-primary/80">{work.model}</span>
             </>
           )}
+          {work.organization && <OrgAttributionBadge org={work.organization} size="xs" />}
         </div>
 
         {work.tools && work.tools.length > 0 && (

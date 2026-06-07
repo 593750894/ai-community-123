@@ -6,6 +6,10 @@ import { FormError, FormField } from "@/components/ui/field";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/loading";
 import { MediaUploader } from "@/components/uploads/media-uploader";
+import {
+  PublishAsSelector,
+  type PublishOrgOption,
+} from "@/components/publish/publish-as-selector";
 import { cn } from "@/lib/utils";
 import {
   POST_TYPE_META,
@@ -29,9 +33,13 @@ export type ChannelOption = {
 export function CreatePostForm({
   channels,
   defaultChannelId,
+  organizations = [],
+  defaultOrgId,
 }: {
   channels: ChannelOption[];
   defaultChannelId?: string;
+  organizations?: PublishOrgOption[];
+  defaultOrgId?: string | null;
 }) {
   const [state, action, pending] = useActionState(createPostAction, initial);
   const [selectedType, setSelectedType] = useState<PostTypeValue>("DISCUSSION");
@@ -46,6 +54,11 @@ export function CreatePostForm({
 
   return (
     <form action={action} className="space-y-5">
+      <PublishAsSelector
+        organizations={organizations}
+        defaultOrgId={defaultOrgId}
+      />
+
       <FormField
         label="频道"
         htmlFor="channelId"

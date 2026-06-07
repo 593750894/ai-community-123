@@ -2,6 +2,10 @@ import "server-only";
 
 import { prisma } from "@/lib/db";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
+import {
+  assertOrgPostingPermission,
+  resolveOrgAttribution,
+} from "@/lib/organizations/content-attribution";
 
 import {
   CreateWorkflowItemSchema,
@@ -26,9 +30,11 @@ export async function createWorkflowItem(
   sellerId: string,
 ): Promise<{ id: string }> {
   const data = CreateWorkflowItemSchema.parse(input);
+  const resolvedOrgId = await resolveOrgAttribution(sellerId, data.organizationId);
   const created = await prisma.workflowItem.create({
     data: {
       sellerId,
+      organizationId: resolvedOrgId,
       title: data.title,
       description: data.description,
       coverUrl: data.coverUrl ?? null,
@@ -59,6 +65,14 @@ export async function updateWorkflowItem(
   if (existing.sellerId !== sellerId) {
     throw new ForbiddenError("只能编辑自己的商品");
   }
+  // Stage 11.3：允许在编辑时切换企业归属（含「切回个人」= organizationId=null）。
+  // 只有当请求里显式带了 organizationId 字段（非 undefined）才参与更新。
+  let attributionPatch: { organizationId: string | null } | Record<string, never> = {};
+  if (data.organizationId !== undefined) {
+    const resolved = await resolveOrgAttribution(sellerId, data.organizationId);
+    attributionPatch = { organizationId: resolved };
+  }
+
   await prisma.workflowItem.update({
     where: { id },
     data: {
@@ -71,6 +85,7 @@ export async function updateWorkflowItem(
       ...(data.category !== undefined ? { category: data.category } : {}),
       ...(data.tags !== undefined ? { tags: data.tags } : {}),
       ...(data.toolStack !== undefined ? { toolStack: data.toolStack } : {}),
+      ...attributionPatch,
     },
   });
 }
@@ -88,6 +103,7 @@ export async function transitionWorkflowItemStatus(
       status: true,
       priceCents: true,
       downloadUrl: true,
+      organizationId: true,
     },
   });
   if (!existing) throw new NotFoundError("商品");
@@ -102,6 +118,11 @@ export async function transitionWorkflowItemStatus(
     }
     if (existing.priceCents <= 0) {
       throw new ValidationError("上架前必须设置价格（>0）");
+    }
+    // Stage 11.3 安全：草稿可能在卖家以企业身份预存后、被踢出企业再上架的情况下
+    // 把内容公开打上企业品牌。这里在上架闸口再校验一次组织归属是否仍有效。
+    if (existing.organizationId) {
+      await assertOrgPostingPermission(sellerId, existing.organizationId);
     }
   }
 

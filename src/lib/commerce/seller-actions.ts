@@ -56,6 +56,7 @@ function parseFormPayload(formData: FormData) {
     category: get("category"),
     tags,
     toolStack,
+    organizationId: get("organizationId") || null,
   };
 }
 

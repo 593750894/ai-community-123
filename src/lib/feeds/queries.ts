@@ -26,6 +26,9 @@ const WORK_BASE_SELECT = {
   bookmarkCount: true,
   createdAt: true,
   author: { select: WORK_AUTHOR_SELECT },
+  organization: {
+    select: { id: true, slug: true, name: true, logo: true, isVerified: true },
+  },
 } as const;
 
 export type FeedWorkRow = {
@@ -47,6 +50,13 @@ export type FeedWorkRow = {
     username: string;
     avatar: string | null;
   };
+  organization: {
+    id: string;
+    slug: string;
+    name: string;
+    logo: string | null;
+    isVerified: boolean;
+  } | null;
 };
 
 /**

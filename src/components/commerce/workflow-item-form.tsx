@@ -11,6 +11,10 @@ import {
   WORKFLOW_ITEM_CATEGORIES,
   WORKFLOW_ITEM_CATEGORY_LABEL,
 } from "@/lib/commerce/schemas";
+import {
+  PublishAsSelector,
+  type PublishOrgOption,
+} from "@/components/publish/publish-as-selector";
 
 interface Defaults {
   id?: string;
@@ -22,11 +26,18 @@ interface Defaults {
   category?: string;
   tags?: string[];
   toolStack?: string[];
+  organizationId?: string | null;
 }
 
 const INITIAL: SellerActionState = {};
 
-export function WorkflowItemForm({ defaults }: { defaults?: Defaults }) {
+export function WorkflowItemForm({
+  defaults,
+  organizations = [],
+}: {
+  defaults?: Defaults;
+  organizations?: PublishOrgOption[];
+}) {
   const isEdit = Boolean(defaults?.id);
   const [state, action, pending] = useActionState(
     isEdit ? updateWorkflowItemAction : createWorkflowItemAction,
@@ -43,6 +54,14 @@ export function WorkflowItemForm({ defaults }: { defaults?: Defaults }) {
       {isEdit && defaults?.id && (
         <input type="hidden" name="id" value={defaults.id} />
       )}
+
+      <PublishAsSelector
+        organizations={organizations}
+        defaultOrgId={defaults?.organizationId ?? null}
+        label="销售身份"
+        hint="以企业身份上架时商品卡展示企业品牌；销售款项仍按个人账户结算。"
+      />
+
 
       {state.message && (
         <div

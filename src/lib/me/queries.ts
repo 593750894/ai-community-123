@@ -56,6 +56,9 @@ export async function getMeDashboard(userId: string): Promise<MeDashboardData> {
         author: {
           select: { id: true, name: true, username: true, avatar: true },
         },
+        organization: {
+          select: { id: true, slug: true, name: true, logo: true, isVerified: true },
+        },
       },
     }),
     prisma.post.findMany({
@@ -68,6 +71,9 @@ export async function getMeDashboard(userId: string): Promise<MeDashboardData> {
         },
         channel: {
           select: { id: true, name: true, slug: true, icon: true, color: true },
+        },
+        organization: {
+          select: { id: true, slug: true, name: true, logo: true, isVerified: true },
         },
       },
     }),
@@ -117,6 +123,9 @@ export async function getMyWorks(args: {
       include: {
         author: {
           select: { id: true, name: true, username: true, avatar: true },
+        },
+        organization: {
+          select: { id: true, slug: true, name: true, logo: true, isVerified: true },
         },
       },
     }),
@@ -187,12 +196,30 @@ export async function getMyLikes(args: {
                 color: true,
               },
             },
+            organization: {
+              select: {
+                id: true,
+                slug: true,
+                name: true,
+                logo: true,
+                isVerified: true,
+              },
+            },
           },
         },
         work: {
           include: {
             author: {
               select: { id: true, name: true, username: true, avatar: true },
+            },
+            organization: {
+              select: {
+                id: true,
+                slug: true,
+                name: true,
+                logo: true,
+                isVerified: true,
+              },
             },
           },
         },
@@ -264,12 +291,30 @@ export async function getMyBookmarks(args: {
                 color: true,
               },
             },
+            organization: {
+              select: {
+                id: true,
+                slug: true,
+                name: true,
+                logo: true,
+                isVerified: true,
+              },
+            },
           },
         },
         work: {
           include: {
             author: {
               select: { id: true, name: true, username: true, avatar: true },
+            },
+            organization: {
+              select: {
+                id: true,
+                slug: true,
+                name: true,
+                logo: true,
+                isVerified: true,
+              },
             },
           },
         },
@@ -313,6 +358,13 @@ type WorkRow = {
   ratio: string | null;
   model: string;
   author: { id: string; name: string; username: string; avatar: string | null };
+  organization?: {
+    id: string;
+    slug: string;
+    name: string;
+    logo: string | null;
+    isVerified: boolean;
+  } | null;
 };
 
 function toWorkCard(w: WorkRow): Work {
@@ -329,6 +381,7 @@ function toWorkCard(w: WorkRow): Work {
     ratio: (w.ratio as Work["ratio"]) ?? "16:9",
     author: w.author.name,
     authorId: w.author.id,
+    organization: w.organization ?? null,
   };
 }
 
@@ -359,6 +412,13 @@ type PostRow = {
     icon: string | null;
     color: string;
   };
+  organization?: {
+    id: string;
+    slug: string;
+    name: string;
+    logo: string | null;
+    isVerified: boolean;
+  } | null;
 };
 
 function toPostCard(p: PostRow): PostCardData {
@@ -377,5 +437,6 @@ function toPostCard(p: PostRow): PostCardData {
     createdAt: p.createdAt,
     author: p.author,
     channel: p.channel,
+    organization: p.organization ?? null,
   };
 }

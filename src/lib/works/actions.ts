@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
 import { CreateWorkSchema } from "@/lib/works/schemas";
+import { resolveOrgAttribution } from "@/lib/organizations/content-attribution";
+import { AppError } from "@/lib/errors";
 import type { WorkCategory } from "@/generated/prisma/client";
 
 export type CreateWorkFormState = {
@@ -42,18 +44,34 @@ export async function createWorkAction(
     videoUrl: formData.get("videoUrl"),
     category: formData.get("category"),
     tools: formData.get("tools"),
+    organizationId: formData.get("organizationId"),
   });
 
   if (!parsed.success) {
     return { ok: false, fieldErrors: flattenZodError(parsed.error) };
   }
 
-  const { title, description, thumbnailUrl, videoUrl, category, tools } =
+  const { title, description, thumbnailUrl, videoUrl, category, tools, organizationId } =
     parsed.data;
+
+  let resolvedOrgId: string | null;
+  try {
+    resolvedOrgId = await resolveOrgAttribution(session.userId, organizationId);
+  } catch (err) {
+    if (err instanceof AppError) {
+      return {
+        ok: false,
+        message: err.message,
+        fieldErrors: { organizationId: [err.message] },
+      };
+    }
+    throw err;
+  }
 
   const created = await prisma.work.create({
     data: {
       authorId: session.userId,
+      organizationId: resolvedOrgId,
       title,
       description,
       thumbnailUrl,

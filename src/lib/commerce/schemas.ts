@@ -78,6 +78,17 @@ export const CreateWorkflowItemSchema = z.object({
     .array(z.string().trim().min(1).max(40))
     .max(10, "最多 10 个工具")
     .default([]),
+  /**
+   * Stage 11.3：企业身份上架。null = 个人卖家身份。
+   * 注意：销售款仍记到 sellerId（操作者），企业身份只做品牌展示。
+   */
+  organizationId: z
+    .string()
+    .trim()
+    .max(64)
+    .nullable()
+    .optional()
+    .transform((v) => (v && v !== "PERSONAL" ? v : null)),
 });
 export type CreateWorkflowItemInput = z.infer<typeof CreateWorkflowItemSchema>;
 

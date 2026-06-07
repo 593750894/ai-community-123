@@ -5,6 +5,10 @@ import { useActionState, useState } from "react";
 import { FormError, FormField } from "@/components/ui/field";
 import { Input, Textarea } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/loading";
+import {
+  PublishAsSelector,
+  type PublishOrgOption,
+} from "@/components/publish/publish-as-selector";
 import { cn } from "@/lib/utils";
 import {
   COLLAB_CATEGORY_META,
@@ -43,7 +47,13 @@ const SUGGESTED_BUDGETS = [
   "面议",
 ];
 
-export function CreateCollaborationForm() {
+export function CreateCollaborationForm({
+  organizations = [],
+  defaultOrgId,
+}: {
+  organizations?: PublishOrgOption[];
+  defaultOrgId?: string | null;
+} = {}) {
   const [state, action, pending] = useActionState(createCollaborationAction, initial);
   const [category, setCategory] = useState<CollabCategoryValue>("AI_VIDEO_TEAM");
   const [workMode, setWorkMode] = useState<CollabWorkModeValue>("PROJECT");
@@ -63,6 +73,12 @@ export function CreateCollaborationForm() {
 
   return (
     <form action={action} className="space-y-5">
+      <PublishAsSelector
+        organizations={organizations}
+        defaultOrgId={defaultOrgId}
+        hint="以企业身份发布合作时，将展示企业品牌，便于建立信任。"
+      />
+
       <FormField
         label="合作类型"
         required

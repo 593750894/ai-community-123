@@ -7,6 +7,7 @@ import {
   notifyOrgInviteResponse,
   notifyOrgMemberRemoved,
 } from "@/lib/notifications/emit";
+import { revokeOrgAttributionForUser } from "@/lib/organizations/content-attribution";
 import {
   CreateOrganizationSchema,
   InviteMemberSchema,
@@ -345,6 +346,12 @@ export async function removeMember(args: {
     },
   });
 
+  // Stage 11.3：移除成员后，把这位用户在该企业名下的全部内容卸下品牌
+  // （organizationId → null）。保留 authorId / sellerId 不动。失败不阻断主流程。
+  void revokeOrgAttributionForUser(args.targetUserId, org.id).catch(() => {
+    /* 后续可加 audit 但不影响 remove 的原子性 */
+  });
+
   void notifyOrgMemberRemoved({
     memberId: args.targetUserId,
     actorId: args.actorId,
@@ -372,6 +379,10 @@ export async function leaveOrganization(args: {
     where: {
       organizationId_userId: { organizationId: args.organizationId, userId: args.userId },
     },
+  });
+  // Stage 11.3：主动退出后，把这位用户在该企业名下的全部内容卸下品牌。
+  void revokeOrgAttributionForUser(args.userId, args.organizationId).catch(() => {
+    /* 不阻断退出流程 */
   });
 }
 

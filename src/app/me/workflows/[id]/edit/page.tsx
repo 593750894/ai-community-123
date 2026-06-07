@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { WorkflowItemForm } from "@/components/commerce/workflow-item-form";
 import { requireUser } from "@/lib/auth/guard";
 import { getMyWorkflowItem } from "@/lib/commerce/queries";
+import { listMyPostableOrganizations } from "@/lib/organizations/content-attribution";
 import {
   WORKFLOW_ITEM_STATUS_LABEL,
   formatPrice,
@@ -34,7 +35,10 @@ export default async function EditWorkflowItemPage({
   const { id } = await params;
   if (!CUID_RE.test(id)) notFound();
   const user = await requireUser(`/me/workflows/${id}/edit`);
-  const item = await getMyWorkflowItem(id, user.id);
+  const [item, organizations] = await Promise.all([
+    getMyWorkflowItem(id, user.id),
+    listMyPostableOrganizations(user.id),
+  ]);
   if (!item) notFound();
 
   const { created } = await searchParams;
@@ -68,6 +72,7 @@ export default async function EditWorkflowItemPage({
       <div className="grid gap-6 px-4 py-6 sm:px-8 sm:py-8 lg:grid-cols-[1fr_320px]">
         <div className="surface-card p-6">
           <WorkflowItemForm
+            organizations={organizations}
             defaults={{
               id: item.id,
               title: item.title,
@@ -78,6 +83,7 @@ export default async function EditWorkflowItemPage({
               category: item.category,
               tags: item.tags,
               toolStack: item.toolStack,
+              organizationId: item.organization?.id ?? null,
             }}
           />
         </div>

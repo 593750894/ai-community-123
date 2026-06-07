@@ -37,6 +37,10 @@ const postSelect = {
   channel: {
     select: { id: true, name: true, slug: true, icon: true, color: true },
   },
+  // Stage 11.3：企业归属
+  organization: {
+    select: { id: true, slug: true, name: true, logo: true, isVerified: true },
+  },
 } as const;
 
 // ---------- Community overview queries ----------
@@ -209,6 +213,7 @@ function toPostOverview(post: Awaited<ReturnType<typeof getLatestPosts>>[number]
       : (post.createdAt instanceof Date ? post.createdAt : new Date(post.createdAt)).toISOString(),
     author: post.author as PostOverview["author"],
     channel: post.channel!,
+    organization: post.organization ?? null,
   };
 }
 

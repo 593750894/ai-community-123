@@ -242,6 +242,7 @@ function toWorkProp(row: FeedWorkRow): Work {
     ratio: ((row.ratio as Work["ratio"]) ?? "16:9"),
     author: row.author.name,
     authorId: row.author.id,
+    organization: row.organization,
   };
 }
 
@@ -381,6 +382,9 @@ async function FollowingFeed({ userId }: { userId: string | null }) {
       channel: {
         select: { id: true, name: true, slug: true, icon: true, color: true },
       },
+      organization: {
+        select: { id: true, slug: true, name: true, logo: true, isVerified: true },
+      },
     },
   });
 
@@ -399,6 +403,7 @@ async function FollowingFeed({ userId }: { userId: string | null }) {
     createdAt: p.createdAt,
     author: p.author,
     channel: p.channel,
+    organization: p.organization,
   }));
 
   if (posts.length === 0) {

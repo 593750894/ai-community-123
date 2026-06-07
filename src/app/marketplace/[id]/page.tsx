@@ -14,6 +14,7 @@ import {
   formatPrice,
   type WorkflowItemCategory,
 } from "@/lib/commerce/schemas";
+import { OrgAttributionBadge } from "@/components/publish/org-attribution-badge";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -181,6 +182,15 @@ export default async function WorkflowItemDetailPage({ params }: PageProps) {
               </div>
             </div>
           </Link>
+
+          {item.organization && (
+            <div className="surface-card space-y-2 p-4">
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                由企业上架
+              </p>
+              <OrgAttributionBadge org={item.organization} size="sm" />
+            </div>
+          )}
         </aside>
       </div>
     </>

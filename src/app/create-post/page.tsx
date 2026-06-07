@@ -8,6 +8,7 @@ import {
   CreatePostForm,
   type ChannelOption,
 } from "@/components/feed/create-post-form";
+import { listMyPostableOrganizations } from "@/lib/organizations/content-attribution";
 import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -28,8 +29,11 @@ export default async function CreatePostPage({
   const next = channelId
     ? `/create-post?channelId=${channelId}`
     : "/create-post";
-  await requireUser(next);
-  const channels = await getChannelOptions();
+  const user = await requireUser(next);
+  const [channels, organizations] = await Promise.all([
+    getChannelOptions(),
+    listMyPostableOrganizations(user.id),
+  ]);
   const defaultChannelId =
     channelId && channels.some((c) => c.id === channelId)
       ? channelId
@@ -59,6 +63,7 @@ export default async function CreatePostPage({
           <CreatePostForm
             channels={channels}
             defaultChannelId={defaultChannelId}
+            organizations={organizations}
           />
         </div>
       </div>

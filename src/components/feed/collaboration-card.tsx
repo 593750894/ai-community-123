@@ -20,6 +20,10 @@ import {
 } from "@/lib/collaborations/categories";
 import { authorTintFromName } from "@/lib/work-categories";
 import { ReportButton } from "@/components/reports/report-button";
+import {
+  OrgAttributionBadge,
+  type OrgAttribution,
+} from "@/components/publish/org-attribution-badge";
 
 export type CollabCardItem = {
   id: string;
@@ -39,6 +43,7 @@ export type CollabCardItem = {
     avatar: string | null;
     industryRole?: string | null;
   };
+  organization?: OrgAttribution | null;
 };
 
 function formatRelative(date: Date | string): string {
@@ -182,6 +187,9 @@ export function CollaborationCard({
               <span className="truncate text-[11px] text-muted-foreground">
                 {item.author.name}
               </span>
+              {item.organization && (
+                <OrgAttributionBadge org={item.organization} size="xs" />
+              )}
             </div>
           </div>
         </div>

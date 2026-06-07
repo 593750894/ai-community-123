@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth/guard";
 import { ValidationError } from "@/lib/errors";
 import { success, created, error } from "@/lib/response";
 import { CreateWorkSchema } from "@/lib/works/schemas";
+import { resolveOrgAttribution } from "@/lib/organizations/content-attribution";
 import { parsePagination, paginatedResponse } from "@/lib/pagination";
 import { WORK_CATEGORY_VALUES } from "@/lib/work-categories";
 
@@ -40,6 +41,9 @@ export async function GET(request: Request) {
           author: {
             select: { id: true, username: true, name: true, avatar: true },
           },
+          organization: {
+            select: { id: true, slug: true, name: true, logo: true, isVerified: true },
+          },
         },
       }),
       prisma.work.count({ where }),
@@ -60,11 +64,15 @@ export async function POST(request: Request) {
       throw new ValidationError("参数校验失败", parsed.error.flatten().fieldErrors);
     }
 
-    const { title, description, thumbnailUrl, videoUrl, category, tools } = parsed.data;
+    const { title, description, thumbnailUrl, videoUrl, category, tools, organizationId } =
+      parsed.data;
+
+    const resolvedOrgId = await resolveOrgAttribution(user.id, organizationId);
 
     const work = await prisma.work.create({
       data: {
         authorId: user.id,
+        organizationId: resolvedOrgId,
         title,
         description,
         thumbnailUrl,
@@ -75,6 +83,9 @@ export async function POST(request: Request) {
       include: {
         author: {
           select: { id: true, username: true, name: true, avatar: true },
+        },
+        organization: {
+          select: { id: true, slug: true, name: true, logo: true, isVerified: true },
         },
       },
     });

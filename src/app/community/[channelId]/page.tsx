@@ -42,6 +42,13 @@ function toPostCard(p: {
   pinned: boolean;
   createdAt: string;
   author: { id: string; name: string; username: string; avatar: string | null; role: string };
+  organization?: {
+    id: string;
+    slug: string;
+    name: string;
+    logo: string | null;
+    isVerified: boolean;
+  } | null;
 }): PostCardData {
   return {
     id: p.id,
@@ -63,6 +70,7 @@ function toPostCard(p: {
       avatar: p.author.avatar,
       role: p.author.role as PostCardData["author"]["role"],
     },
+    organization: p.organization ?? null,
   };
 }
 

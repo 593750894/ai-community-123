@@ -53,6 +53,15 @@ export const CreateCollaborationSchema = z.object({
       }
       return Array.from(seen).slice(0, 8);
     }),
+  /** Stage 11.3：企业身份发布。详见 src/lib/posts/schemas.ts 同名字段。 */
+  organizationId: z
+    .string()
+    .trim()
+    .max(64)
+    .optional()
+    .or(z.literal(""))
+    .or(z.null())
+    .transform((v) => (v && v !== "PERSONAL" ? v : null)),
 });
 
 export type CreateCollaborationInput = z.infer<typeof CreateCollaborationSchema>;
