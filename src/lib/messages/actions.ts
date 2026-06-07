@@ -10,6 +10,7 @@ import {
   StartConversationSchema,
 } from "@/lib/messages/schemas";
 import { findDirectConversation } from "@/lib/messages/queries";
+import { buildMessagePreview, inferMessageType } from "@/lib/messages/preview";
 import { notifyMessage } from "@/lib/notifications/emit";
 
 export type SendMessageFormState = {
@@ -107,15 +108,30 @@ export async function sendMessageAction(
     return { ok: false, message: "请先登录后再发送消息" };
   }
 
+  // 附件以 JSON 字符串形式藏在 formData.attachments；空字符串视作 []。
+  const rawAttachments = formData.get("attachments");
+  let attachments: unknown = [];
+  if (typeof rawAttachments === "string" && rawAttachments.length > 0) {
+    try {
+      attachments = JSON.parse(rawAttachments);
+    } catch {
+      return { ok: false, message: "附件数据无法解析" };
+    }
+  }
+
   const parsed = SendMessageSchema.safeParse({
     conversationId: formData.get("conversationId"),
-    content: formData.get("content"),
+    content: formData.get("content") ?? "",
+    attachments,
   });
   if (!parsed.success) {
     return { ok: false, fieldErrors: flattenZodError(parsed.error) };
   }
 
-  const { conversationId, content } = parsed.data;
+  const { conversationId, content, attachments: parsedAttachments } =
+    parsed.data;
+  const type = inferMessageType(parsedAttachments);
+  const preview = buildMessagePreview(content, parsedAttachments);
 
   // 鉴权：必须是会话参与者
   const membership = await prisma.conversationParticipant.findUnique({
@@ -138,6 +154,11 @@ export async function sendMessageAction(
         conversationId,
         senderId: session.userId,
         content,
+        type,
+        attachments:
+          parsedAttachments.length > 0
+            ? (parsedAttachments as unknown as object)
+            : undefined,
       },
       select: { id: true },
     }),
@@ -164,7 +185,7 @@ export async function sendMessageAction(
     conversationId,
     messageId: message.id,
     actorId: session.userId,
-    preview: content,
+    preview,
   });
 
   return {

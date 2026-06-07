@@ -1,8 +1,10 @@
 import {
   ALLOWED_IMAGE_MIME,
+  ALLOWED_MESSAGE_ATTACHMENT_MIME,
   ALLOWED_VIDEO_MIME,
   getMaxSize,
   isImageMime,
+  isMessageAttachmentMime,
   isVideoMime,
   UPLOAD_KIND,
   type UploadKind,
@@ -40,17 +42,25 @@ interface SignResponse {
   error?: { code: string; message: string; details?: unknown };
 }
 
+function mimeExtLabel(mimes: Record<string, string>): string {
+  return Array.from(new Set(Object.values(mimes)))
+    .map((ext) => ext.toUpperCase())
+    .join(" / ");
+}
+
 /** 在选文件后立即做客户端检查，省一次往返。 */
 export function precheckFile(kind: UploadKind, file: File): string | null {
   if (kind === UPLOAD_KIND.IMAGE && !isImageMime(file.type)) {
-    return `图片格式必须是 ${Object.keys(ALLOWED_IMAGE_MIME)
-      .map((m) => m.split("/")[1].toUpperCase())
-      .join(" / ")}`;
+    return `图片格式必须是 ${mimeExtLabel(ALLOWED_IMAGE_MIME)}`;
   }
   if (kind === UPLOAD_KIND.VIDEO && !isVideoMime(file.type)) {
-    return `视频格式必须是 ${Object.keys(ALLOWED_VIDEO_MIME)
-      .map((m) => m.split("/")[1].toUpperCase())
-      .join(" / ")}`;
+    return `视频格式必须是 ${mimeExtLabel(ALLOWED_VIDEO_MIME)}`;
+  }
+  if (
+    kind === UPLOAD_KIND.MESSAGE_ATTACHMENT &&
+    !isMessageAttachmentMime(file.type)
+  ) {
+    return `附件格式必须是 ${mimeExtLabel(ALLOWED_MESSAGE_ATTACHMENT_MIME)}`;
   }
   const max = getMaxSize(kind);
   if (file.size > max) {

@@ -4,15 +4,41 @@ import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { success, created, error } from "@/lib/response";
 import { parsePagination, paginatedResponse } from "@/lib/pagination";
 import { notifyMessage } from "@/lib/notifications/emit";
+import {
+  buildMessagePreview,
+  inferMessageType,
+} from "@/lib/messages/preview";
+import {
+  MESSAGE_ATTACHMENT_MAX_COUNT,
+  MESSAGE_CONTENT_MAX,
+  MessageAttachmentSchema,
+} from "@/lib/messages/schemas";
 import { z } from "zod";
 
-const SendMessageBodySchema = z.object({
-  content: z
-    .string()
-    .trim()
-    .min(1, "消息不能为空")
-    .max(4000, "消息最多 4000 个字符"),
-});
+const SendMessageBodySchema = z
+  .object({
+    content: z
+      .string()
+      .trim()
+      .max(MESSAGE_CONTENT_MAX, `消息最多 ${MESSAGE_CONTENT_MAX} 个字符`)
+      .default(""),
+    attachments: z
+      .array(MessageAttachmentSchema)
+      .max(
+        MESSAGE_ATTACHMENT_MAX_COUNT,
+        `单条消息最多 ${MESSAGE_ATTACHMENT_MAX_COUNT} 个附件`,
+      )
+      .default([]),
+  })
+  .superRefine((val, ctx) => {
+    if (val.content.length === 0 && val.attachments.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "消息或附件至少需要一项",
+        path: ["content"],
+      });
+    }
+  });
 
 async function getConversationAndVerify(conversationId: string, userId: string) {
   const conversation = await prisma.conversation.findUnique({
@@ -83,6 +109,10 @@ export async function POST(
 
     await getConversationAndVerify(conversationId, user.id);
 
+    const { content, attachments } = parsed.data;
+    const type = inferMessageType(attachments);
+    const preview = buildMessagePreview(content, attachments);
+
     const now = new Date();
 
     const [message] = await prisma.$transaction([
@@ -90,7 +120,12 @@ export async function POST(
         data: {
           conversationId,
           senderId: user.id,
-          content: parsed.data.content,
+          content,
+          type,
+          attachments:
+            attachments.length > 0
+              ? (attachments as unknown as object)
+              : undefined,
         },
         include: {
           sender: {
@@ -108,7 +143,7 @@ export async function POST(
       conversationId,
       messageId: message.id,
       actorId: user.id,
-      preview: parsed.data.content,
+      preview,
     });
 
     return created(message, "发送成功");

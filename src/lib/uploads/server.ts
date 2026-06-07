@@ -2,11 +2,13 @@ import { AwsClient } from "aws4fetch";
 
 import {
   ALLOWED_IMAGE_MIME,
+  ALLOWED_MESSAGE_ATTACHMENT_MIME,
   ALLOWED_VIDEO_MIME,
   getExtension,
   getMaxSize,
   getR2Config,
   isImageMime,
+  isMessageAttachmentMime,
   isVideoMime,
   UPLOAD_KIND,
   type UploadKind,
@@ -49,6 +51,12 @@ function todaySegment(): string {
   return `${y}/${m}/${d}`;
 }
 
+/** Stage 12.3：把 kind 映射成 R2 object key 前缀；message_attachment 单独一个桶下目录。 */
+function kindPrefix(kind: UploadKind): string {
+  if (kind === UPLOAD_KIND.MESSAGE_ATTACHMENT) return "messages";
+  return kind; // "image" | "video"
+}
+
 export class UploadValidationError extends Error {
   code = "UPLOAD_VALIDATION";
   details: Record<string, string[]>;
@@ -74,8 +82,12 @@ export function validateUploadRequest(input: SignUploadInput): {
 } {
   const errors: Record<string, string[]> = {};
 
-  if (input.kind !== UPLOAD_KIND.IMAGE && input.kind !== UPLOAD_KIND.VIDEO) {
-    errors.kind = [`kind 必须是 image 或 video`];
+  if (
+    input.kind !== UPLOAD_KIND.IMAGE &&
+    input.kind !== UPLOAD_KIND.VIDEO &&
+    input.kind !== UPLOAD_KIND.MESSAGE_ATTACHMENT
+  ) {
+    errors.kind = [`kind 必须是 image / video / message_attachment`];
   }
 
   if (input.kind === UPLOAD_KIND.IMAGE && !isImageMime(input.mime)) {
@@ -86,6 +98,14 @@ export function validateUploadRequest(input: SignUploadInput): {
   if (input.kind === UPLOAD_KIND.VIDEO && !isVideoMime(input.mime)) {
     errors.mime = [
       `视频格式必须是 ${Object.keys(ALLOWED_VIDEO_MIME).join(" / ")}`,
+    ];
+  }
+  if (
+    input.kind === UPLOAD_KIND.MESSAGE_ATTACHMENT &&
+    !isMessageAttachmentMime(input.mime)
+  ) {
+    errors.mime = [
+      `附件格式必须是 ${Object.keys(ALLOWED_MESSAGE_ATTACHMENT_MIME).join(" / ")}`,
     ];
   }
 
@@ -126,7 +146,7 @@ export async function signUploadUrl(
     );
   }
 
-  const objectKey = `${input.kind}/${todaySegment()}/${input.userId}/${randomKey()}.${ext}`;
+  const objectKey = `${kindPrefix(input.kind)}/${todaySegment()}/${input.userId}/${randomKey()}.${ext}`;
 
   const client = new AwsClient({
     accessKeyId: config.accessKeyId,

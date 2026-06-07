@@ -5,6 +5,7 @@ import { ArrowLeft, Settings2, UserRound, Users } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { MessageComposer } from "@/components/feed/message-composer";
+import { MessageAttachments } from "@/components/messages/message-attachments";
 import { getSession } from "@/lib/auth/session";
 import {
   getConversationForUser,
@@ -143,6 +144,24 @@ export default async function ConversationDetailPage({
                     !prev || !isSameDay(prev.createdAt, m.createdAt);
                   const self = m.senderId === session.userId;
                   const sender = senderMap.get(m.senderId) ?? null;
+                  const hasAttachments =
+                    Array.isArray(m.attachments) && m.attachments.length > 0;
+
+                  if (m.type === "SYSTEM") {
+                    return (
+                      <div key={m.id} className="space-y-2">
+                        {showDate && (
+                          <div className="text-center text-[11px] text-muted-foreground">
+                            {DATE_FMT.format(m.createdAt)}
+                          </div>
+                        )}
+                        <div className="mx-auto max-w-md rounded-full border border-border/40 bg-muted/30 px-3 py-1 text-center text-[11px] text-muted-foreground">
+                          {m.content || "系统消息"}
+                        </div>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div key={m.id} className="space-y-2">
                       {showDate && (
@@ -167,26 +186,39 @@ export default async function ConversationDetailPage({
                             </span>
                           ))}
                         <div
-                          className={`max-w-md whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-sm ${
+                          className={`flex max-w-md flex-col gap-2 break-words rounded-2xl px-3 py-2 text-sm ${
                             self
                               ? "rounded-tr-sm bg-primary text-primary-foreground"
                               : "rounded-tl-sm bg-card/70 text-foreground/95"
                           }`}
                         >
                           {!self && isGroup && sender && (
-                            <div className="mb-1 text-[10px] font-medium text-primary/80">
+                            <div className="text-[10px] font-medium text-primary/80">
                               {sender.name}
                             </div>
                           )}
-                          {m.content}
+                          {m.content && (
+                            <div className="whitespace-pre-wrap">
+                              {m.content}
+                            </div>
+                          )}
+                          {hasAttachments && (
+                            <MessageAttachments
+                              attachments={m.attachments!}
+                              self={self}
+                            />
+                          )}
                           <div
-                            className={`mt-1 text-[10px] ${
+                            className={`text-[10px] ${
                               self
                                 ? "text-primary-foreground/70"
                                 : "text-muted-foreground"
                             }`}
                           >
                             {TIME_FMT.format(m.createdAt)}
+                            {m.editedAt && (
+                              <span className="ml-1 opacity-70">(已编辑)</span>
+                            )}
                           </div>
                         </div>
                       </div>

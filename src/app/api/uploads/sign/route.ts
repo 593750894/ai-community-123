@@ -20,7 +20,11 @@ const uploadLimiter = createRateLimiter({
 });
 
 const Schema = z.object({
-  kind: z.enum([UPLOAD_KIND.IMAGE, UPLOAD_KIND.VIDEO]),
+  kind: z.enum([
+    UPLOAD_KIND.IMAGE,
+    UPLOAD_KIND.VIDEO,
+    UPLOAD_KIND.MESSAGE_ATTACHMENT,
+  ]),
   mime: z.string().min(1).max(120),
   size: z.number().int().positive(),
   filename: z.string().max(200).optional(),

@@ -6,8 +6,33 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getSession } from "@/lib/auth/session";
-import { listConversationsForUser } from "@/lib/messages/queries";
+import {
+  listConversationsForUser,
+  type ConversationListItem,
+} from "@/lib/messages/queries";
+import { categorizeAttachment } from "@/lib/uploads/config";
 import { formatRelativeTime } from "@/lib/utils";
+
+function previewText(
+  last: NonNullable<ConversationListItem["lastMessage"]>,
+): string {
+  if (last.deletedAt) return "（消息已删除）";
+  if (last.type === "SYSTEM") return last.content || "系统消息";
+  if (last.type === "TEXT") return last.content;
+  // IMAGE / FILE：用首个附件类别打 label
+  const first = last.attachments?.[0];
+  if (!first) return last.content || "[附件]";
+  const cat = categorizeAttachment(first.mimeType);
+  const label =
+    cat === "image"
+      ? "[图片]"
+      : cat === "video"
+        ? "[视频]"
+        : cat === "audio"
+          ? "[语音]"
+          : "[文件]";
+  return last.content ? `${label} ${last.content}` : `${label} ${first.name}`;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -84,11 +109,9 @@ export default async function MessagesPage() {
                 ? `${c.participantCount} 位成员`
                 : (other?.industryRole ?? null);
               const preview = c.lastMessage
-                ? c.lastMessage.deletedAt
-                  ? "（消息已删除）"
-                  : c.lastMessage.senderId === session.userId
-                    ? `你: ${c.lastMessage.content}`
-                    : c.lastMessage.content
+                ? c.lastMessage.senderId === session.userId
+                  ? `你: ${previewText(c.lastMessage)}`
+                  : previewText(c.lastMessage)
                 : "暂无消息";
               return (
                 <li key={c.id}>

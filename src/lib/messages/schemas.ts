@@ -1,20 +1,79 @@
 import { z } from "zod";
 
+import { ALLOWED_MESSAGE_ATTACHMENT_MIME } from "@/lib/uploads/config";
+
 export const StartConversationSchema = z.object({
   targetUserId: z.string().min(1, "targetUserId 缺失"),
 });
 
-export const SendMessageSchema = z.object({
-  conversationId: z.string().min(1, "conversationId 缺失"),
-  content: z
+// ─────────────────────────────────────────────────────────────
+// Stage 12.3：消息附件 schema。
+// 同一条消息最多 9 个附件（与微信对齐）；content 在带附件时可为空。
+// 附件每条必须包含 url / name / mimeType / sizeBytes；image/video 可选带 width/height。
+// ─────────────────────────────────────────────────────────────
+
+export const MESSAGE_ATTACHMENT_MAX_COUNT = 9;
+export const MESSAGE_CONTENT_MAX = 4000;
+export const ATTACHMENT_NAME_MAX = 200;
+export const ATTACHMENT_URL_MAX = 2048;
+
+const ALLOWED_ATTACHMENT_MIMES = Object.keys(ALLOWED_MESSAGE_ATTACHMENT_MIME);
+
+export const MessageAttachmentSchema = z.object({
+  url: z
     .string()
     .trim()
-    .min(1, "消息不能为空")
-    .max(4000, "消息最多 4000 个字符"),
+    .url("附件 URL 非法")
+    .max(ATTACHMENT_URL_MAX, "附件 URL 过长"),
+  name: z
+    .string()
+    .trim()
+    .min(1, "附件名不能为空")
+    .max(ATTACHMENT_NAME_MAX, "附件名过长"),
+  mimeType: z
+    .string()
+    .trim()
+    .max(120)
+    .refine((m) => ALLOWED_ATTACHMENT_MIMES.includes(m), "附件 MIME 不在白名单"),
+  sizeBytes: z
+    .number()
+    .int("文件大小必须为整数")
+    .positive("文件大小无效")
+    .max(200 * 1024 * 1024, "文件超过 200MB 上限"),
+  width: z.number().int().positive().optional(),
+  height: z.number().int().positive().optional(),
 });
+
+export const MessageContentSchema = z
+  .string()
+  .trim()
+  .max(MESSAGE_CONTENT_MAX, `消息最多 ${MESSAGE_CONTENT_MAX} 个字符`);
+
+export const SendMessageSchema = z
+  .object({
+    conversationId: z.string().min(1, "conversationId 缺失"),
+    content: MessageContentSchema.default(""),
+    attachments: z
+      .array(MessageAttachmentSchema)
+      .max(
+        MESSAGE_ATTACHMENT_MAX_COUNT,
+        `单条消息最多 ${MESSAGE_ATTACHMENT_MAX_COUNT} 个附件`,
+      )
+      .default([]),
+  })
+  .superRefine((val, ctx) => {
+    if (val.content.length === 0 && val.attachments.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "消息或附件至少需要一项",
+        path: ["content"],
+      });
+    }
+  });
 
 export type StartConversationInput = z.infer<typeof StartConversationSchema>;
 export type SendMessageInput = z.infer<typeof SendMessageSchema>;
+export type MessageAttachmentInput = z.infer<typeof MessageAttachmentSchema>;
 
 // ─────────────────────────────────────────────────────────────
 // Stage 12.2：群聊 CRUD + 成员管理
