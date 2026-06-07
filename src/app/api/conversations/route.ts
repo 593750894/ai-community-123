@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth/guard";
 import { ValidationError } from "@/lib/errors";
 import { success, created, error } from "@/lib/response";
 import { StartConversationSchema } from "@/lib/messages/schemas";
+import { findDirectConversation } from "@/lib/messages/queries";
 import { parsePagination, paginatedResponse } from "@/lib/pagination";
 
 export async function GET(request: Request) {
@@ -72,30 +73,27 @@ export async function POST(request: Request) {
       throw new ValidationError("目标用户不存在");
     }
 
-    const existing = await prisma.conversation.findFirst({
-      where: {
-        AND: [
-          { participants: { some: { userId: user.id } } },
-          { participants: { some: { userId: targetUserId } } },
-        ],
-      },
-      include: {
-        participants: {
-          include: {
-            user: {
-              select: { id: true, username: true, name: true, avatar: true },
+    const existingMatch = await findDirectConversation(user.id, targetUserId);
+    if (existingMatch) {
+      const existing = await prisma.conversation.findUnique({
+        where: { id: existingMatch.id },
+        include: {
+          participants: {
+            include: {
+              user: {
+                select: { id: true, username: true, name: true, avatar: true },
+              },
             },
           },
         },
-      },
-    });
-
-    if (existing) {
+      });
       return success(existing, "会话已存在");
     }
 
     const conversation = await prisma.conversation.create({
       data: {
+        isGroup: false,
+        memberLimit: 2,
         participants: {
           create: [{ userId: user.id }, { userId: targetUserId }],
         },

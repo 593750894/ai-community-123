@@ -9,6 +9,7 @@ import {
   SendMessageSchema,
   StartConversationSchema,
 } from "@/lib/messages/schemas";
+import { findDirectConversation } from "@/lib/messages/queries";
 import { notifyMessage } from "@/lib/notifications/emit";
 
 export type SendMessageFormState = {
@@ -66,25 +67,17 @@ export async function startConversationAction(
     redirect("/messages");
   }
 
-  // 找已有会话：双方都是参与者，且总参与者数 = 2（排除多人群聊场景，预留扩展）
-  const existing = await prisma.conversation.findFirst({
-    where: {
-      AND: [
-        { participants: { some: { userId: session.userId } } },
-        { participants: { some: { userId: targetUserId } } },
-      ],
-    },
-    include: {
-      _count: { select: { participants: true } },
-    },
-  });
+  // 找已有 1v1 会话（isGroup=false + 参与者数 = 2）
+  const existing = await findDirectConversation(session.userId, targetUserId);
 
   let conversationId: string;
-  if (existing && existing._count.participants === 2) {
+  if (existing) {
     conversationId = existing.id;
   } else {
     const created = await prisma.conversation.create({
       data: {
+        isGroup: false,
+        memberLimit: 2,
         participants: {
           create: [
             { userId: session.userId },

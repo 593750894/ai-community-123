@@ -279,8 +279,10 @@ model User {
   toolRatings        ToolRating[]
 
   // 私信
-  conversations ConversationParticipant[]
-  messagesSent  Message[]                 @relation("MessageSender")
+  conversations      ConversationParticipant[]
+  messagesSent       Message[]                 @relation("MessageSender")
+  // Stage 12.1：群聊群主
+  conversationsOwned Conversation[]            @relation("ConversationOwner")
 
   // 互动
   likes     Like[]
@@ -581,15 +583,42 @@ model WorkflowItem {
 //                  Messaging (一对一 / 群聊 私信)
 // ═════════════════════════════════════════════════════════════════
 
+/// 群聊角色（Stage 12.1）。1v1 会话所有参与者默认 MEMBER；群聊 OWNER 唯一，
+/// 可由 OWNER 提拔 ADMIN（Stage 12.2）。
+enum ConversationRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+/// 消息类型（Stage 12.1）。TEXT 为默认；IMAGE/FILE 由 Stage 12.3 附件管道使用；
+/// SYSTEM 用于「XX 加入了群聊 / XX 修改了群名」等系统通知。
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
+}
+
 model Conversation {
   id            String   @id @default(cuid())
   createdAt     DateTime @default(now()) @map("created_at")
   lastMessageAt DateTime @default(now()) @map("last_message_at")
 
+  // Stage 12.1：群聊扩展。1v1 isGroup=false / title=null / ownerId=null / memberLimit=2；
+  // 群聊 isGroup=true / title=群名 / avatarUrl=群头像 / ownerId=群主 / memberLimit 默认 100。
+  isGroup     Boolean @default(false) @map("is_group")
+  title       String?
+  avatarUrl   String? @map("avatar_url")
+  ownerId     String? @map("owner_id")
+  memberLimit Int     @default(2) @map("member_limit")
+
   participants ConversationParticipant[]
   messages     Message[]
+  owner        User?                     @relation("ConversationOwner", fields: [ownerId], references: [id], onDelete: SetNull)
 
   @@index([lastMessageAt])
+  @@index([isGroup, lastMessageAt])
   @@map("conversations")
 }
 
@@ -598,6 +627,10 @@ model ConversationParticipant {
   userId         String   @map("user_id")
   createdAt      DateTime @default(now()) @map("created_at")
   lastReadAt     DateTime @default(now()) @map("last_read_at")
+
+  // Stage 12.1：群聊角色 + 免打扰。1v1 全部 MEMBER；群聊由 OWNER/ADMIN 管理。
+  role       ConversationRole @default(MEMBER)
+  mutedUntil DateTime?        @map("muted_until")
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -614,6 +647,14 @@ model Message {
   content        String
   readAt         DateTime? @map("read_at")
   createdAt      DateTime  @default(now()) @map("created_at")
+
+  // Stage 12.1：消息类型 + 附件 JSON + 编辑/删除时间戳。
+  // attachments 形如 [{ url, name, mimeType, sizeBytes, width?, height? }]，由 Stage 12.3 写入；
+  // SYSTEM 消息的 senderId = 触发者（如加群者本人）。
+  type        MessageType @default(TEXT)
+  attachments Json?
+  editedAt    DateTime?   @map("edited_at")
+  deletedAt   DateTime?   @map("deleted_at")
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
