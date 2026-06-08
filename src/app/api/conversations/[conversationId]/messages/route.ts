@@ -8,6 +8,7 @@ import {
   buildMessagePreview,
   inferMessageType,
 } from "@/lib/messages/preview";
+import { parseMentions } from "@/lib/messages/lifecycle";
 import {
   MESSAGE_ATTACHMENT_MAX_COUNT,
   MESSAGE_CONTENT_MAX,
@@ -144,6 +145,7 @@ export async function POST(
       messageId: message.id,
       actorId: user.id,
       preview,
+      mentions: parseMentions(content),
     });
 
     return created(message, "发送成功");

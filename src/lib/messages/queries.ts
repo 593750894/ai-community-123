@@ -35,6 +35,8 @@ export type ConversationListItem = {
   ownerId: string | null;
   viewerRole: ConversationRole;
   participantCount: number;
+  /** Stage 12.4：当前用户在此会话的免打扰到期时间；null = 未静音。 */
+  mutedUntil: Date | null;
   /** 1v1 时为对方信息；群聊为 null（UI 用 title + avatarUrl 渲染）。 */
   otherUser: ConversationUser | null;
   lastMessage: {
@@ -101,20 +103,25 @@ export async function listConversationsForUser(
     },
   });
 
+  const now = new Date();
   const items = await Promise.all(
     rows.map(async (c) => {
       const me = c.participants.find((p) => p.userId === userId);
       const other = c.participants.find((p) => p.userId !== userId);
-      const unreadCount = me
-        ? await prisma.message.count({
-            where: {
-              conversationId: c.id,
-              senderId: { not: userId },
-              createdAt: { gt: me.lastReadAt },
-              deletedAt: null,
-            },
-          })
-        : 0;
+      // Stage 12.4：免打扰窗口内的会话不计入未读 badge（红点）；
+      // UI 仍能在列表里看到消息内容，只是不再骚扰。
+      const muted = me?.mutedUntil != null && me.mutedUntil > now;
+      const unreadCount =
+        me && !muted
+          ? await prisma.message.count({
+              where: {
+                conversationId: c.id,
+                senderId: { not: userId },
+                createdAt: { gt: me.lastReadAt },
+                deletedAt: null,
+              },
+            })
+          : 0;
       const last = c.messages[0] ?? null;
       return {
         id: c.id,
@@ -126,6 +133,7 @@ export async function listConversationsForUser(
         ownerId: c.ownerId,
         viewerRole: me?.role ?? ("MEMBER" as ConversationRole),
         participantCount: c.participants.length,
+        mutedUntil: me?.mutedUntil ?? null,
         otherUser: c.isGroup ? null : (other?.user ?? null),
         lastMessage: last
           ? {
@@ -271,17 +279,19 @@ export async function markConversationRead(
 
 /**
  * 当前用户的全站未读消息数（用于侧边栏 badge，预留）。
- * 软删除的消息不计入未读。
+ * 软删除的消息不计入未读；Stage 12.4：免打扰中的会话也不计入。
  */
 export async function getTotalUnreadForUser(userId: string): Promise<number> {
+  const now = new Date();
   const parts = await prisma.conversationParticipant.findMany({
     where: { userId },
-    select: { conversationId: true, lastReadAt: true },
+    select: { conversationId: true, lastReadAt: true, mutedUntil: true },
   });
-  if (parts.length === 0) return 0;
+  const active = parts.filter((p) => p.mutedUntil == null || p.mutedUntil <= now);
+  if (active.length === 0) return 0;
   return prisma.message.count({
     where: {
-      OR: parts.map((p) => ({
+      OR: active.map((p) => ({
         conversationId: p.conversationId,
         senderId: { not: userId },
         createdAt: { gt: p.lastReadAt },

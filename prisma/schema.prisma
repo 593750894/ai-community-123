@@ -125,6 +125,7 @@ enum NotificationType {
   MENTION
   COLLAB_REPLY
   MESSAGE
+  GROUP_MESSAGE // 阶段 12.4：群聊新消息（与 1v1 MESSAGE 分流，便于偏好分别关闭）
   FOLLOW
   SYSTEM
   ORDER_PAID // 阶段 10：买家订单付款成功

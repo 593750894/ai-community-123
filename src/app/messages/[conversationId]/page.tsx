@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Settings2, UserRound, Users } from "lucide-react";
+import { ArrowLeft, BellOff, Settings2, UserRound, Users } from "lucide-react";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { MessageComposer } from "@/components/feed/message-composer";
-import { MessageAttachments } from "@/components/messages/message-attachments";
+import { MessageBubble } from "@/components/messages/message-bubble";
+import { MuteToggle } from "@/components/messages/mute-toggle";
 import { getSession } from "@/lib/auth/session";
 import {
   getConversationForUser,
@@ -14,10 +15,6 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const TIME_FMT = new Intl.DateTimeFormat("zh-CN", {
-  hour: "2-digit",
-  minute: "2-digit",
-});
 const DATE_FMT = new Intl.DateTimeFormat("zh-CN", {
   year: "numeric",
   month: "2-digit",
@@ -30,6 +27,13 @@ function isSameDay(a: Date, b: Date) {
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate()
   );
+}
+
+function mutedUntilHours(mutedUntil: Date | null): number {
+  if (!mutedUntil) return 0;
+  const diffMs = mutedUntil.getTime() - Date.now();
+  if (diffMs <= 0) return 0;
+  return Math.max(1, Math.ceil(diffMs / 3600_000));
 }
 
 export default async function ConversationDetailPage({
@@ -58,6 +62,12 @@ export default async function ConversationDetailPage({
   const senderMap = new Map(
     detail.participants.map((p) => [p.user.id, p.user]),
   );
+  // sender → 角色映射，决定 admin 是否能强删该消息
+  const senderRoleMap = new Map(
+    detail.participants.map((p) => [p.user.id, p.role]),
+  );
+  const me = detail.participants.find((p) => p.user.id === session.userId);
+  const isMuted = me?.mutedUntil != null && me.mutedUntil > new Date();
 
   const headerTitle = isGroup
     ? (detail.title ?? "未命名群聊")
@@ -93,6 +103,11 @@ export default async function ConversationDetailPage({
               <ArrowLeft className="size-3.5" />
               返回列表
             </Button>
+            <MuteToggle
+              conversationId={conversationId}
+              isMuted={isMuted}
+              mutedHours={mutedUntilHours(me?.mutedUntil ?? null)}
+            />
             {isGroup ? (
               <Button
                 variant="outline"
@@ -122,10 +137,20 @@ export default async function ConversationDetailPage({
 
       <div className="flex min-h-0 flex-1 flex-col px-6 pb-4 sm:px-8">
         <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border/60 bg-card/20">
+          {isMuted && (
+            <div className="flex items-center gap-2 border-b border-border/40 bg-amber-500/5 px-5 py-2 text-xs text-amber-300">
+              <BellOff className="size-3.5" />
+              <span>
+                免打扰开启中 · 此会话不会推送通知，红点也不计入未读
+              </span>
+            </div>
+          )}
           {isGroup && (
             <div className="flex items-center gap-2 border-b border-border/40 px-5 py-2.5 text-xs text-muted-foreground">
               <Users className="size-3.5 text-emerald-300" />
-              <span>群聊 · 群主 / 管理员 可以管理成员；点右上「群聊设置」修改信息或退群。</span>
+              <span>
+                群聊 · 群主 / 管理员 可以管理成员；点右上「群聊设置」修改信息或退群。可在消息内 @用户名 提醒对方。
+              </span>
             </div>
           )}
           <div className="flex-1 space-y-3 overflow-y-auto p-5">
@@ -136,95 +161,40 @@ export default async function ConversationDetailPage({
                   : "这是一个新会话。说点什么打个招呼吧～"}
               </div>
             ) : (
-              detail.messages
-                .filter((m) => !m.deletedAt) // 软删除消息隐藏（12.4 再加 placeholder）
-                .map((m, idx, list) => {
-                  const prev = list[idx - 1];
-                  const showDate =
-                    !prev || !isSameDay(prev.createdAt, m.createdAt);
-                  const self = m.senderId === session.userId;
-                  const sender = senderMap.get(m.senderId) ?? null;
-                  const hasAttachments =
-                    Array.isArray(m.attachments) && m.attachments.length > 0;
+              detail.messages.map((m, idx, list) => {
+                const prev = list[idx - 1];
+                const showDate =
+                  !prev || !isSameDay(prev.createdAt, m.createdAt);
+                const self = m.senderId === session.userId;
+                const sender = senderMap.get(m.senderId) ?? null;
+                const senderRole = senderRoleMap.get(m.senderId);
 
-                  if (m.type === "SYSTEM") {
-                    return (
-                      <div key={m.id} className="space-y-2">
-                        {showDate && (
-                          <div className="text-center text-[11px] text-muted-foreground">
-                            {DATE_FMT.format(m.createdAt)}
-                          </div>
-                        )}
-                        <div className="mx-auto max-w-md rounded-full border border-border/40 bg-muted/30 px-3 py-1 text-center text-[11px] text-muted-foreground">
-                          {m.content || "系统消息"}
-                        </div>
+                return (
+                  <div key={m.id} className="space-y-2">
+                    {showDate && (
+                      <div className="text-center text-[11px] text-muted-foreground">
+                        {DATE_FMT.format(m.createdAt)}
                       </div>
-                    );
-                  }
-
-                  return (
-                    <div key={m.id} className="space-y-2">
-                      {showDate && (
-                        <div className="text-center text-[11px] text-muted-foreground">
-                          {DATE_FMT.format(m.createdAt)}
-                        </div>
-                      )}
-                      <div
-                        className={`flex gap-2 ${self ? "justify-end" : "justify-start"}`}
-                      >
-                        {!self &&
-                          (sender?.avatar ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={sender.avatar}
-                              alt={sender.name}
-                              className="size-7 shrink-0 rounded-full border border-border/60 object-cover"
-                            />
-                          ) : (
-                            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-300 to-purple-500 text-[11px] font-semibold text-black/70">
-                              {sender?.name?.slice(0, 1) ?? "?"}
-                            </span>
-                          ))}
-                        <div
-                          className={`flex max-w-md flex-col gap-2 break-words rounded-2xl px-3 py-2 text-sm ${
-                            self
-                              ? "rounded-tr-sm bg-primary text-primary-foreground"
-                              : "rounded-tl-sm bg-card/70 text-foreground/95"
-                          }`}
-                        >
-                          {!self && isGroup && sender && (
-                            <div className="text-[10px] font-medium text-primary/80">
-                              {sender.name}
-                            </div>
-                          )}
-                          {m.content && (
-                            <div className="whitespace-pre-wrap">
-                              {m.content}
-                            </div>
-                          )}
-                          {hasAttachments && (
-                            <MessageAttachments
-                              attachments={m.attachments!}
-                              self={self}
-                            />
-                          )}
-                          <div
-                            className={`text-[10px] ${
-                              self
-                                ? "text-primary-foreground/70"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {TIME_FMT.format(m.createdAt)}
-                            {m.editedAt && (
-                              <span className="ml-1 opacity-70">(已编辑)</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
+                    )}
+                    <MessageBubble
+                      conversationId={detail.id}
+                      messageId={m.id}
+                      senderId={m.senderId}
+                      content={m.content}
+                      type={m.type}
+                      attachments={m.attachments}
+                      createdAt={m.createdAt}
+                      editedAt={m.editedAt}
+                      deletedAt={m.deletedAt}
+                      self={self}
+                      sender={sender}
+                      isGroup={isGroup}
+                      viewerRole={detail.viewerRole}
+                      senderRole={senderRole}
+                    />
+                  </div>
+                );
+              })
             )}
           </div>
 

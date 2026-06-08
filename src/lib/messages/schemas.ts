@@ -76,6 +76,37 @@ export type SendMessageInput = z.infer<typeof SendMessageSchema>;
 export type MessageAttachmentInput = z.infer<typeof MessageAttachmentSchema>;
 
 // ─────────────────────────────────────────────────────────────
+// Stage 12.4：消息生命周期 + 免打扰
+// ─────────────────────────────────────────────────────────────
+
+/** 编辑窗口：发出后 15 分钟内可改文本（与微信对齐）。 */
+export const MESSAGE_EDIT_WINDOW_MS = 15 * 60 * 1000;
+/** 撤回窗口：发出后 2 分钟内可撤回（与微信对齐）。 */
+export const MESSAGE_RECALL_WINDOW_MS = 2 * 60 * 1000;
+/** 免打扰最长设置时长：30 天（超过通常没意义；上限可避免误用永久静音）。 */
+export const MUTE_MAX_HOURS = 24 * 30;
+
+/** 文本消息编辑 schema：只允许改 content；不允许调附件/类型。 */
+export const EditMessageSchema = z.object({
+  content: MessageContentSchema.refine(
+    (s) => s.length > 0,
+    "编辑后的内容不能为空",
+  ),
+});
+
+/** 免打扰 schema：hours=0 → 取消；否则按小时设到未来时间点（最多 30 天）。 */
+export const MuteConversationSchema = z.object({
+  hours: z
+    .number()
+    .int("时长必须为整数小时")
+    .min(0, "时长不能为负")
+    .max(MUTE_MAX_HOURS, `最多免打扰 ${MUTE_MAX_HOURS} 小时`),
+});
+
+export type EditMessageInput = z.infer<typeof EditMessageSchema>;
+export type MuteConversationInput = z.infer<typeof MuteConversationSchema>;
+
+// ─────────────────────────────────────────────────────────────
 // Stage 12.2：群聊 CRUD + 成员管理
 // ─────────────────────────────────────────────────────────────
 

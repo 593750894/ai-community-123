@@ -21,6 +21,13 @@ const DEDUP_TYPES: Set<NotificationType> = new Set([
   "MENTION",
 ]);
 
+/**
+ * Stage 12.4：群聊消息短窗口去重 = 5 分钟。
+ * 比赞/收藏的 24h 窄得多——群聊里短时间内连发多条仍只推一条通知，
+ * 但用户离开后回来再发就会再次提醒；避免「群聊每条消息都炸 Bell」。
+ */
+const GROUP_MESSAGE_DEDUP_WINDOW_MS = 5 * 60 * 1000;
+
 // Stage 9：用户可在 /settings/notifications 关闭通知类型；但 SYSTEM 永远直达
 // （admin 举报通知、强制下线提示等运维通道，不能被用户关掉）。
 const NON_GATEABLE_TYPES: Set<NotificationType> = new Set(["SYSTEM"]);
@@ -552,40 +559,125 @@ export async function notifyOrgMemberRemoved(args: {
   }
 }
 
-/** 私信 → 通知会话中所有非发送者的参与者 */
+/**
+ * Stage 12.4：消息通知统一入口。
+ * - 1v1：收件人收到一条 MESSAGE 类型通知。
+ * - 群聊：mentioned 的成员收到 MENTION（高优先），其它非发送者收到 GROUP_MESSAGE；
+ *   短窗口（5min）内的同会话同 actor → 同收件人通知去重，避免群里连发刷屏。
+ * - 任意类型：mutedUntil > now 的参与者跳过（badge/Bell 都不响）。
+ * - mentions 由调用方解析过；这里只挑会话内 username 命中且非发送者的人。
+ */
 export async function notifyMessage(args: {
   conversationId: string;
   messageId: string;
   actorId: string;
   preview: string;
+  /** @username 列表（不含 @ 前缀），由调用方解析；空 = 无 @mention。 */
+  mentions?: string[];
 }) {
   try {
-    const [participants, actor] = await Promise.all([
+    const [conversation, participants, actor] = await Promise.all([
+      prisma.conversation.findUnique({
+        where: { id: args.conversationId },
+        select: { isGroup: true, title: true },
+      }),
       prisma.conversationParticipant.findMany({
         where: { conversationId: args.conversationId },
-        select: { userId: true },
+        select: {
+          userId: true,
+          mutedUntil: true,
+          user: { select: { username: true } },
+        },
       }),
       actorDisplay(args.actorId),
     ]);
-    if (!actor) return;
+    if (!actor || !conversation) return;
 
-    const recipients = participants
-      .map((p) => p.userId)
-      .filter((id) => id !== args.actorId);
+    const now = new Date();
+    const eligible = participants.filter(
+      (p) =>
+        p.userId !== args.actorId &&
+        (p.mutedUntil === null || p.mutedUntil <= now),
+    );
+
+    if (eligible.length === 0) return;
+
+    const mentions = (args.mentions ?? []).map((m) => m.toLowerCase());
+    const mentionedSet = new Set(
+      eligible
+        .filter((p) => mentions.includes(p.user.username.toLowerCase()))
+        .map((p) => p.userId),
+    );
+
+    const preview = args.preview.slice(0, 80);
+    const channelTitle =
+      conversation.isGroup && conversation.title
+        ? conversation.title
+        : null;
+
+    if (!conversation.isGroup) {
+      await Promise.all(
+        eligible.map((p) =>
+          emitNotification({
+            recipientId: p.userId,
+            actorId: args.actorId,
+            type: "MESSAGE",
+            title: `${actor.name} 给你发了一条私信`,
+            body: preview,
+            link: `/messages/${args.conversationId}`,
+            targetType: "CONVERSATION",
+            targetId: args.conversationId,
+          }),
+        ),
+      );
+      return;
+    }
+
+    const since = new Date(now.getTime() - GROUP_MESSAGE_DEDUP_WINDOW_MS);
 
     await Promise.all(
-      recipients.map((recipientId) =>
-        emitNotification({
-          recipientId,
+      eligible.map(async (p) => {
+        if (mentionedSet.has(p.userId)) {
+          await emitNotification({
+            recipientId: p.userId,
+            actorId: args.actorId,
+            type: "MENTION",
+            title: channelTitle
+              ? `${actor.name} 在「${channelTitle}」@了你`
+              : `${actor.name} @了你`,
+            body: preview,
+            link: `/messages/${args.conversationId}#message-${args.messageId}`,
+            targetType: "CONVERSATION",
+            targetId: args.conversationId,
+          });
+          return;
+        }
+        // 群聊普通消息：短窗口内同 actor → 同收件人只推一条
+        const existing = await prisma.notification.findFirst({
+          where: {
+            userId: p.userId,
+            actorId: args.actorId,
+            type: "GROUP_MESSAGE",
+            targetType: "CONVERSATION",
+            targetId: args.conversationId,
+            createdAt: { gte: since },
+          },
+          select: { id: true },
+        });
+        if (existing) return;
+        await emitNotification({
+          recipientId: p.userId,
           actorId: args.actorId,
-          type: "MESSAGE",
-          title: `${actor.name} 给你发了一条私信`,
-          body: args.preview.slice(0, 80),
+          type: "GROUP_MESSAGE",
+          title: channelTitle
+            ? `${actor.name} 在「${channelTitle}」发了新消息`
+            : `${actor.name} 在群聊里发了新消息`,
+          body: preview,
           link: `/messages/${args.conversationId}`,
           targetType: "CONVERSATION",
           targetId: args.conversationId,
-        }),
-      ),
+        });
+      }),
     );
   } catch (err) {
     console.error("[notifications] notifyMessage", err);

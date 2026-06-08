@@ -11,6 +11,7 @@ import {
 } from "@/lib/messages/schemas";
 import { findDirectConversation } from "@/lib/messages/queries";
 import { buildMessagePreview, inferMessageType } from "@/lib/messages/preview";
+import { parseMentions } from "@/lib/messages/lifecycle";
 import { notifyMessage } from "@/lib/notifications/emit";
 
 export type SendMessageFormState = {
@@ -186,6 +187,7 @@ export async function sendMessageAction(
     messageId: message.id,
     actorId: session.userId,
     preview,
+    mentions: parseMentions(content),
   });
 
   return {

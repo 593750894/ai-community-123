@@ -13,6 +13,40 @@ import {
   type UpdateGroupMemberRoleInput,
 } from "@/lib/messages/schemas";
 import type { ConversationRole } from "@/lib/messages/queries";
+import { appendSystemMessage } from "@/lib/messages/lifecycle";
+
+/** 取触发者的展示名，给 SYSTEM 消息文案用；查不到 fallback 用 username。 */
+async function actorDisplayName(userId: string): Promise<string> {
+  const u = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true, username: true },
+  });
+  return u?.name?.trim() || u?.username || "某位成员";
+}
+
+/** 取多个用户的展示名列表（按入参顺序）。 */
+async function userDisplayNames(ids: string[]): Promise<string[]> {
+  if (ids.length === 0) return [];
+  const rows = await prisma.user.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, name: true, username: true },
+  });
+  const map = new Map(rows.map((u) => [u.id, u.name?.trim() || u.username]));
+  return ids.map((id) => map.get(id) ?? "某位成员");
+}
+
+/** 失败不阻塞主流程的系统消息追加。 */
+async function safeAppendSystemMessage(
+  conversationId: string,
+  triggeredById: string,
+  content: string,
+): Promise<void> {
+  try {
+    await appendSystemMessage(conversationId, triggeredById, content);
+  } catch (err) {
+    console.warn("[groups] appendSystemMessage", err);
+  }
+}
 
 /**
  * Stage 12.2：群聊 CRUD + 成员管理业务层。
@@ -117,7 +151,7 @@ async function assertGroupMembership(
   return { conversation: conv, viewerRole: me.role };
 }
 
-/** 群信息编辑（标题 / 头像）。OWNER + ADMIN 均可。 */
+/** 群信息编辑（标题 / 头像）。OWNER + ADMIN 均可。改动会写入 SYSTEM 消息留痕。 */
 export async function updateGroupConversation(
   viewerId: string,
   conversationId: string,
@@ -127,6 +161,10 @@ export async function updateGroupConversation(
   if (viewerRole !== "OWNER" && viewerRole !== "ADMIN") {
     throw new ForbiddenError("仅群主或管理员可修改群信息");
   }
+  const previous = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+    select: { title: true, avatarUrl: true },
+  });
   const data: { title?: string; avatarUrl?: string | null } = {};
   if (input.title !== undefined) data.title = input.title;
   if (input.avatarUrl !== undefined) data.avatarUrl = input.avatarUrl ?? null;
@@ -134,6 +172,23 @@ export async function updateGroupConversation(
     where: { id: conversationId },
     data,
   });
+
+  const actorName = await actorDisplayName(viewerId);
+  if (input.title !== undefined && input.title !== previous?.title) {
+    await safeAppendSystemMessage(
+      conversationId,
+      viewerId,
+      `${actorName} 修改群名为「${input.title}」`,
+    );
+  }
+  const newAvatar = input.avatarUrl ?? null;
+  if (input.avatarUrl !== undefined && newAvatar !== (previous?.avatarUrl ?? null)) {
+    await safeAppendSystemMessage(
+      conversationId,
+      viewerId,
+      newAvatar ? `${actorName} 更新了群头像` : `${actorName} 移除了群头像`,
+    );
+  }
 }
 
 /** OWNER 解散群聊。Cascade 会带走 participants/messages/notifications targetType=CONVERSATION。 */
@@ -210,6 +265,20 @@ export async function addGroupMembers(
     skipDuplicates: true, // 双重保险，防 race
   });
 
+  const [actorName, addedNames] = await Promise.all([
+    actorDisplayName(viewerId),
+    userDisplayNames(targetIds),
+  ]);
+  const namesText =
+    addedNames.length <= 3
+      ? addedNames.join("、")
+      : `${addedNames.slice(0, 3).join("、")} 等 ${addedNames.length} 人`;
+  await safeAppendSystemMessage(
+    conversationId,
+    viewerId,
+    `${actorName} 邀请 ${namesText} 加入了群聊`,
+  );
+
   return { added: targetIds, skipped };
 }
 
@@ -245,6 +314,16 @@ export async function removeGroupMember(
       conversationId_userId: { conversationId, userId: targetUserId },
     },
   });
+
+  const [actorName, [targetName]] = await Promise.all([
+    actorDisplayName(viewerId),
+    userDisplayNames([targetUserId]),
+  ]);
+  await safeAppendSystemMessage(
+    conversationId,
+    viewerId,
+    `${actorName} 将 ${targetName} 移出了群聊`,
+  );
 }
 
 /** 改成员角色（OWNER → ADMIN 或 ADMIN → MEMBER）。仅 OWNER 可调用。 */
@@ -280,6 +359,17 @@ export async function updateGroupMemberRole(
     },
     data: { role: input.role },
   });
+
+  const [actorName, [targetName]] = await Promise.all([
+    actorDisplayName(viewerId),
+    userDisplayNames([targetUserId]),
+  ]);
+  const roleLabel = input.role === "ADMIN" ? "管理员" : "成员";
+  await safeAppendSystemMessage(
+    conversationId,
+    viewerId,
+    `${actorName} 将 ${targetName} 设为${roleLabel}`,
+  );
 }
 
 /** 退出群聊（成员 / 管理员）。OWNER 必须先转让（未实现）或解散。 */
@@ -296,6 +386,15 @@ export async function leaveGroupConversation(
       conversationId_userId: { conversationId, userId: viewerId },
     },
   });
+
+  // 退群者已不在 participant 列表里，systemMessage 的 senderId 仍指他本人便于审计；
+  // UI 渲染时也能找到对应头像（仍在 messageSender 关系里）。
+  const actorName = await actorDisplayName(viewerId);
+  await safeAppendSystemMessage(
+    conversationId,
+    viewerId,
+    `${actorName} 退出了群聊`,
+  );
 }
 
 /** 列出群成员（仅成员可见）。详情页面板用。 */
