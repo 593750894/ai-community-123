@@ -55,6 +55,9 @@ export function useRealtime(
     let source: EventSource | null = null;
     let retryDelayMs = INITIAL_RETRY_MS;
     let retryTimer: ReturnType<typeof setTimeout> | null = null;
+    // 只有在 onopen 真正触发后，下一轮 visibilitychange 才允许把退避计数器重置回 1s。
+    // 否则未授权 (401) 用户反复切 tab 会触发约 1 RPS 的 401 风暴。
+    let openedOnce = false;
 
     const clearRetryTimer = () => {
       if (retryTimer !== null) {
@@ -97,6 +100,8 @@ export function useRealtime(
       }
 
       es.onopen = () => {
+        // 成功握上连接（HTTP 200）才认为身份有效，重置退避。
+        openedOnce = true;
         retryDelayMs = INITIAL_RETRY_MS;
       };
 
@@ -117,7 +122,9 @@ export function useRealtime(
     const onVisible = () => {
       if (document.visibilityState !== "visible") return;
       if (cancelled) return;
-      // 回到前台：如果当前没连上，立即尝试 + 重置退避，让用户尽快感知到。
+      // 回到前台：仅当之前曾握手成功过、且当前没连上时才立即试 + 重置退避。
+      // 从未握手成功（401 / 网络错误） → 沿用现有退避，避免切 tab 把 401 节奏加速到 1s。
+      if (!openedOnce) return;
       if (!source || source.readyState === EventSource.CLOSED) {
         retryDelayMs = INITIAL_RETRY_MS;
         clearRetryTimer();

@@ -32,15 +32,23 @@ async function conversationParticipantIds(
 /**
  * 新消息（任意类型，TEXT/IMAGE/FILE/SYSTEM）。
  * 广播给所有参与者；含发送者本人——TA 的其它 tab 也需要更新。
+ *
+ * Stage 12.5 修：调用方可传入 `participantIds` 快照（在消息写入事务前已拿到的）
+ * 来跳过这里的 DB 查询。这样能避免「写消息 → 成员变更 → publish 查到新成员集合」
+ * 的 race：成员被踢后仍能收到自己在群里时的消息事件，而新加入的成员不会收到
+ * 加入前的事件。同时省一次 DB 往返。
  */
 export async function publishMessageCreated(args: {
   conversationId: string;
   messageId: string;
   senderId: string;
   type: MessageType;
+  participantIds?: ReadonlyArray<string>;
 }): Promise<void> {
   try {
-    const ids = await conversationParticipantIds(args.conversationId);
+    const ids = args.participantIds
+      ? Array.from(args.participantIds)
+      : await conversationParticipantIds(args.conversationId);
     if (ids.length === 0) return;
     const event: RealtimeEvent = {
       kind: "message.created",
@@ -60,9 +68,12 @@ export async function publishMessageCreated(args: {
 export async function publishMessageUpdated(args: {
   conversationId: string;
   messageId: string;
+  participantIds?: ReadonlyArray<string>;
 }): Promise<void> {
   try {
-    const ids = await conversationParticipantIds(args.conversationId);
+    const ids = args.participantIds
+      ? Array.from(args.participantIds)
+      : await conversationParticipantIds(args.conversationId);
     if (ids.length === 0) return;
     publishToUsers(ids, {
       kind: "message.updated",
@@ -79,9 +90,12 @@ export async function publishMessageUpdated(args: {
 export async function publishMessageDeleted(args: {
   conversationId: string;
   messageId: string;
+  participantIds?: ReadonlyArray<string>;
 }): Promise<void> {
   try {
-    const ids = await conversationParticipantIds(args.conversationId);
+    const ids = args.participantIds
+      ? Array.from(args.participantIds)
+      : await conversationParticipantIds(args.conversationId);
     if (ids.length === 0) return;
     publishToUsers(ids, {
       kind: "message.deleted",

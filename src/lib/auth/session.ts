@@ -75,6 +75,12 @@ export async function clearSessionCookie() {
   store.delete(SESSION_COOKIE);
 }
 
+/**
+ * Stage 12.5 修：把「DB 暂时不可用」与「token 无效 / 用户被封禁」明确区分开。
+ * 之前 `.catch(() => null)` 会把 Neon 抖动同样当作未登录，导致 SSE 客户端进入 401 退避循环、
+ * 同时整页 server component 退化为匿名视图。现在 DB 错误向上抛，由调用方决定 503 / fallback；
+ * 仅 token 非法 / 用户被封禁 / iat 过期 才返回 null。
+ */
 export async function getSession(): Promise<SessionPayload | null> {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
@@ -85,14 +91,19 @@ export async function getSession(): Promise<SessionPayload | null> {
   // Stage 9：tokensValidAfter + 状态守卫提前到 getSession，
   // 确保所有调用者（包括只取 userId 的 server action 写入路径）
   // 都看到强制下线 / 封禁 / 注销账号为「未登录」。
-  const user = await prisma.user
-    .findUnique({
-      where: { id: decoded.userId },
-      select: { status: true, tokensValidAfter: true },
-    })
-    .catch(() => null);
+  // DB 错误不吞 — 让调用方决定 503/降级。
+  const user = await prisma.user.findUnique({
+    where: { id: decoded.userId },
+    select: { status: true, tokensValidAfter: true },
+  });
   if (!user) return null;
-  if (user.status === "BANNED" || user.status === "DELETED") return null;
+  if (
+    user.status === "BANNED" ||
+    user.status === "DELETED" ||
+    user.status === "SUSPENDED"
+  ) {
+    return null;
+  }
   if (
     user.tokensValidAfter &&
     typeof decoded.iat === "number" &&
@@ -158,8 +169,12 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     return null;
   }
 
-  // 已封禁 / 已注销 用户视同未登录
-  if (user.status === "BANNED" || user.status === "DELETED") {
+  // 已封禁 / 已注销 / 已暂停 用户视同未登录（与 getSession 保持一致）
+  if (
+    user.status === "BANNED" ||
+    user.status === "DELETED" ||
+    user.status === "SUSPENDED"
+  ) {
     return null;
   }
 

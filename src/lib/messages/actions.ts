@@ -135,19 +135,17 @@ export async function sendMessageAction(
   const type = inferMessageType(parsedAttachments);
   const preview = buildMessagePreview(content, parsedAttachments);
 
-  // 鉴权：必须是会话参与者
-  const membership = await prisma.conversationParticipant.findUnique({
-    where: {
-      conversationId_userId: {
-        conversationId,
-        userId: session.userId,
-      },
-    },
-    select: { conversationId: true },
+  // 鉴权 + 抓取参与者快照（Stage 12.5 M3 修）：一次查询既校验 viewer 是成员，
+  // 又拿到「此刻」的参与者 ID 集合喂给 publishMessageCreated，避免之后成员变更
+  // 导致 realtime 推送漂移到新集合。
+  const allParticipants = await prisma.conversationParticipant.findMany({
+    where: { conversationId },
+    select: { userId: true },
   });
-  if (!membership) {
+  if (!allParticipants.some((p) => p.userId === session.userId)) {
     return { ok: false, message: "你不是该会话的参与者" };
   }
+  const participantIds = allParticipants.map((p) => p.userId);
 
   const now = new Date();
   const [message] = await prisma.$transaction([
@@ -190,6 +188,7 @@ export async function sendMessageAction(
     messageId: message.id,
     senderId: session.userId,
     type,
+    participantIds,
   });
 
   await notifyMessage({

@@ -108,9 +108,20 @@ export async function editMessage(
     );
   }
   const now = new Date();
-  const updated = await prisma.message.update({
-    where: { id: messageId },
+  // Stage 12.5 修：用 updateMany + deletedAt=null 防 TOCTOU。
+  // loadMessageContext 取到 deletedAt=null 后，另一线程可以并发把它撤回；
+  // 紧接着这里若仍 update().where(id) 就会写出「deletedAt!=null 但 content 被改」的脏行。
+  // updateMany WHERE deletedAt IS NULL → 行刚被撤回的话 count=0，返回 409。
+  const guard = await prisma.message.updateMany({
+    where: { id: messageId, deletedAt: null },
     data: { content: input.content, editedAt: now },
+  });
+  if (guard.count === 0) {
+    throw new ConflictError("消息已被撤回，无法编辑");
+  }
+  // 重新读一次拿最新 content/editedAt（updateMany 不返回字段）。
+  const updated = await prisma.message.findUniqueOrThrow({
+    where: { id: messageId },
     select: { id: true, content: true, editedAt: true },
   });
   // Stage 12.5：广播给会话所有参与者，让对方 UI 重拉。
@@ -184,14 +195,19 @@ export async function softDeleteMessage(
     }
   }
 
-  await prisma.message.update({
-    where: { id: messageId },
+  // Stage 12.5 修：updateMany + deletedAt=null 兜双重撤回 race。
+  // 并发两次撤回（或撤回 + 编辑）只让一笔成功；count=0 → 已被撤回 → 409，避免重复推 message.deleted 事件。
+  const guard = await prisma.message.updateMany({
+    where: { id: messageId, deletedAt: null },
     data: {
       deletedAt: new Date(),
       content: "",
       attachments: undefined,
     },
   });
+  if (guard.count === 0) {
+    throw new ConflictError("该消息已被撤回");
+  }
   // Stage 12.5：广播撤回事件，UI 会把气泡换成「已撤回」placeholder。
   await publishMessageDeleted({
     conversationId: message.conversationId,

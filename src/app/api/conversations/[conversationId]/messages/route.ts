@@ -109,7 +109,10 @@ export async function POST(
       throw new ValidationError("参数校验失败", parsed.error.flatten().fieldErrors);
     }
 
-    await getConversationAndVerify(conversationId, user.id);
+    const conversation = await getConversationAndVerify(conversationId, user.id);
+    // Stage 12.5 修：抓取消息写入「那一刻」的参与者快照，喂给 publishMessageCreated，
+    // 避免随后成员变更（加入/退出）让 realtime 推送漂移到新集合。
+    const participantIds = conversation.participants.map((p) => p.userId);
 
     const { content, attachments } = parsed.data;
     const type = inferMessageType(attachments);
@@ -147,6 +150,7 @@ export async function POST(
       messageId: message.id,
       senderId: user.id,
       type,
+      participantIds,
     });
 
     await notifyMessage({
