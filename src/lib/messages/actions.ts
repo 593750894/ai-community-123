@@ -13,6 +13,7 @@ import { findDirectConversation } from "@/lib/messages/queries";
 import { buildMessagePreview, inferMessageType } from "@/lib/messages/preview";
 import { parseMentions } from "@/lib/messages/lifecycle";
 import { notifyMessage } from "@/lib/notifications/emit";
+import { publishMessageCreated } from "@/lib/realtime/events";
 
 export type SendMessageFormState = {
   ok?: boolean;
@@ -181,6 +182,15 @@ export async function sendMessageAction(
 
   revalidatePath(`/messages/${conversationId}`);
   revalidatePath("/messages");
+
+  // Stage 12.5：先发实时事件，让对方 SSE 流立刻拉到（不依赖通知后才推送）；
+  // notifyMessage 内部会再触发 notification.created 事件给 Bell badge。
+  await publishMessageCreated({
+    conversationId,
+    messageId: message.id,
+    senderId: session.userId,
+    type,
+  });
 
   await notifyMessage({
     conversationId,

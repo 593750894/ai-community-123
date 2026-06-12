@@ -11,6 +11,11 @@ import {
   MUTE_MAX_HOURS,
   type EditMessageInput,
 } from "@/lib/messages/schemas";
+import {
+  publishMessageCreated,
+  publishMessageDeleted,
+  publishMessageUpdated,
+} from "@/lib/realtime/events";
 
 /**
  * Stage 12.4：消息生命周期 + 群聊免打扰
@@ -108,6 +113,11 @@ export async function editMessage(
     data: { content: input.content, editedAt: now },
     select: { id: true, content: true, editedAt: true },
   });
+  // Stage 12.5：广播给会话所有参与者，让对方 UI 重拉。
+  await publishMessageUpdated({
+    conversationId: message.conversationId,
+    messageId: updated.id,
+  });
   return {
     id: updated.id,
     content: updated.content,
@@ -182,6 +192,11 @@ export async function softDeleteMessage(
       attachments: undefined,
     },
   });
+  // Stage 12.5：广播撤回事件，UI 会把气泡换成「已撤回」placeholder。
+  await publishMessageDeleted({
+    conversationId: message.conversationId,
+    messageId,
+  });
 }
 
 /** @username 解析：抽取 `@xxx`，按出现顺序去重；不验证用户是否存在（调用方按需做）。 */
@@ -226,6 +241,13 @@ export async function appendSystemMessage(
       data: { lastMessageAt: now },
     }),
   ]);
+  // Stage 12.5：SYSTEM 消息也通过 message.created 事件广播，UI 不区分对待。
+  await publishMessageCreated({
+    conversationId,
+    messageId: created.id,
+    senderId: triggeredById,
+    type: "SYSTEM",
+  });
   return created;
 }
 

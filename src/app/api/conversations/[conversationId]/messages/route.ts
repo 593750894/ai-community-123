@@ -9,6 +9,7 @@ import {
   inferMessageType,
 } from "@/lib/messages/preview";
 import { parseMentions } from "@/lib/messages/lifecycle";
+import { publishMessageCreated } from "@/lib/realtime/events";
 import {
   MESSAGE_ATTACHMENT_MAX_COUNT,
   MESSAGE_CONTENT_MAX,
@@ -139,6 +140,14 @@ export async function POST(
         data: { lastMessageAt: now },
       }),
     ]);
+
+    // Stage 12.5：先广播实时事件（覆盖所有 SSE 订阅者，不绕 notification 偏好）。
+    await publishMessageCreated({
+      conversationId,
+      messageId: message.id,
+      senderId: user.id,
+      type,
+    });
 
     await notifyMessage({
       conversationId,

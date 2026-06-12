@@ -5,6 +5,7 @@ import { Bell } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useRealtime } from "@/hooks/use-realtime";
 import { cn } from "@/lib/utils";
 
 interface UnreadCountResponse {
@@ -19,7 +20,10 @@ interface NotificationBellProps {
 }
 
 /**
- * 顶部 Bell：每 60s 轮询 /api/notifications/unread-count。
+ * 顶部 Bell：每 60s 轮询 /api/notifications/unread-count 作为兜底；
+ * Stage 12.5：同时订阅 SSE notification.created 事件，立刻 fetch 一次 count（不直接
+ * +1 是为了反映服务端去重 / preference 过滤后的真实未读数，比客户端臆测更准）。
+ *
  * 未登录时仅显示一个图标按钮，点击跳登录页。
  */
 export function NotificationBell({ isLoggedIn }: NotificationBellProps) {
@@ -72,6 +76,17 @@ export function NotificationBell({ isLoggedIn }: NotificationBellProps) {
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [isLoggedIn, fetchCount]);
+
+  // Stage 12.5：SSE 事件触发即时刷新（替代 60s 等待）。
+  // enabled=false 时 hook 不建立连接，未登录页不会 401 死循环。
+  useRealtime(
+    (event) => {
+      if (event.kind === "notification.created") {
+        void fetchCount();
+      }
+    },
+    { enabled: isLoggedIn },
+  );
 
   const display = count > 99 ? "99+" : String(count);
 

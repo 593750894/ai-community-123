@@ -5,6 +5,7 @@ import { MessageSquare, Plus, Users } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ConversationListRealtime } from "@/components/messages/conversation-list-realtime";
 import { getSession } from "@/lib/auth/session";
 import {
   listConversationsForUser,
@@ -46,10 +47,11 @@ export default async function MessagesPage() {
 
   return (
     <div className="flex flex-1 flex-col">
+      <ConversationListRealtime />
       <PageHeader
         eyebrow="消息中心"
         title="Messages"
-        description="与其他创作者的一对一私信或群聊。MVP 阶段消息发送后需手动刷新或重新进入会话查看对方回复。"
+        description="与其他创作者的一对一私信或群聊；新消息会通过 SSE 实时推送到列表。"
         actions={
           <Button
             variant="default"

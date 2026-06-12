@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { MessageComposer } from "@/components/feed/message-composer";
 import { MessageBubble } from "@/components/messages/message-bubble";
+import { ConversationRealtime } from "@/components/messages/conversation-realtime";
 import { MuteToggle } from "@/components/messages/mute-toggle";
 import { getSession } from "@/lib/auth/session";
 import {
@@ -88,6 +89,7 @@ export default async function ConversationDetailPage({
 
   return (
     <div className="flex flex-1 flex-col">
+      <ConversationRealtime conversationId={conversationId} />
       <PageHeader
         eyebrow={isGroup ? "群聊" : "私信"}
         title={headerTitle}

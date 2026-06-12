@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import type { NotificationType } from "@/generated/prisma/client";
+import { publishNotificationCreated } from "@/lib/realtime/events";
 
 /**
  * 通知触发层
@@ -74,7 +75,7 @@ export async function emitNotification(input: EmitNotificationInput) {
       if (pref && !pref.enabled) return null;
     }
 
-    return await prisma.notification.create({
+    const created = await prisma.notification.create({
       data: {
         userId: recipientId,
         actorId: actorId ?? null,
@@ -87,6 +88,16 @@ export async function emitNotification(input: EmitNotificationInput) {
       },
       select: { id: true },
     });
+
+    // Stage 12.5：推送 notification.created 事件给收件人的 SSE 流（Bell badge 实时刷新）。
+    // 同步发布，不阻塞主流程；publish 函数内部已 try/catch。
+    publishNotificationCreated({
+      recipientId,
+      notificationId: created.id,
+      type,
+    });
+
+    return created;
   } catch (err) {
     console.error("[notifications] emit failed", err);
     return null;
