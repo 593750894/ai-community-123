@@ -139,19 +139,23 @@ async function closeSubscription(page: Page): Promise<void> {
 async function waitForKind(
   page: Page,
   kind: string,
-  predicate: (event: Record<string, unknown>) => boolean,
+  match: Record<string, string>,
   timeoutMs = 5_000,
 ): Promise<void> {
+  // 直接把要比对的字段当 arg 传进 page 上下文——避免 .toString() 丢闭包。
   await page.waitForFunction(
-    ({ kind, predicateFnSrc }) => {
-      const w = window as unknown as { __sseEvents?: unknown[] };
-      const events = (w.__sseEvents ?? []) as Array<Record<string, unknown>>;
-      const predicate = new Function(`return (${predicateFnSrc})`)() as (
-        e: Record<string, unknown>,
-      ) => boolean;
-      return events.some((ev) => ev.kind === kind && predicate(ev));
+    ({ kind, match }) => {
+      const w = window as unknown as {
+        __sseEvents?: Array<Record<string, unknown>>;
+      };
+      const events = w.__sseEvents ?? [];
+      return events.some(
+        (ev) =>
+          ev.kind === kind &&
+          Object.entries(match).every(([k, v]) => ev[k] === v),
+      );
     },
-    { kind, predicateFnSrc: predicate.toString() },
+    { kind, match },
     { timeout: timeoutMs },
   );
 }
@@ -231,13 +235,10 @@ test.describe("Stage 12.5 · SSE realtime", () => {
     expect(sendResp.status()).toBe(201);
     const sentMsgId = (await sendResp.json()).data.id as string;
 
-    await waitForKind(
-      pageA,
-      "message.created",
-      (ev) =>
-        ev.conversationId === conversationId &&
-        ev.messageId === sentMsgId,
-    );
+    await waitForKind(pageA, "message.created", {
+      conversationId,
+      messageId: sentMsgId,
+    });
 
     const events = (await readEvents(pageA)) as Array<{
       kind: string;
@@ -262,12 +263,10 @@ test.describe("Stage 12.5 · SSE realtime", () => {
     );
     expect(editResp.status()).toBe(200);
 
-    await waitForKind(
-      pageA,
-      "message.updated",
-      (ev) =>
-        ev.conversationId === conversationId && ev.messageId === sentMsgId,
-    );
+    await waitForKind(pageA, "message.updated", {
+      conversationId,
+      messageId: sentMsgId,
+    });
 
     // 撤回该消息 → message.deleted
     const delResp = await request.delete(
@@ -276,12 +275,10 @@ test.describe("Stage 12.5 · SSE realtime", () => {
     );
     expect(delResp.status()).toBe(200);
 
-    await waitForKind(
-      pageA,
-      "message.deleted",
-      (ev) =>
-        ev.conversationId === conversationId && ev.messageId === sentMsgId,
-    );
+    await waitForKind(pageA, "message.deleted", {
+      conversationId,
+      messageId: sentMsgId,
+    });
 
     await closeSubscription(pageA);
     await ctxA.close();

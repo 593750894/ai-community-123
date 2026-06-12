@@ -6,15 +6,7 @@
 --   messages.deleted_at 列承载，无需再变更表结构。
 --   conversation_participants.muted_until 字段也已在 12.1 铺好，本阶段直接读写。
 --
--- 沿用 11.x / 12.x 幂等模式（DO $$ 包 ADD VALUE），可重跑安全。
+-- 用 PG 9.6+ 原生的 `ADD VALUE IF NOT EXISTS` 保证可重跑；之前的 DO $$ + regtype 写法在
+-- 大小写规范化下会查不到 NotificationType，反而引起首次部署失败。
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_enum
-    WHERE enumlabel = 'GROUP_MESSAGE'
-      AND enumtypid = 'NotificationType'::regtype
-  ) THEN
-    ALTER TYPE "NotificationType" ADD VALUE 'GROUP_MESSAGE';
-  END IF;
-END $$;
+ALTER TYPE "NotificationType" ADD VALUE IF NOT EXISTS 'GROUP_MESSAGE';
