@@ -1,5 +1,9 @@
 import { getSession } from "@/lib/auth/session";
-import { subscribe } from "@/lib/realtime/bus";
+import {
+  MAX_SUBSCRIBERS_PER_USER,
+  subscribe,
+  subscriberCount,
+} from "@/lib/realtime/bus";
 
 /**
  * Stage 12.5：Server-Sent Events 实时端点。
@@ -47,6 +51,22 @@ export async function GET(request: Request) {
 
   const encoder = new TextEncoder();
   const userId = session.userId;
+
+  // Stage 12.5 audit M4：单用户并发连接上限 precheck。这是一个小竞态窗口
+  // （precheck → subscribe 之间另一个 tab 可能也通过），但 cap 是软 DoS 防线，
+  // 允许 ±1 误差；subscribe 内部还有兜底（返回 null → 我们再次回 429）。
+  if (subscriberCount(userId) >= MAX_SUBSCRIBERS_PER_USER) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: {
+          code: "TOO_MANY_CONNECTIONS",
+          message: "实时连接数已达上限，请关闭其他标签页后重试",
+        },
+      }),
+      { status: 429, headers: { "Content-Type": "application/json" } },
+    );
+  }
 
   // 复用同一个 cleanup 函数避免清理被重复执行 / 早退泄漏 timer。
   // 提升到 stream 外层，让 cancel() 也能直接调（不再复制 teardown）。
@@ -109,10 +129,16 @@ export async function GET(request: Request) {
       safeEnqueue(`retry: 2000\n: ready ${Date.now()}\n\n`);
 
       // 2) 注册订阅：每个事件按 SSE 协议输出 event/data 两行 + 空行分隔。
+      // 如果 precheck 后另一个 tab 抢先占满了上限，subscribe 会返回 null —— 立即清理。
+      // 客户端收到 EOF 后走指数退避，下一次连接会再次撞上 429。
       unsubscribe = subscribe(userId, (event) => {
         const payload = `event: ${event.kind}\ndata: ${JSON.stringify(event)}\n\n`;
         safeEnqueue(payload);
       });
+      if (!unsubscribe) {
+        cleanup();
+        return;
+      }
 
       // 3) 心跳：每 25s 写注释行；写失败说明 stream 已关，主动 cleanup。
       //    每 N 次心跳重新跑一次 getSession —— session 被吊销 / 用户被封禁 / 改密

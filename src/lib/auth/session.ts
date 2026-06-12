@@ -25,13 +25,26 @@ function getSecretKey(): Uint8Array {
   return new TextEncoder().encode(raw);
 }
 
+/**
+ * Stage 12.5 audit M9：把 iat slop 集中到这一处。
+ *
+ * 旧实现 `setIssuedAt()` 用当前秒签发；但 session 检查 `iat * 1000 <= tokensValidAfter.getTime()`
+ * 在「同一秒内 force-logout + 重新登录 / 改密 + 重发 cookie」的场景里会把刚发出的新 token
+ * 误判为失效（iat 是秒精度，tokensValidAfter 是毫秒精度，刚 +1s 的 bump 永远 >= 同秒 iat*1000）。
+ *
+ * 修复：iat 用「下一秒后」的时间戳（`ceil(now/1000) + 1`），保证 iat*1000 严格大于任何用
+ * `Date.now() + 1000` 模式生成的 tokensValidAfter。代价：新 token 看起来比实际签发时间晚 ~1s，
+ * jose verify 不要求 iat <= now，所以不会拒签；exp 也用绝对秒数避免被 iat 推迟。
+ */
 export async function encodeSession(
   payload: SessionPayload,
 ): Promise<string> {
+  const iatSec = Math.ceil(Date.now() / 1000) + 1;
+  const expSec = iatSec + SESSION_TTL_SECONDS;
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(`${SESSION_TTL_SECONDS}s`)
+    .setIssuedAt(iatSec)
+    .setExpirationTime(expSec)
     .sign(getSecretKey());
 }
 

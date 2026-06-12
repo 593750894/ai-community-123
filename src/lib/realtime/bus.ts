@@ -61,14 +61,30 @@ const subscribers: SubscriberMap =
   G.__aiCommunityRealtimeSubs ?? (G.__aiCommunityRealtimeSubs = new Map());
 
 /**
+ * Stage 12.5 audit M4：单用户并发 SSE 连接上限。
+ *
+ * 上限设到 8：覆盖正常用户开 ~3-4 个 tab + 自动重连 / 移动端切换的余量；超过这个数
+ * 几乎可以认为是登录后的脚本式 DoS。超额时 subscribe 返回 null，由路由层回 429
+ * 而不是开流——已认证 DoS 路径就此封死。
+ *
+ * 经 useRealtimeEvent / RealtimeProvider 重构后单 tab 只占 1 个 subscriber，
+ * 用户即便挂 4-5 个 tab 也都进不到这个上限。
+ */
+export const MAX_SUBSCRIBERS_PER_USER = 8;
+
+/**
  * 订阅 userId 的所有事件。
  * 返回 unsubscribe 函数；SSE endpoint 在 stream 关闭时必须调用。
+ * 当该用户的并发连接已达上限时，返回 null —— 调用方应拒绝继续打开流。
  */
 export function subscribe(
   userId: string,
   send: RealtimeSubscriber,
-): () => void {
+): (() => void) | null {
   let set = subscribers.get(userId);
+  if (set && set.size >= MAX_SUBSCRIBERS_PER_USER) {
+    return null;
+  }
   if (!set) {
     set = new Set();
     subscribers.set(userId, set);
@@ -115,4 +131,9 @@ export function subscriberStats(): { users: number; connections: number } {
   let connections = 0;
   for (const set of subscribers.values()) connections += set.size;
   return { users: subscribers.size, connections };
+}
+
+/** 单用户当前并发订阅数。SSE 路由用它做 429 precheck。 */
+export function subscriberCount(userId: string): number {
+  return subscribers.get(userId)?.size ?? 0;
 }
