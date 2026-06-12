@@ -50,12 +50,20 @@ interface RealtimeContextValue {
 
 const RealtimeContext = createContext<RealtimeContextValue | null>(null);
 
-const EVENT_KINDS: ReadonlyArray<RealtimeEventKind> = [
+// Stage 12.5 post-audit LOW：EVENT_KINDS 漂移防御。
+// 把字面量列表用 `as const satisfies` 锁住为 RealtimeEvent["kind"] 的合法子集；
+// 再用 `_KindExhaustivenessCheck` 让 TS 在新增了 union 成员但忘记追加到这里时
+// 直接编译报错 —— 不会出现「新事件类型静默不被订阅」的隐患。
+const EVENT_KINDS = [
   "message.created",
   "message.updated",
   "message.deleted",
   "notification.created",
-];
+] as const satisfies ReadonlyArray<RealtimeEventKind>;
+// 编译期穷尽性：若 RealtimeEvent 加了新 kind 而这里没补，下面这一行就不再赋值成立。
+type _MissingKinds = Exclude<RealtimeEventKind, (typeof EVENT_KINDS)[number]>;
+const _KindExhaustivenessCheck: _MissingKinds extends never ? true : never = true;
+void _KindExhaustivenessCheck;
 
 const INITIAL_RETRY_MS = 1_000;
 const MAX_RETRY_MS = 30_000;

@@ -40,9 +40,10 @@ async function safeAppendSystemMessage(
   conversationId: string,
   triggeredById: string,
   content: string,
+  options?: { extraNotifyUserIds?: ReadonlyArray<string> },
 ): Promise<void> {
   try {
-    await appendSystemMessage(conversationId, triggeredById, content);
+    await appendSystemMessage(conversationId, triggeredById, content, options);
   } catch (err) {
     console.warn("[groups] appendSystemMessage", err);
   }
@@ -319,10 +320,13 @@ export async function removeGroupMember(
     actorDisplayName(viewerId),
     userDisplayNames([targetUserId]),
   ]);
+  // Stage 12.5 post-audit LOW：把被踢用户也带入 SSE 推送，让他们的 Tab 触发 router.refresh
+  // → 403 → 跳走，避免 UI 还停留在「成员视图」。
   await safeAppendSystemMessage(
     conversationId,
     viewerId,
     `${actorName} 将 ${targetName} 移出了群聊`,
+    { extraNotifyUserIds: [targetUserId] },
   );
 }
 
@@ -389,11 +393,14 @@ export async function leaveGroupConversation(
 
   // 退群者已不在 participant 列表里，systemMessage 的 senderId 仍指他本人便于审计；
   // UI 渲染时也能找到对应头像（仍在 messageSender 关系里）。
+  // Stage 12.5 post-audit LOW：把退群者带入 SSE 推送 —— 这样他另一个开着的 Tab 也会
+  // 触发 router.refresh → 403 → 跳走，避免 UI 残留在群聊里。
   const actorName = await actorDisplayName(viewerId);
   await safeAppendSystemMessage(
     conversationId,
     viewerId,
     `${actorName} 退出了群聊`,
+    { extraNotifyUserIds: [viewerId] },
   );
 }
 

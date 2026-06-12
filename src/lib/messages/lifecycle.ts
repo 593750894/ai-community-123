@@ -235,11 +235,18 @@ export function parseMentions(content: string): string[] {
  * 追加一条 SYSTEM 消息到会话，并把 lastMessageAt 推到现在。
  * 不会触发用户通知；只在会话内部留痕。
  * senderId 取「触发动作的用户」用于事后排查 / UI 显示「XX」是谁。
+ *
+ * Stage 12.5 post-audit LOW：`extraNotifyUserIds` 让调用方把「已不在 conversation 里
+ * 但仍需收到这条事件」的用户也加入 SSE 推送 —— 典型是 removeGroupMember + leave：
+ * 被踢 / 主动退群的人已经从 participants 里删了，按当前参与者发布的话他们的开着的
+ * Tab 永远不会触发 router.refresh，UI 还停留在「成员视图」。把他们也带上后，他们
+ * 的 conversation-realtime 触发刷新 → 列表/详情会拿到 403 → 跳转走，UX 闭环。
  */
 export async function appendSystemMessage(
   conversationId: string,
   triggeredById: string,
   content: string,
+  options?: { extraNotifyUserIds?: ReadonlyArray<string> },
 ): Promise<{ id: string }> {
   const now = new Date();
   const [created] = await prisma.$transaction([
@@ -258,11 +265,24 @@ export async function appendSystemMessage(
     }),
   ]);
   // Stage 12.5：SYSTEM 消息也通过 message.created 事件广播，UI 不区分对待。
+  // 显式拼出参与者快照 + extra，传给 publish 跳过它内部的二次 DB 查询，
+  // 同时确保被踢用户也能收到事件。
+  let participantIds: string[] | undefined;
+  if (options?.extraNotifyUserIds?.length) {
+    const rows = await prisma.conversationParticipant.findMany({
+      where: { conversationId },
+      select: { userId: true },
+    });
+    const set = new Set(rows.map((r) => r.userId));
+    for (const id of options.extraNotifyUserIds) set.add(id);
+    participantIds = Array.from(set);
+  }
   await publishMessageCreated({
     conversationId,
     messageId: created.id,
     senderId: triggeredById,
     type: "SYSTEM",
+    participantIds,
   });
   return created;
 }
