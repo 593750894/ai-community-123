@@ -5,7 +5,7 @@ import { Bell } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { useRealtime } from "@/hooks/use-realtime";
+import { useRealtimeEvent } from "@/components/providers/realtime-provider";
 import { cn } from "@/lib/utils";
 
 interface UnreadCountResponse {
@@ -30,6 +30,9 @@ export function NotificationBell({ isLoggedIn }: NotificationBellProps) {
   const [count, setCount] = useState<number>(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inflightRef = useRef<AbortController | null>(null);
+  // Stage 12.5 (post-audit M8) Bell debounce：群里短时间 N 条消息会触发 N 次 notification.created
+  // 事件，原实现每条都 fetchCount() —— 200ms trailing debounce 折叠成一次。
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchCount = useCallback(async () => {
     if (!isLoggedIn) return;
@@ -72,21 +75,22 @@ export function NotificationBell({ isLoggedIn }: NotificationBellProps) {
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
       inflightRef.current?.abort();
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [isLoggedIn, fetchCount]);
 
-  // Stage 12.5：SSE 事件触发即时刷新（替代 60s 等待）。
-  // enabled=false 时 hook 不建立连接，未登录页不会 401 死循环。
-  useRealtime(
-    (event) => {
-      if (event.kind === "notification.created") {
-        void fetchCount();
-      }
-    },
-    { enabled: isLoggedIn },
-  );
+  // Stage 12.5：SSE 事件触发即时刷新（替代 60s 等待）。Provider 在未登录时不连接，
+  // 这里仍按 isLoggedIn 守一道保险（防 SSR 阶段触发或日志噪音）。
+  useRealtimeEvent("notification.created", () => {
+    if (!isLoggedIn) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      debounceRef.current = null;
+      void fetchCount();
+    }, 200);
+  });
 
   const display = count > 99 ? "99+" : String(count);
 

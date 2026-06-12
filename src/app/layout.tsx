@@ -4,6 +4,7 @@ import { MobileBottomNav } from "@/components/layout/mobile-nav";
 import { Navbar } from "@/components/layout/navbar";
 import { RightPanel } from "@/components/layout/right-panel";
 import { Sidebar } from "@/components/layout/sidebar";
+import { RealtimeProvider } from "@/components/providers/realtime-provider";
 import { getCurrentUser } from "@/lib/auth/session";
 import {
   getActiveCreators,
@@ -71,20 +72,22 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
-        <Navbar user={navbarUser} />
-        <div className="mx-auto flex w-full max-w-[1600px] flex-1">
-          <Sidebar hotChannels={sidebarChannels} popularTags={popularTags} />
-          <main className="flex min-w-0 flex-1 flex-col pb-16 lg:pb-0">
-            {children}
-          </main>
-          <RightPanel
-            popularTags={popularTags}
-            activeCreators={rightPanelCreators}
-            viewerId={user?.id ?? null}
-            signedIn={!!user}
-          />
-        </div>
-        <MobileBottomNav />
+        <RealtimeProvider enabled={!!user}>
+          <Navbar user={navbarUser} />
+          <div className="mx-auto flex w-full max-w-[1600px] flex-1">
+            <Sidebar hotChannels={sidebarChannels} popularTags={popularTags} />
+            <main className="flex min-w-0 flex-1 flex-col pb-16 lg:pb-0">
+              {children}
+            </main>
+            <RightPanel
+              popularTags={popularTags}
+              activeCreators={rightPanelCreators}
+              viewerId={user?.id ?? null}
+              signedIn={!!user}
+            />
+          </div>
+          <MobileBottomNav />
+        </RealtimeProvider>
       </body>
     </html>
   );

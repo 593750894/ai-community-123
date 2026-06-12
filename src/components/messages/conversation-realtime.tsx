@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
-import { useRealtime } from "@/hooks/use-realtime";
+import { useRealtimeEvent } from "@/components/providers/realtime-provider";
 
 /**
  * Stage 12.5：会话详情页的 realtime hook 触发器。
@@ -16,6 +16,10 @@ import { useRealtime } from "@/hooks/use-realtime";
  *  - 详情页消息列表 + 参与者角色 + viewerRole + mute 等都在 server component 算好，
  *    增量 patch 容易漏 SYSTEM 消息 / 撤回 placeholder / 编辑高亮等细节；
  *  - router.refresh 走 RSC 增量补丁，开销不大且能保证视图与 DB 一致。
+ *
+ * Stage 12.5 post-audit (M6 + M7)：
+ *  - 改用单一 RealtimeProvider 的 useRealtimeEvent，省掉本组件单开一条 EventSource。
+ *  - 增加 unmount 清理 pendingRef，避免切走后仍 router.refresh() 到新路由。
  */
 export function ConversationRealtime({
   conversationId,
@@ -26,17 +30,14 @@ export function ConversationRealtime({
   const pendingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handler = useCallback(
-    (event: Parameters<Parameters<typeof useRealtime>[0]>[0]) => {
-      if (
-        event.kind !== "message.created" &&
-        event.kind !== "message.updated" &&
-        event.kind !== "message.deleted"
-      ) {
-        return;
-      }
+    (event: {
+      kind:
+        | "message.created"
+        | "message.updated"
+        | "message.deleted";
+      conversationId: string;
+    }) => {
       if (event.conversationId !== conversationId) return;
-
-      // 已经有一个待刷新的 timeout —— 合并到那一次。
       if (pendingRef.current !== null) return;
       pendingRef.current = setTimeout(() => {
         pendingRef.current = null;
@@ -46,7 +47,18 @@ export function ConversationRealtime({
     [conversationId, router],
   );
 
-  useRealtime(handler);
+  useRealtimeEvent("message.created", handler);
+  useRealtimeEvent("message.updated", handler);
+  useRealtimeEvent("message.deleted", handler);
+
+  useEffect(() => {
+    return () => {
+      if (pendingRef.current) {
+        clearTimeout(pendingRef.current);
+        pendingRef.current = null;
+      }
+    };
+  }, []);
 
   return null;
 }
