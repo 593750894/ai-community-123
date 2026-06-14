@@ -1,8 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import {
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { formatPrice } from "@/lib/commerce/schemas";
 
 /**
@@ -13,6 +21,8 @@ import { formatPrice } from "@/lib/commerce/schemas";
  *   - 提交走 fetch POST /api/admin/orders/:orderNo/refund；成功后 router.refresh() 刷 SSR。
  *   - 内部表单抽到 <RefundForm>，靠 React mount/unmount 控制状态初始化 —
  *     避免 useEffect 里 setState（仓库 lint 规则 react-hooks/set-state-in-effect）。
+ *   - Modal scaffolding（backdrop / Esc / focus trap / scroll lock / ✕）由
+ *     <Dialog> 原语托管；此处只关心业务逻辑。
  */
 
 export interface RefundDialogProps {
@@ -41,13 +51,13 @@ export function RefundDialog(props: RefundDialogProps) {
       >
         退款
       </button>
-      {open && (
+      <Dialog open={open} onOpenChange={setOpen}>
         <RefundForm
           {...props}
           remaining={remaining}
           onClose={() => setOpen(false)}
         />
-      )}
+      </Dialog>
     </>
   );
 }
@@ -70,19 +80,6 @@ function RefundForm({
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errMsg, setErrMsg] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  // 挂载后 focus + 监听 Escape。两个均为合法外部副作用（DOM API + 事件订阅）。
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", h);
-    return () => window.removeEventListener("keydown", h);
-  }, [onClose]);
 
   async function submit() {
     setErrMsg(null);
@@ -124,103 +121,95 @@ function RefundForm({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
-      onClick={(e) => {
-        // 点遮罩关闭，但点内容不传播。
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="w-full max-w-md rounded-xl border border-border/60 bg-card p-5 shadow-2xl">
-        <div className="space-y-1">
-          <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-            Stage 10.4 · 退款
-          </div>
-          <h2 className="text-lg font-semibold">订单退款</h2>
-          <p className="text-xs text-muted-foreground">
-            订单 <span className="font-mono">{orderNo}</span> · 渠道{" "}
-            {paymentMethodLabel}
-          </p>
+    <DialogContent ariaLabelledBy="refund-dialog-title" size="md">
+      <DialogHeader>
+        <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+          Stage 10.4 · 退款
         </div>
+        <DialogTitle id="refund-dialog-title">订单退款</DialogTitle>
+        <p className="text-xs text-muted-foreground">
+          订单 <span className="font-mono">{orderNo}</span> · 渠道{" "}
+          {paymentMethodLabel}
+        </p>
+      </DialogHeader>
 
-        <div className="mt-4 space-y-3">
-          <div className="rounded-lg border border-border/60 bg-muted/20 p-3 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">订单金额</span>
-              <span className="tabular-nums">
-                {formatPrice(amountCents, currency)}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">已退</span>
-              <span className="tabular-nums">
-                {formatPrice(refundCents, currency)}
-              </span>
-            </div>
-            <div className="mt-1 flex items-center justify-between border-t border-border/40 pt-1">
-              <span className="font-medium">剩余可退</span>
-              <span className="tabular-nums font-semibold text-cyan-300">
-                {formatPrice(remaining, currency)}
-              </span>
-            </div>
-          </div>
-
-          <label className="block space-y-1">
-            <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
-              本次退款金额（元）
+      <DialogBody className="space-y-3">
+        <div className="rounded-lg border border-border/60 bg-muted/20 p-3 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">订单金额</span>
+            <span className="tabular-nums">
+              {formatPrice(amountCents, currency)}
             </span>
-            <input
-              ref={inputRef}
-              type="number"
-              step="0.01"
-              min="0"
-              max={(remaining / 100).toFixed(2)}
-              value={amountYuan}
-              onChange={(e) => setAmountYuan(e.target.value)}
-              className="block h-9 w-full rounded-lg border border-border/60 bg-background px-2 text-sm tabular-nums outline-none focus:border-primary/60"
-            />
-          </label>
-
-          <label className="block space-y-1">
-            <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
-              退款原因（可选，会进 PSP + 审计日志）
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">已退</span>
+            <span className="tabular-nums">
+              {formatPrice(refundCents, currency)}
             </span>
-            <textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              rows={2}
-              maxLength={200}
-              placeholder="例：买家申请，商品不符"
-              className="block w-full rounded-lg border border-border/60 bg-background px-2 py-1.5 text-xs outline-none focus:border-primary/60"
-            />
-          </label>
-
-          {errMsg && (
-            <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1.5 text-[11px] text-rose-300">
-              {errMsg}
-            </div>
-          )}
+          </div>
+          <div className="mt-1 flex items-center justify-between border-t border-border/40 pt-1">
+            <span className="font-medium">剩余可退</span>
+            <span className="tabular-nums font-semibold text-cyan-300">
+              {formatPrice(remaining, currency)}
+            </span>
+          </div>
         </div>
 
-        <div className="mt-5 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={submitting}
-            className="rounded-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-          >
-            取消
-          </button>
-          <button
-            type="button"
-            onClick={submit}
-            disabled={submitting}
-            className="rounded-md border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs font-medium text-rose-300 hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {submitting ? "处理中…" : "确认退款"}
-          </button>
-        </div>
-      </div>
-    </div>
+        <label className="block space-y-1">
+          <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            本次退款金额（元）
+          </span>
+          <input
+            data-autofocus
+            type="number"
+            step="0.01"
+            min="0"
+            max={(remaining / 100).toFixed(2)}
+            value={amountYuan}
+            onChange={(e) => setAmountYuan(e.target.value)}
+            className="block h-9 w-full rounded-lg border border-border/60 bg-background px-2 text-sm tabular-nums outline-none focus:border-primary/60"
+          />
+        </label>
+
+        <label className="block space-y-1">
+          <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            退款原因（可选，会进 PSP + 审计日志）
+          </span>
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={2}
+            maxLength={200}
+            placeholder="例：买家申请，商品不符"
+            className="block w-full rounded-lg border border-border/60 bg-background px-2 py-1.5 text-xs outline-none focus:border-primary/60"
+          />
+        </label>
+
+        {errMsg && (
+          <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1.5 text-[11px] text-rose-300">
+            {errMsg}
+          </div>
+        )}
+      </DialogBody>
+
+      <DialogFooter>
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={submitting}
+          className="rounded-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+        >
+          取消
+        </button>
+        <button
+          type="button"
+          onClick={submit}
+          disabled={submitting}
+          className="rounded-md border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs font-medium text-rose-300 hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {submitting ? "处理中…" : "确认退款"}
+        </button>
+      </DialogFooter>
+    </DialogContent>
   );
 }

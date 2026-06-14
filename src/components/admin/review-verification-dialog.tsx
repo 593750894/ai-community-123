@@ -1,7 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+
+import {
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 /**
  * Stage 11.2：admin 审核企业认证申请的弹窗。
@@ -10,7 +19,7 @@ import { useRouter } from "next/navigation";
  *   - 行内按钮（通过 / 驳回）触发同一对话框，预选 decision；
  *   - 通过不要求 note；驳回必须填写 note；
  *   - 提交走 fetch POST /api/admin/organizations/:id/verification；
- *   - mount/unmount 控制 state，规避 lint react-hooks/set-state-in-effect。
+ *   - 对话框 scaffolding（焦点陷阱 / Esc / 遮罩 / 滚动锁 / portal）走 <Dialog> 原语。
  */
 
 interface VerificationDetails {
@@ -78,18 +87,6 @@ function ReviewForm({
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errMsg, setErrMsg] = useState<string | null>(null);
-  const inputRef = useRef<HTMLTextAreaElement | null>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", h);
-    return () => window.removeEventListener("keydown", h);
-  }, [onClose]);
 
   async function submit() {
     setErrMsg(null);
@@ -125,79 +122,81 @@ function ReviewForm({
   const approve = decision === "APPROVE";
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
       }}
     >
-      <div className="w-full max-w-md rounded-xl border border-border/60 bg-card p-5 shadow-2xl">
-        <div className="space-y-1">
+      <DialogContent ariaLabelledBy="review-verification-dialog-title">
+        <DialogHeader>
           <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
             Stage 11.2 · 企业认证审核
           </div>
-          <h2 className="text-lg font-semibold">
+          <DialogTitle id="review-verification-dialog-title">
             {approve ? "通过认证" : "驳回认证"}
-          </h2>
+          </DialogTitle>
           <p className="text-xs text-muted-foreground">
             企业：<span className="font-medium text-foreground">{orgName}</span>
           </p>
-        </div>
+        </DialogHeader>
 
-        <div className="mt-4 space-y-3 text-xs">
-          <DetailRow label="营业执照名称" value={details.name} />
-          <DetailRow label="注册号" value={details.regNo} mono />
-          <DetailRow label="法定代表人" value={details.rep} />
-          <DetailRow label="联系方式" value={details.contact} />
-          {details.licenseUrl && (
-            <div className="flex items-center gap-2">
-              <span className="w-24 shrink-0 text-muted-foreground">执照</span>
-              <a
-                href={details.licenseUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="break-all text-primary hover:underline"
-              >
-                {details.licenseUrl}
-              </a>
-            </div>
-          )}
-          {details.note && (
-            <div>
-              <p className="text-muted-foreground">企业补充说明</p>
-              <p className="mt-1 rounded-md border border-border/60 bg-muted/20 px-2 py-1.5">
-                {details.note}
-              </p>
-            </div>
-          )}
+        <DialogBody>
+          <div className="space-y-3 text-xs">
+            <DetailRow label="营业执照名称" value={details.name} />
+            <DetailRow label="注册号" value={details.regNo} mono />
+            <DetailRow label="法定代表人" value={details.rep} />
+            <DetailRow label="联系方式" value={details.contact} />
+            {details.licenseUrl && (
+              <div className="flex items-center gap-2">
+                <span className="w-24 shrink-0 text-muted-foreground">执照</span>
+                <a
+                  href={details.licenseUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="break-all text-primary hover:underline"
+                >
+                  {details.licenseUrl}
+                </a>
+              </div>
+            )}
+            {details.note && (
+              <div>
+                <p className="text-muted-foreground">企业补充说明</p>
+                <p className="mt-1 rounded-md border border-border/60 bg-muted/20 px-2 py-1.5">
+                  {details.note}
+                </p>
+              </div>
+            )}
 
-          <label className="block space-y-1">
-            <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
-              {approve ? "审核备注（可选，会写入审计日志）" : "驳回原因（必填，会通知到企业）"}
-            </span>
-            <textarea
-              ref={inputRef}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={3}
-              maxLength={500}
-              placeholder={
-                approve
-                  ? "例：资料完整、与公开信息一致"
-                  : "例：营业执照号与企业名称不匹配，请重新提交"
-              }
-              className="block w-full rounded-lg border border-border/60 bg-background px-2 py-1.5 text-xs outline-none focus:border-primary/60"
-            />
-          </label>
+            <label className="block space-y-1">
+              <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                {approve ? "审核备注（可选，会写入审计日志）" : "驳回原因（必填，会通知到企业）"}
+              </span>
+              <textarea
+                data-autofocus
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={3}
+                maxLength={500}
+                placeholder={
+                  approve
+                    ? "例：资料完整、与公开信息一致"
+                    : "例：营业执照号与企业名称不匹配，请重新提交"
+                }
+                className="block w-full rounded-lg border border-border/60 bg-background px-2 py-1.5 text-xs outline-none focus:border-primary/60"
+              />
+            </label>
 
-          {errMsg && (
-            <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1.5 text-[11px] text-rose-300">
-              {errMsg}
-            </div>
-          )}
-        </div>
+            {errMsg && (
+              <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1.5 text-[11px] text-rose-300">
+                {errMsg}
+              </div>
+            )}
+          </div>
+        </DialogBody>
 
-        <div className="mt-5 flex items-center justify-end gap-2">
+        <DialogFooter>
           <button
             type="button"
             onClick={onClose}
@@ -218,9 +217,9 @@ function ReviewForm({
           >
             {submitting ? "处理中…" : approve ? "确认通过" : "确认驳回"}
           </button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

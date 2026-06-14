@@ -1,8 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import {
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   PAYOUT_METHOD_LABEL,
   formatPrice,
@@ -52,7 +60,9 @@ export function MarkPayoutPaidDialog(props: MarkPayoutPaidDialogProps) {
       >
         标记已打款
       </button>
-      {open && <MarkForm {...props} onClose={() => setOpen(false)} />}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <MarkForm {...props} onClose={() => setOpen(false)} />
+      </Dialog>
     </>
   );
 }
@@ -70,18 +80,6 @@ function MarkForm({
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errMsg, setErrMsg] = useState<string | null>(null);
-  const noteRef = useRef<HTMLTextAreaElement | null>(null);
-
-  useEffect(() => {
-    noteRef.current?.focus();
-  }, []);
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", h);
-    return () => window.removeEventListener("keydown", h);
-  }, [onClose]);
 
   async function submit() {
     setErrMsg(null);
@@ -110,24 +108,21 @@ function MarkForm({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="w-full max-w-md rounded-xl border border-border/60 bg-card p-5 shadow-2xl">
-        <div className="space-y-1">
-          <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-            Stage 10.5 · 结算
-          </div>
-          <h2 className="text-lg font-semibold">标记结算单已打款</h2>
-          <p className="text-xs text-muted-foreground">
-            订单 <span className="font-mono">{orderNo}</span> · 卖家 @{sellerUsername}
-          </p>
+    <DialogContent ariaLabelledBy="mark-payout-paid-dialog-title">
+      <DialogHeader>
+        <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+          Stage 10.5 · 结算
         </div>
+        <DialogTitle id="mark-payout-paid-dialog-title">
+          标记结算单已打款
+        </DialogTitle>
+        <p className="text-xs text-muted-foreground">
+          订单 <span className="font-mono">{orderNo}</span> · 卖家 @{sellerUsername}
+        </p>
+      </DialogHeader>
 
-        <div className="mt-4 space-y-3">
+      <DialogBody>
+        <div className="space-y-3">
           <div className="rounded-lg border border-border/60 bg-muted/20 p-3 text-xs">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">结算净额</span>
@@ -160,7 +155,7 @@ function MarkForm({
               备注（可选，存入审计日志 / 卖家可见）
             </span>
             <textarea
-              ref={noteRef}
+              data-autofocus
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={2}
@@ -180,26 +175,26 @@ function MarkForm({
             </div>
           )}
         </div>
+      </DialogBody>
 
-        <div className="mt-5 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={submitting}
-            className="rounded-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-          >
-            取消
-          </button>
-          <button
-            type="button"
-            onClick={submit}
-            disabled={submitting}
-            className="rounded-md border border-emerald-500/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {submitting ? "处理中…" : "确认已打款"}
-          </button>
-        </div>
-      </div>
-    </div>
+      <DialogFooter>
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={submitting}
+          className="rounded-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+        >
+          取消
+        </button>
+        <button
+          type="button"
+          onClick={submit}
+          disabled={submitting}
+          className="rounded-md border border-emerald-500/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {submitting ? "处理中…" : "确认已打款"}
+        </button>
+      </DialogFooter>
+    </DialogContent>
   );
 }
