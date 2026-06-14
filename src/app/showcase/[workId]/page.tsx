@@ -14,6 +14,7 @@ import {
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
+import { PillTag } from "@/components/ui/pill-tag";
 import { WorkCard, type Work } from "@/components/feed/work-card";
 import { OrgAttributionBadge } from "@/components/publish/org-attribution-badge";
 import {
@@ -25,7 +26,6 @@ import { prisma } from "@/lib/db";
 import { loadInteractionState } from "@/lib/interactions/queries";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import {
-  authorTintFromName,
   workCategoryMeta,
   type WorkCategoryValue,
 } from "@/lib/work-categories";
@@ -82,7 +82,6 @@ export default async function WorkDetailPage({
   if (!work) notFound();
 
   const meta = workCategoryMeta(work.category);
-  const tint = authorTintFromName(work.author.name);
 
   // 计数：曝光 + 1（轻量异步）
   await prisma.work.update({
@@ -130,7 +129,7 @@ export default async function WorkDetailPage({
       <div className="grid gap-6 px-6 py-6 sm:px-8 lg:grid-cols-[1fr_320px]">
         <main className="space-y-6">
           {/* 视频播放区 */}
-          <section className="overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-card/60 to-card/20">
+          <section className="surface-card overflow-hidden rounded-2xl border-primary/20">
             <div className={cn("relative w-full overflow-hidden bg-black", aspect)}>
               {work.thumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -140,7 +139,7 @@ export default async function WorkDetailPage({
                   className="absolute inset-0 size-full object-cover opacity-90"
                 />
               ) : (
-                <div className={cn("absolute inset-0 bg-gradient-to-br", meta.cover)} />
+                <div className="absolute inset-0 bg-muted" />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
               <a
@@ -150,20 +149,13 @@ export default async function WorkDetailPage({
                 className="absolute inset-0 flex items-center justify-center"
                 title="在新标签页打开原视频链接"
               >
-                <span className="flex size-20 items-center justify-center rounded-full bg-white/15 backdrop-blur-md ring-1 ring-white/30 transition-transform hover:scale-105">
-                  <Play className="size-9 fill-white text-white" />
+                <span className="flex size-20 items-center justify-center rounded-full border border-border bg-background/85 text-foreground transition-transform hover:scale-105">
+                  <Play className="size-9 fill-foreground text-foreground" />
                 </span>
               </a>
               <div className="absolute right-3 top-3 flex items-center gap-2">
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-medium backdrop-blur",
-                    meta.tone,
-                  )}
-                >
-                  {meta.label}
-                </span>
-                <span className="rounded bg-black/55 px-2 py-0.5 text-[11px] font-medium tabular-nums text-white backdrop-blur">
+                <PillTag tint={meta.tint}>{meta.label}</PillTag>
+                <span className="rounded bg-black/70 px-2 py-0.5 text-[11px] font-medium tabular-nums text-white">
                   {formatDuration(work.durationSec)}
                 </span>
               </div>
@@ -175,7 +167,7 @@ export default async function WorkDetailPage({
               </h1>
 
               {/* 计数条 */}
-              <div className="flex flex-wrap items-center gap-3 border-y border-border/40 py-3 text-xs text-muted-foreground tabular-nums">
+              <div className="flex flex-wrap items-center gap-3 border-y border-border py-3 text-xs text-muted-foreground tabular-nums">
                 <span className="inline-flex items-center gap-1.5">
                   <Eye className="size-3.5" />
                   {work.views} 次观看
@@ -227,7 +219,7 @@ export default async function WorkDetailPage({
                     {work.tools.map((t) => (
                       <span
                         key={t}
-                        className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-muted/40 px-2 py-1 text-xs text-foreground/90"
+                        className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs text-foreground/90"
                       >
                         <Wrench className="size-3 text-muted-foreground/70" />
                         {t}
@@ -243,7 +235,7 @@ export default async function WorkDetailPage({
                   <div className="label-section-strong">
                     Prompt
                   </div>
-                  <div className="rounded-lg border border-border/60 bg-muted/60 dark:bg-background/40 px-3 py-2 font-mono text-[11px] leading-relaxed text-foreground/85">
+                  <div className="rounded-lg border border-border bg-muted/60 dark:bg-background/40 px-3 py-2 font-mono text-[11px] leading-relaxed text-foreground/85">
                     {work.prompt}
                   </div>
                 </div>
@@ -262,7 +254,7 @@ export default async function WorkDetailPage({
                     label="封面链接"
                     icon={<ImageIcon className="size-3" />}
                     href={work.thumbnailUrl}
-                    accent="text-cyan-300"
+                    accent="text-muted-foreground"
                   />
                 )}
               </div>
@@ -308,17 +300,11 @@ export default async function WorkDetailPage({
 
         <aside className="space-y-4">
           {/* 作品分类卡 */}
-          <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
+          <section className="rounded-2xl border border-border bg-card/40 p-4">
             <div className="label-section-strong mb-2">
               作品类型
             </div>
-            <div
-              className={cn(
-                "rounded-lg border bg-gradient-to-br p-3",
-                meta.tone,
-                meta.cover,
-              )}
-            >
+            <div className="rounded-lg border border-border bg-card p-3">
               <div className="text-sm font-semibold text-foreground">
                 {meta.label}
               </div>
@@ -333,7 +319,7 @@ export default async function WorkDetailPage({
           </section>
 
           {/* 作者卡 */}
-          <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
+          <section className="rounded-2xl border border-border bg-card/40 p-4">
             <div className="label-section-strong mb-3">
               作者
             </div>
@@ -343,15 +329,10 @@ export default async function WorkDetailPage({
                 <img
                   src={work.author.avatar}
                   alt={work.author.name}
-                  className="size-12 rounded-xl border border-border/60"
+                  className="size-12 rounded-xl border border-border"
                 />
               ) : (
-                <span
-                  className={cn(
-                    "flex size-12 items-center justify-center rounded-xl bg-gradient-to-br text-sm font-medium text-black/70",
-                    tint,
-                  )}
-                >
+                <span className="flex size-12 items-center justify-center rounded-xl bg-muted text-sm font-medium text-muted-foreground">
                   {work.author.name.slice(0, 1)}
                 </span>
               )}
@@ -384,7 +365,7 @@ export default async function WorkDetailPage({
               查看作者主页 →
             </Link>
             {work.organization && (
-              <div className="mt-3 border-t border-border/40 pt-3">
+              <div className="mt-3 border-t border-border pt-3">
                 <p className="label-section-strong mb-1.5">
                   企业发布
                 </p>
@@ -394,7 +375,7 @@ export default async function WorkDetailPage({
           </section>
 
           {/* 互动数据 */}
-          <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
+          <section className="rounded-2xl border border-border bg-card/40 p-4">
             <div className="label-section-strong mb-2">
               数据
             </div>
@@ -422,7 +403,7 @@ function LinkField({
   accent: string;
 }) {
   return (
-    <div className="rounded-xl border border-border/60 bg-background/40 p-3">
+    <div className="rounded-xl border border-border bg-background/40 p-3">
       <div className={cn("mb-1.5 inline-flex items-center gap-1 text-[11px]", accent)}>
         {icon}
         {label}
@@ -450,7 +431,7 @@ function Stat({
   label: string;
 }) {
   return (
-    <div className="rounded-lg border border-border/40 bg-background/30 px-2 py-2">
+    <div className="rounded-lg border border-border bg-background/30 px-2 py-2">
       <div className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
         {icon}
         {label}

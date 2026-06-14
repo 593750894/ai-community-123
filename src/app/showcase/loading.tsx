@@ -3,7 +3,7 @@ import { CardSkeleton, Skeleton } from "@/components/ui/loading";
 export default function ShowcaseLoading() {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex flex-col gap-3 border-b border-border/60 px-4 py-5 sm:px-8 sm:py-7">
+      <header className="flex flex-col gap-3 border-b border-border px-4 py-5 sm:px-8 sm:py-7">
         <Skeleton className="h-5 w-24 rounded-full" />
         <Skeleton className="h-8 w-72" />
         <Skeleton className="h-4 w-full max-w-xl" />

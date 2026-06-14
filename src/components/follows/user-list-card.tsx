@@ -17,7 +17,7 @@ export function UserListCard({
   loginNext: string;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-2xl border border-border/60 bg-card/40 p-4 transition-colors hover:border-primary/40">
+    <div className="flex items-start gap-3 rounded-2xl border border-border bg-card/40 p-4 transition-colors hover:border-primary/40">
       <Link
         href={`/profile/${user.id}`}
         className="shrink-0"
@@ -28,7 +28,7 @@ export function UserListCard({
           <img
             src={user.avatar}
             alt={user.name}
-            className="size-12 rounded-xl border border-border/60 object-cover"
+            className="size-12 rounded-xl border border-border object-cover"
           />
         ) : (
           <span className="flex size-12 items-center justify-center rounded-xl bg-muted text-sm font-medium text-foreground">

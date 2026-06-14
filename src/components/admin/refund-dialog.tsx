@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { MoneyText } from "@/components/ui/money-text";
 import { formatPrice } from "@/lib/commerce/schemas";
 
 /**
@@ -47,7 +48,7 @@ export function RefundDialog(props: RefundDialogProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-[11px] text-rose-300 hover:bg-rose-500/20"
+        className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-[11px] text-rose-300 hover:bg-rose-500/20"
       >
         退款
       </button>
@@ -134,24 +135,22 @@ function RefundForm({
       </DialogHeader>
 
       <DialogBody className="space-y-3">
-        <div className="rounded-lg border border-border/60 bg-muted/20 p-3 text-xs">
+        <div className="rounded-lg border border-border bg-muted/20 p-3 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">订单金额</span>
-            <span className="tabular-nums">
-              {formatPrice(amountCents, currency)}
-            </span>
+            <MoneyText value={amountCents} currency={currency} />
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">已退</span>
-            <span className="tabular-nums">
-              {formatPrice(refundCents, currency)}
-            </span>
+            <MoneyText value={refundCents} currency={currency} />
           </div>
-          <div className="mt-1 flex items-center justify-between border-t border-border/40 pt-1">
+          <div className="mt-1 flex items-center justify-between border-t border-border pt-1">
             <span className="font-medium">剩余可退</span>
-            <span className="tabular-nums font-semibold text-cyan-300">
-              {formatPrice(remaining, currency)}
-            </span>
+            <MoneyText
+              value={remaining}
+              currency={currency}
+              className="font-semibold text-cyan-300"
+            />
           </div>
         </div>
 
@@ -167,7 +166,7 @@ function RefundForm({
             max={(remaining / 100).toFixed(2)}
             value={amountYuan}
             onChange={(e) => setAmountYuan(e.target.value)}
-            className="block h-9 w-full rounded-lg border border-border/60 bg-background px-2 text-sm tabular-nums outline-none focus:border-primary/60"
+            className="block h-9 w-full rounded-lg border border-border bg-background px-2 text-sm tabular-nums outline-none focus:border-primary/60"
           />
         </label>
 
@@ -181,7 +180,7 @@ function RefundForm({
             rows={2}
             maxLength={200}
             placeholder="例：买家申请，商品不符"
-            className="block w-full rounded-lg border border-border/60 bg-background px-2 py-1.5 text-xs outline-none focus:border-primary/60"
+            className="block w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs outline-none focus:border-primary/60"
           />
         </label>
 
@@ -197,7 +196,7 @@ function RefundForm({
           type="button"
           onClick={onClose}
           disabled={submitting}
-          className="rounded-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+          className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
         >
           取消
         </button>
@@ -205,7 +204,7 @@ function RefundForm({
           type="button"
           onClick={submit}
           disabled={submitting}
-          className="rounded-md border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs font-medium text-rose-300 hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs font-medium text-rose-300 hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? "处理中…" : "确认退款"}
         </button>

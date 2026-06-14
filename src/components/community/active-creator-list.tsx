@@ -34,7 +34,7 @@ export function ActiveCreatorList({
               <img
                 src={user.avatar}
                 alt={user.name}
-                className="size-10 shrink-0 rounded-full border border-border/60"
+                className="size-10 shrink-0 rounded-full border border-border"
               />
             ) : (
               <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium text-foreground">

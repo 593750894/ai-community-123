@@ -94,7 +94,7 @@ export function MuteToggle({
       </Button>
       {open && (
         <div
-          className="absolute right-0 top-full z-30 mt-1 w-40 overflow-hidden rounded-lg border border-border/60 bg-popover shadow-lg"
+          className="absolute right-0 top-full z-30 mt-1 w-40 overflow-hidden rounded-lg border border-border bg-popover shadow-lg"
           onMouseLeave={() => setOpen(false)}
         >
           {MUTE_PRESETS.map((p) => (

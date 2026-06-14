@@ -45,7 +45,7 @@ const TYPE_ACCENT: Record<string, string> = {
   COLLAB_REPLY: "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
   MESSAGE: "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
   FOLLOW: "text-sky-300 bg-sky-500/10 border-sky-500/30",
-  SYSTEM: "text-muted-foreground bg-muted/30 border-border/60",
+  SYSTEM: "text-muted-foreground bg-muted/30 border-border",
 };
 
 type Bucket = "today" | "thisWeek" | "older";
@@ -193,7 +193,7 @@ export function NotificationList({
             <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {BUCKET_LABEL[b]}
             </h2>
-            <ul className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card/30">
+            <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card/30">
               {rows.map((n) => (
                 <NotificationRow key={n.id} item={n} onClick={() => markOne(n.id)} />
               ))}
@@ -253,7 +253,7 @@ function NotificationRow({
               <img
                 src={item.actor.avatar}
                 alt={item.actor.name}
-                className="mr-1.5 inline-block size-4 rounded-full border border-border/60 object-cover align-[-3px]"
+                className="mr-1.5 inline-block size-4 rounded-full border border-border object-cover align-[-3px]"
               />
             ) : null}
             <span className={cn(unread ? "text-foreground" : "text-muted-foreground")}>

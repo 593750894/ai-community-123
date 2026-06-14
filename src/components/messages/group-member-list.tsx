@@ -58,7 +58,7 @@ export function GroupMemberList({
   });
 
   return (
-    <ul className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card/30">
+    <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card/30">
       {sorted.map((m) => {
         const isSelf = m.user.id === viewerId;
         const canPromote =
@@ -86,10 +86,10 @@ export function GroupMemberList({
                 <img
                   src={m.user.avatar}
                   alt={m.user.name}
-                  className="size-9 shrink-0 rounded-full border border-border/60 object-cover"
+                  className="size-9 shrink-0 rounded-full border border-border object-cover"
                 />
               ) : (
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-300 to-purple-500 text-xs font-semibold text-black/70">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
                   {m.user.name.slice(0, 1)}
                 </span>
               )}
@@ -130,7 +130,7 @@ export function GroupMemberList({
                     <input type="hidden" name="role" value="ADMIN" />
                     <button
                       type="submit"
-                      className="rounded-md border border-sky-500/40 px-2 py-1 text-[11px] text-sky-300 transition-colors hover:bg-sky-500/10"
+                      className="rounded-full border border-sky-500/40 px-2.5 py-1 text-[11px] text-sky-300 transition-colors hover:bg-sky-500/10"
                     >
                       提为管理员
                     </button>
@@ -147,7 +147,7 @@ export function GroupMemberList({
                     <input type="hidden" name="role" value="MEMBER" />
                     <button
                       type="submit"
-                      className="rounded-md border border-border/60 px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted/50"
+                      className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted/50"
                     >
                       取消管理员
                     </button>
@@ -166,7 +166,7 @@ export function GroupMemberList({
                     <input type="hidden" name="userId" value={m.user.id} />
                     <button
                       type="submit"
-                      className="rounded-md border border-rose-500/40 px-2 py-1 text-[11px] text-rose-300 transition-colors hover:bg-rose-500/10"
+                      className="rounded-full border border-rose-500/40 px-2.5 py-1 text-[11px] text-rose-300 transition-colors hover:bg-rose-500/10"
                     >
                       移除
                     </button>

@@ -259,7 +259,7 @@ function DialogPortal({ children, closeOnEscape, closeOnBackdrop }: DialogPortal
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
       onMouseDown={(e) => {
         // 用 mousedown + currentTarget 判断，避免点内容 drag 出来误触发关闭。
         if (!closeOnBackdrop) return;
@@ -323,7 +323,7 @@ export function DialogContent({
       aria-describedby={ariaDescribedBy}
       tabIndex={-1}
       className={cn(
-        "relative flex w-full flex-col rounded-xl border border-border/60 bg-card text-card-foreground shadow-2xl outline-none",
+        "relative flex w-full flex-col rounded-xl border border-border bg-card text-card-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] outline-none",
         "max-h-[90dvh] overflow-hidden",
         DIALOG_SIZES[size],
         className,
@@ -370,7 +370,7 @@ export function DialogHeader({ children, className }: DialogHeaderProps) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-1 border-b border-border/60 px-5 py-4 pr-12",
+        "flex flex-col gap-1 border-b border-border px-5 py-4 pr-12",
         className,
       )}
     >
@@ -425,7 +425,7 @@ export function DialogFooter({ children, className }: DialogFooterProps) {
   return (
     <div
       className={cn(
-        "flex items-center justify-end gap-2 border-t border-border/60 px-5 py-3",
+        "flex items-center justify-end gap-2 border-t border-border px-5 py-3",
         className,
       )}
     >

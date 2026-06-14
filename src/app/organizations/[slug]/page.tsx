@@ -54,9 +54,9 @@ export default async function OrganizationDetailPage({ params }: PageProps) {
         </Link>
       </div>
 
-      <div className="rounded-xl border border-border/60 bg-card/40 p-6">
+      <div className="rounded-xl border border-border bg-card/40 p-6">
         <div className="flex flex-wrap items-start gap-4">
-          <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted/40">
+          <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted/40">
             {org.logo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={org.logo} alt={org.name} className="size-full object-cover" />
@@ -205,7 +205,7 @@ function Card({
   return (
     <section
       className={[
-        "rounded-xl border border-border/60 bg-card/40 p-4",
+        "rounded-xl border border-border bg-card/40 p-4",
         className ?? "",
       ].join(" ")}
     >

@@ -82,7 +82,7 @@ export function PublishAsSelector({
               <img
                 src={org.logo}
                 alt={org.name}
-                className="size-7 shrink-0 rounded-md border border-border/60 object-cover"
+                className="size-7 shrink-0 rounded-md border border-border object-cover"
               />
             ) : (
               <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10">
@@ -126,7 +126,7 @@ function OptionTile({
         "flex items-center gap-2 rounded-lg border px-3 py-2 text-left transition-all",
         active
           ? "border-primary/60 bg-primary/10 ring-1 ring-primary/30"
-          : "border-border/60 bg-card/40 hover:border-border hover:bg-muted/40",
+          : "border-border bg-card/40 hover:border-border hover:bg-muted/40",
       )}
     >
       {children}

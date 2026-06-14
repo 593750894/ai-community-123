@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import { CountText } from "@/components/ui/count-text";
 import { cn } from "@/lib/utils";
 
 // Stage 7 · /me pages 用 SSR-friendly 翻页：直接渲染 Link，每次跳页带 ?page=N。
@@ -29,14 +30,10 @@ export function MePager({
         <ChevronLeft className="size-4" />
       </PagerLink>
 
-      <div className="flex items-center gap-1 rounded-lg border border-border/30 bg-card/20 px-3 py-1.5">
-        <span className="text-xs font-semibold tabular-nums text-primary">
-          {page}
-        </span>
+      <div className="flex items-center gap-1 rounded-full border border-border bg-card/20 px-3 py-1.5">
+        <CountText value={page} className="text-xs font-semibold text-primary" />
         <span className="text-xs text-muted-foreground/50">/</span>
-        <span className="text-xs tabular-nums text-muted-foreground">
-          {totalPages}
-        </span>
+        <CountText value={totalPages} className="text-xs text-muted-foreground" />
       </div>
 
       <PagerLink href={nextHref} label="下一页">
@@ -56,7 +53,7 @@ function PagerLink({
   children: React.ReactNode;
 }) {
   const baseCls =
-    "inline-flex size-9 items-center justify-center rounded-lg border border-border/40 bg-card/30 text-muted-foreground transition-all";
+    "inline-flex size-9 items-center justify-center rounded-full border border-border bg-card/30 text-muted-foreground transition-all";
   if (!href) {
     return (
       <span

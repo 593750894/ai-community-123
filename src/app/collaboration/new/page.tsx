@@ -40,7 +40,7 @@ export default async function CollaborationNewPage() {
               的身份发布。需求将公开展示在合作市场，联系方式仅登录用户可见。
             </span>
           </div>
-          <div className="rounded-2xl border border-border/60 bg-card/30 p-6 sm:p-8">
+          <div className="rounded-2xl border border-border bg-card/30 p-6 sm:p-8">
             <CreateCollaborationForm organizations={organizations} />
           </div>
         </div>

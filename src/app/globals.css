@@ -2,129 +2,318 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/* Dark variant matches both legacy `.dark` class (V1 theme system) and
+ * `[data-theme="dark"]` (V2 contract). Descendant form so `dark:` modifiers
+ * fire on anything under either root. */
+@custom-variant dark (&:is(.dark *, [data-theme="dark"] *));
 
+/* ─────────────────────────── @theme: V2 token surface ───────────────────────────
+ * DESIGN.md (SeedLand · V2) is the source of truth. Light values live in :root;
+ * dark counterparts are explicitly enumerated in the [data-theme="dark"] block —
+ * NOT algorithmically derived (per §10). */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Type stack — system fonts, no webfonts. CJK leads the fallback. */
   --font-sans: var(--font-sans);
   --font-mono: var(--font-system-mono);
   --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
+
+  /* shadcn aliases — wired to V2 tokens so existing call sites pick up the
+   * new palette without per-file changes. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* V2-named tokens — first-class so utilities like `bg-canvas-cream`,
+   * `text-money-positive`, `border-hairline-strong` exist. */
+  --color-canvas: var(--canvas);
+  --color-canvas-cream: var(--canvas-cream);
+  --color-canvas-soft: var(--canvas-soft);
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-mute: var(--ink-mute);
+  --color-ink-mute-2: var(--ink-mute-2);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+  --color-hairline-input: var(--hairline-input);
+  --color-primary-deep: var(--primary-deep);
+  --color-primary-press: var(--primary-press);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-bg-subdued: var(--primary-bg-subdued);
+  --color-money: var(--money);
+  --color-money-positive: var(--money-positive);
+  --color-money-negative: var(--money-negative);
+  --color-accent-amber: var(--accent-amber);
+  --color-accent-amber-soft: var(--accent-amber-soft);
+  --color-accent-emerald: var(--accent-emerald);
+  --color-accent-emerald-soft: var(--accent-emerald-soft);
+  --color-destructive-soft: var(--destructive-soft);
+
+  /* Taxonomy tag tints — 7 pairs. Used only for category coding. */
+  --color-tag-cyan-bg: var(--tag-cyan-bg);
+  --color-tag-cyan-fg: var(--tag-cyan-fg);
+  --color-tag-blue-bg: var(--tag-blue-bg);
+  --color-tag-blue-fg: var(--tag-blue-fg);
+  --color-tag-violet-bg: var(--tag-violet-bg);
+  --color-tag-violet-fg: var(--tag-violet-fg);
+  --color-tag-rose-bg: var(--tag-rose-bg);
+  --color-tag-rose-fg: var(--tag-rose-fg);
+  --color-tag-amber-bg: var(--tag-amber-bg);
+  --color-tag-amber-fg: var(--tag-amber-fg);
+  --color-tag-emerald-bg: var(--tag-emerald-bg);
+  --color-tag-emerald-fg: var(--tag-emerald-fg);
+  --color-tag-slate-bg: var(--tag-slate-bg);
+  --color-tag-slate-fg: var(--tag-slate-fg);
+
+  /* Radius scale — V2 explicit values, not shadcn calc() chain. */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-4xl: 28px;
+
+  /* Paper-halo elevation. Generates `shadow-paper-1/2/3/modal` utilities. */
+  --shadow-paper-1: var(--elevation-paper-1);
+  --shadow-paper-2: var(--elevation-paper-2);
+  --shadow-paper-3: var(--elevation-paper-3);
+  --shadow-paper-modal: var(--elevation-paper-modal);
 }
 
+/* ─────────────────────────── :root — Light (V2 default canvas) ─────────────────────────── */
 :root {
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   --font-system-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Surfaces */
+  --canvas: oklch(1 0 0);
+  --canvas-cream: oklch(0.985 0.005 90);
+  --canvas-soft: oklch(0.98 0.005 230);
+
+  /* Ink (deep navy — never pure black) */
+  --ink: oklch(0.22 0.05 250);
+  --ink-secondary: oklch(0.34 0.04 250);
+  --ink-mute: oklch(0.44 0.025 245);
+  --ink-mute-2: oklch(0.58 0.02 245);
+
+  /* Hairlines — used at full strength, no dilution at site. */
+  --hairline: oklch(0.92 0.015 230);
+  --hairline-strong: oklch(0.86 0.02 230);
+  --hairline-input: oklch(0.88 0.025 230);
+
+  /* Primary — the single brand blue. */
+  --primary: oklch(0.48 0.17 245);
+  --primary-deep: oklch(0.42 0.17 248);
+  --primary-press: oklch(0.36 0.17 252);
+  --primary-soft: oklch(0.92 0.04 240);
+  --primary-bg-subdued: oklch(0.96 0.025 240);
+  --primary-foreground: oklch(1 0 0);
+
+  /* Money */
+  --money: oklch(0.22 0.05 250);
+  --money-positive: oklch(0.42 0.14 160);
+  --money-negative: oklch(0.45 0.18 25);
+
+  /* Semantic accents */
+  --accent-amber: oklch(0.55 0.15 75);
+  --accent-amber-soft: oklch(0.95 0.07 80);
+  --accent-emerald: oklch(0.45 0.14 160);
+  --accent-emerald-soft: oklch(0.95 0.05 160);
+  --destructive: oklch(0.5 0.21 25);
+  --destructive-soft: oklch(0.95 0.05 25);
+
+  /* Taxonomy tag tints (bg + fg pair per tint) */
+  --tag-cyan-bg: oklch(0.94 0.04 215);
+  --tag-cyan-fg: oklch(0.32 0.13 215);
+  --tag-blue-bg: oklch(0.94 0.04 240);
+  --tag-blue-fg: oklch(0.32 0.15 240);
+  --tag-violet-bg: oklch(0.94 0.04 290);
+  --tag-violet-fg: oklch(0.32 0.17 290);
+  --tag-rose-bg: oklch(0.94 0.04 10);
+  --tag-rose-fg: oklch(0.36 0.17 10);
+  --tag-amber-bg: oklch(0.96 0.06 80);
+  --tag-amber-fg: oklch(0.38 0.13 75);
+  --tag-emerald-bg: oklch(0.94 0.04 160);
+  --tag-emerald-fg: oklch(0.32 0.13 160);
+  --tag-slate-bg: oklch(0.94 0.005 250);
+  --tag-slate-fg: oklch(0.3 0.02 250);
+
+  /* Paper-halo elevation. Neutral alpha-ink shadows only — no colored glow. */
+  --elevation-paper-1: 0 1px 0 0 oklch(0.92 0.015 230 / 0.6);
+  --elevation-paper-2:
+    0 1px 2px oklch(0.22 0.05 250 / 0.04),
+    0 1px 1px oklch(0.22 0.05 250 / 0.04),
+    0 0 0 1px oklch(0.92 0.015 230 / 0.6);
+  --elevation-paper-3:
+    0 8px 8px oklch(0.22 0.05 250 / 0.04),
+    0 4px 4px oklch(0.22 0.05 250 / 0.04),
+    0 2px 2px oklch(0.22 0.05 250 / 0.04),
+    0 0 0 1px oklch(0.92 0.015 230 / 0.5);
+  --elevation-paper-modal:
+    0 25px 50px -12px oklch(0.22 0.05 250 / 0.18),
+    0 0 0 1px oklch(0.92 0.015 230 / 0.4);
+
+  /* shadcn aliases mapped to V2 tokens.
+   * (--primary, --primary-foreground, --destructive, --destructive-soft declared above.) */
+  --background: var(--canvas-cream);
+  --foreground: var(--ink);
+  --card: var(--canvas);
+  --card-foreground: var(--ink);
+  --popover: var(--canvas);
+  --popover-foreground: var(--ink);
+  --secondary: var(--canvas-soft);
+  --secondary-foreground: var(--ink);
+  --muted: var(--canvas-soft);
+  --muted-foreground: var(--ink-mute);
+  --accent: var(--primary-soft);
+  --accent-foreground: var(--primary-deep);
+  --border: var(--hairline);
+  --input: var(--hairline-input);
+  --ring: var(--primary);
+
+  /* Charts — neutral steps so existing dashboard tiles keep working.
+   * Stage 13.x will revisit if a real chart palette is needed. */
+  --chart-1: oklch(0.48 0.17 245);
+  --chart-2: oklch(0.45 0.14 160);
+  --chart-3: oklch(0.55 0.15 75);
+  --chart-4: oklch(0.5 0.17 290);
+  --chart-5: oklch(0.5 0.21 25);
+
+  --radius: 0.75rem; /* 12px — matches V2 rounded.lg, the default card. */
+
+  /* Sidebar */
+  --sidebar: var(--canvas);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--primary-soft);
+  --sidebar-accent-foreground: var(--primary-deep);
+  --sidebar-border: var(--hairline);
+  --sidebar-ring: var(--primary);
 }
 
-.dark {
-  /* SeedLand · V — 暗色调色板（蓝紫双色系，作为产品视觉锚点）*/
-  --background: oklch(0.16 0.02 255);
-  --foreground: oklch(0.97 0.01 240);
-  --card: oklch(0.21 0.025 255);
-  --card-foreground: oklch(0.97 0.01 240);
-  --popover: oklch(0.21 0.025 255);
-  --popover-foreground: oklch(0.97 0.01 240);
-  --primary: oklch(0.78 0.16 220);
-  --primary-foreground: oklch(0.18 0.03 255);
-  --secondary: oklch(0.27 0.03 255);
-  --secondary-foreground: oklch(0.97 0.01 240);
-  --muted: oklch(0.24 0.025 255);
-  --muted-foreground: oklch(0.68 0.02 240);
-  --accent: oklch(0.32 0.05 240);
-  --accent-foreground: oklch(0.97 0.01 240);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.7 0.16 220);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+/* ─────────────────────────── Dark — nighttime user preference ───────────────────────────
+ * §10: hand-enumerated. NOT algorithmically derived. Both selectors (legacy `.dark`
+ * and V2 `[data-theme="dark"]`) point at the same night-* token set. */
+.dark,
+[data-theme="dark"] {
+  --canvas: oklch(0.16 0.02 255);
+  --canvas-cream: oklch(0.16 0.02 255);
+  --canvas-soft: oklch(0.19 0.022 252);
+  --night-card: oklch(0.21 0.025 255);
 
-  /* 语义辅色（卡片/标签/状态点共用） */
-  --accent-cyan: oklch(0.78 0.16 220);
-  --accent-violet: oklch(0.7 0.2 295);
-  --accent-pink: oklch(0.78 0.18 350);
-  --accent-amber: oklch(0.82 0.15 75);
-  --accent-emerald: oklch(0.78 0.15 160);
+  --ink: oklch(0.94 0.01 240);
+  --ink-secondary: oklch(0.82 0.012 240);
+  --ink-mute: oklch(0.68 0.015 240);
+  --ink-mute-2: oklch(0.55 0.018 240);
+
+  --hairline: oklch(1 0 0 / 0.1);
+  --hairline-strong: oklch(1 0 0 / 0.16);
+  --hairline-input: oklch(1 0 0 / 0.14);
+
+  --primary: oklch(0.72 0.16 240);
+  --primary-deep: oklch(0.78 0.16 240);
+  --primary-press: oklch(0.64 0.16 240);
+  --primary-soft: oklch(0.32 0.08 240);
+  --primary-bg-subdued: oklch(0.24 0.06 240);
+  --primary-foreground: oklch(0.18 0.03 255);
+
+  --money: oklch(0.94 0.01 240);
+  --money-positive: oklch(0.78 0.14 160);
+  --money-negative: oklch(0.72 0.16 25);
+
+  --accent-amber: oklch(0.84 0.14 75);
+  --accent-amber-soft: oklch(0.3 0.08 75);
+  --accent-emerald: oklch(0.78 0.14 160);
+  --accent-emerald-soft: oklch(0.28 0.06 160);
+  --destructive: oklch(0.72 0.16 25);
+  --destructive-soft: oklch(0.3 0.1 25);
+
+  --tag-cyan-bg: oklch(0.28 0.06 215);
+  --tag-cyan-fg: oklch(0.82 0.1 215);
+  --tag-blue-bg: oklch(0.28 0.06 240);
+  --tag-blue-fg: oklch(0.82 0.1 240);
+  --tag-violet-bg: oklch(0.28 0.06 290);
+  --tag-violet-fg: oklch(0.82 0.1 290);
+  --tag-rose-bg: oklch(0.28 0.06 10);
+  --tag-rose-fg: oklch(0.82 0.1 10);
+  --tag-amber-bg: oklch(0.3 0.06 75);
+  --tag-amber-fg: oklch(0.84 0.1 75);
+  --tag-emerald-bg: oklch(0.28 0.06 160);
+  --tag-emerald-fg: oklch(0.82 0.1 160);
+  --tag-slate-bg: oklch(0.28 0.01 250);
+  --tag-slate-fg: oklch(0.82 0.012 250);
+
+  /* Elevation in dark collapses to hairline rings — stacked tiny black shadows
+   * are invisible against night-canvas, and lightening them produces banned
+   * colored-glow halos. (§5, §10) */
+  --elevation-paper-1: 0 1px 0 0 oklch(1 0 0 / 0.06);
+  --elevation-paper-2: 0 0 0 1px oklch(1 0 0 / 0.1);
+  --elevation-paper-3: 0 0 0 1px oklch(1 0 0 / 0.16);
+  --elevation-paper-modal:
+    0 25px 50px -12px oklch(0 0 0 / 0.5),
+    0 0 0 1px oklch(1 0 0 / 0.12);
+
+  /* shadcn aliases — dark mapping. Card surface uses the slightly lifted
+   * night-card value (not canvas) so cards on the canvas have visible separation. */
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --card: var(--night-card);
+  --card-foreground: var(--ink);
+  --popover: var(--night-card);
+  --popover-foreground: var(--ink);
+  --secondary: var(--canvas-soft);
+  --secondary-foreground: var(--ink);
+  --muted: var(--canvas-soft);
+  --muted-foreground: var(--ink-mute);
+  --accent: var(--primary-soft);
+  --accent-foreground: var(--ink);
+  --border: var(--hairline);
+  --input: var(--hairline-input);
+  --ring: var(--primary);
+
+  --chart-1: oklch(0.72 0.16 240);
+  --chart-2: oklch(0.78 0.14 160);
+  --chart-3: oklch(0.84 0.14 75);
+  --chart-4: oklch(0.7 0.16 290);
+  --chart-5: oklch(0.72 0.16 25);
+
+  --sidebar: var(--canvas);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--primary-soft);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--hairline);
+  --sidebar-ring: var(--primary);
 }
 
 @layer base {
@@ -133,34 +322,12 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-image:
-      radial-gradient(
-        ellipse 80% 50% at 50% -20%,
-        oklch(0.7 0.16 220 / 0.06),
-        transparent 70%
-      ),
-      radial-gradient(
-        ellipse 60% 50% at 80% 110%,
-        oklch(0.6 0.18 280 / 0.04),
-        transparent 70%
-      );
-    background-attachment: fixed;
-  }
-  .dark body {
-    background-image:
-      radial-gradient(
-        ellipse 80% 50% at 50% -20%,
-        oklch(0.7 0.16 220 / 0.18),
-        transparent 70%
-      ),
-      radial-gradient(
-        ellipse 60% 50% at 80% 110%,
-        oklch(0.6 0.18 280 / 0.12),
-        transparent 70%
-      );
+    /* V2: flat canvas. No atmosphere wash. (DESIGN.md §2 "One Voice", §8 Don'ts) */
   }
   html {
     @apply font-sans;
+    /* CJK paragraphs sit truthfully on PingFang SC metrics — the font stack
+     * leads with CJK. tabular-nums via @utility / explicit Tailwind class. */
   }
   ::-webkit-scrollbar {
     width: 8px;
@@ -170,102 +337,155 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: oklch(0 0 0 / 0.12);
-    border-radius: 8px;
+    background: var(--hairline-strong);
+    border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0 0 0 / 0.22);
-  }
-  .dark ::-webkit-scrollbar-thumb {
-    background: oklch(1 0 0 / 0.06);
-  }
-  .dark ::-webkit-scrollbar-thumb:hover {
-    background: oklch(1 0 0 / 0.12);
+    background: var(--ink-mute-2);
   }
 }
+
+/* ─────────────────────────── Utilities ───────────────────────────
+ * Surface utilities are kept under their existing names for backwards
+ * compatibility with the ~46 files that still reference them. Internals
+ * are rewired to V2 vocabulary (paper-halo, hairline-full-strength).
+ * Component-level migration to `card-default` / `card-feature` / etc.
+ * is a follow-up stage. */
 
 @utility bg-grid {
   background-image:
-    linear-gradient(to right, oklch(0 0 0 / 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0 0 0 / 0.06) 1px, transparent 1px);
+    linear-gradient(to right, var(--hairline) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--hairline) 1px, transparent 1px);
   background-size: 32px 32px;
 }
-.dark .bg-grid {
-  background-image:
-    linear-gradient(to right, oklch(1 0 0 / 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(1 0 0 / 0.04) 1px, transparent 1px);
-}
 
-/* ─────────────────────────── 统一组件样式工具类 ─────────────────────────── */
-
-/* 卡片 · 玻璃质感面板 */
+/* surface-card → V2 card-default: white surface, paper-2 halo, hairline ring. */
 @utility surface-card {
-  @apply rounded-xl border border-border/60 bg-card transition-colors;
+  background-color: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--elevation-paper-2);
+  transition: box-shadow 150ms ease-out, transform 150ms ease-out;
 }
-.dark .surface-card {
-  @apply bg-card/40;
-}
+/* Hover lift: paper-2 → paper-3 + small Y translate. Honest neutral shadow,
+ * never a colored glow. (§5 "Hover Lift Rule") */
 @utility surface-card-hover {
-  @apply hover:border-primary/40 hover:bg-muted/40;
+  &:hover {
+    box-shadow: var(--elevation-paper-3);
+    transform: translateY(-2px);
+  }
 }
-.dark .surface-card-hover {
-  @apply hover:bg-card/70;
-}
+
+/* surface-glass → V2 card-default shim. The V1 "milled bezel inset highlight"
+ * is retired; surfaces now wear paper-halo elevation. Existing callers keep
+ * working until §11 migration replaces them. */
 @utility surface-glass {
-  @apply rounded-2xl border border-border/60 bg-gradient-to-br from-card/80 via-card/45 to-card/15 shadow-[0_1px_0_0_rgba(0,0,0,0.07)_inset];
+  background-color: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--elevation-paper-2);
 }
-.dark .surface-glass {
-  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset;
-}
+/* surface-glass-accent → V2 card-service-featured shim: subtle primary tint
+ * fill, primary-soft hairline ring. No more inset bezel highlight. */
 @utility surface-glass-accent {
-  @apply rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card/40 to-card/20;
+  background-color: var(--primary-bg-subdued);
+  border: 1px solid var(--primary-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--elevation-paper-2);
 }
+
+/* panel-dashboard → cool-tinted near-white sub-surface for task/data panels.
+ * NO shadow — it's a sub-surface, not a hovering object. (§7) */
+@utility panel-dashboard {
+  background-color: var(--canvas-soft);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+}
+
+/* card-cream-band → warm tonal section card on long landing pages. Reads as a
+ * band of the page itself, not a card. No shadow, no border. */
+@utility card-cream-band {
+  background-color: var(--canvas-cream);
+  border-radius: var(--radius);
+}
+
+/* timeline-item → vertical timeline entry. Bottom-hairline elevation only. */
+@utility timeline-item {
+  background-color: var(--card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-paper-1);
+}
+
+/* label-section: eyebrow-uppercase tracked label.
+ * Use sparingly — DESIGN.md §11 caps at ≤ 2 per page. */
 @utility label-section {
-  @apply text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-mute);
+  font-feature-settings: "tnum";
 }
 @utility label-section-strong {
-  @apply text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/80;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-secondary);
+  font-feature-settings: "tnum";
 }
+
 @utility surface-dashed {
-  @apply rounded-2xl border border-dashed border-border/60 bg-border/40 dark:bg-card/30;
+  background-color: var(--canvas-soft);
+  border: 1px dashed var(--hairline-strong);
+  border-radius: var(--radius);
 }
 
-/* 文字渐变 */
-@utility text-gradient-brand {
-  background: linear-gradient(135deg, oklch(0.5 0.16 220), oklch(0.48 0.22 295));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.dark .text-gradient-brand {
-  background: linear-gradient(135deg, oklch(0.85 0.13 220), oklch(0.78 0.16 295));
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
-/* 焦点环 · 输入框统一 */
+/* Focus ring — primary border + primary-soft 2px halo. (§7 Inputs / Buttons) */
 @utility focus-ring {
-  @apply outline-none transition-colors focus:border-primary/60 focus:ring-2 focus:ring-primary/20 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive/20;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  &:focus,
+  &:focus-visible {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-soft);
+  }
+  &[aria-invalid="true"] {
+    border-color: var(--destructive);
+    box-shadow: 0 0 0 2px var(--destructive-soft);
+  }
 }
 
-/* 移动端隐藏滚动条但允许滚动 */
 @utility scroll-x-snap {
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-}
-.scroll-x-snap::-webkit-scrollbar {
-  display: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-/* 移动端安全区底部 padding */
 @utility pb-safe {
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.25rem);
 }
 
-/* 静态页排版 · 不依赖 @tailwindcss/typography */
+/* Money primitive — tabular-num + V2 money colors. Use via class instead of
+ * the <MoneyText> React primitive when JSX isn't available. */
+@utility money {
+  font-variant-numeric: tabular-nums;
+  color: var(--money);
+}
+@utility money-positive {
+  font-variant-numeric: tabular-nums;
+  color: var(--money-positive);
+}
+@utility money-negative {
+  font-variant-numeric: tabular-nums;
+  color: var(--money-negative);
+}
+
+/* Static-page typography — no @tailwindcss/typography dependency. */
 @layer components {
   .static-prose p {
-    @apply my-4 leading-relaxed text-foreground/80;
+    @apply my-4 leading-relaxed;
+    color: var(--ink-secondary);
   }
   .static-prose ul,
   .static-prose ol {
@@ -278,23 +498,31 @@
     @apply list-decimal;
   }
   .static-prose li {
-    @apply leading-relaxed text-foreground/80;
+    @apply leading-relaxed;
+    color: var(--ink-secondary);
   }
   .static-prose li::marker {
-    @apply text-muted-foreground/60;
+    color: var(--ink-mute);
   }
   .static-prose strong {
-    @apply font-semibold text-foreground;
+    @apply font-semibold;
+    color: var(--ink);
   }
   .static-prose a {
-    @apply text-primary underline-offset-2 transition-colors hover:underline;
+    color: var(--primary);
+    text-underline-offset: 2px;
+    transition: color 120ms ease;
+  }
+  .static-prose a:hover {
+    text-decoration: underline;
   }
   .static-prose code {
-    @apply rounded bg-muted/60 px-1.5 py-0.5 font-mono text-[0.85em];
+    @apply rounded px-1.5 py-0.5 font-mono text-[0.85em];
+    background-color: var(--canvas-soft);
   }
 }
 
-/* Skeleton 闪动 */
+/* Skeleton shimmer — neutral alpha-ink, never primary-tinted. */
 @keyframes skeleton-shimmer {
   0% {
     background-position: -200% 0;
@@ -306,19 +534,20 @@
 @utility animate-skeleton {
   background: linear-gradient(
     90deg,
-    oklch(0 0 0 / 0.06) 0%,
-    oklch(0 0 0 / 0.12) 50%,
-    oklch(0 0 0 / 0.06) 100%
+    oklch(0.22 0.05 250 / 0.06) 0%,
+    oklch(0.22 0.05 250 / 0.12) 50%,
+    oklch(0.22 0.05 250 / 0.06) 100%
   );
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.4s ease-in-out infinite;
 }
-.dark .animate-skeleton {
+.dark .animate-skeleton,
+[data-theme="dark"] .animate-skeleton {
   background: linear-gradient(
     90deg,
-    oklch(1 0 0 / 0.04) 0%,
-    oklch(1 0 0 / 0.1) 50%,
-    oklch(1 0 0 / 0.04) 100%
+    oklch(1 0 0 / 0.05) 0%,
+    oklch(1 0 0 / 0.12) 50%,
+    oklch(1 0 0 / 0.05) 100%
   );
   background-size: 200% 100%;
 }

@@ -34,7 +34,7 @@ export default async function NewGroupPage() {
         }
       />
       <div className="px-4 py-5 sm:px-8 sm:py-6">
-        <div className="max-w-xl rounded-2xl border border-border/60 bg-card/30 p-5 sm:p-6">
+        <div className="max-w-xl rounded-2xl border border-border bg-card/30 p-5 sm:p-6">
           <CreateGroupForm />
         </div>
       </div>

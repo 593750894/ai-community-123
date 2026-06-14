@@ -38,7 +38,7 @@ export function RightPanel({
   signedIn: boolean;
 }) {
   return (
-    <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-80 shrink-0 overflow-y-auto border-l border-border/60 bg-muted/40 dark:bg-background/40 px-4 py-5 xl:block">
+    <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-80 shrink-0 overflow-y-auto border-l border-border bg-muted/40 dark:bg-background/40 px-4 py-5 xl:block">
       <Section icon={Flame} title="热门话题">
         {popularTags.length === 0 ? (
           <EmptyHint>暂无热门话题</EmptyHint>
@@ -48,7 +48,7 @@ export function RightPanel({
               <li key={t.tag}>
                 <Link
                   href={`/search?q=${encodeURIComponent(t.tag)}`}
-                  className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
+                  className="flex items-center gap-2 rounded-full px-2.5 py-1.5 transition-colors hover:bg-muted/50"
                 >
                   <span
                     className={`w-5 text-center text-xs font-semibold tabular-nums ${
@@ -91,7 +91,7 @@ export function RightPanel({
                         <img
                           src={c.avatar}
                           alt={c.name}
-                          className="size-9 rounded-full border border-border/60 object-cover"
+                          className="size-9 rounded-full border border-border object-cover"
                         />
                       ) : (
                         <span className="flex size-9 items-center justify-center rounded-full bg-muted text-sm font-medium text-foreground">
@@ -99,7 +99,7 @@ export function RightPanel({
                         </span>
                       )}
                       {idx === 0 && (
-                        <Trophy className="absolute -right-1 -top-1 size-3.5 text-amber-600 dark:text-amber-400" />
+                        <Trophy className="absolute -right-1 -top-1 size-3.5 text-primary" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -128,7 +128,7 @@ export function RightPanel({
       <Link
         href="/community/creator-program"
         aria-label="加入创作者计划"
-        className="mt-6 block rounded-lg border border-border/60 bg-gradient-to-br from-primary/10 via-card/40 to-card/40 p-4 transition-colors hover:border-primary/40 hover:bg-primary/5"
+        className="mt-6 block surface-glass-accent p-4 transition-colors hover:bg-primary/[0.09]"
       >
         <div className="mb-2 flex items-center gap-2 text-xs text-primary/80">
           <Sparkles className="size-3.5" />
@@ -177,7 +177,7 @@ function Section({
 
 function EmptyHint({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-md border border-dashed border-border/40 px-3 py-4 text-center text-xs text-muted-foreground/70">
+    <div className="rounded-md border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground/70">
       {children}
     </div>
   );

@@ -178,7 +178,7 @@ export function MediaUploader({
           value={url}
           onChange={(e) => applyUrl(e.target.value)}
           placeholder="https://..."
-          className="h-10 rounded-lg border border-border/60 bg-background px-3 text-sm outline-none transition-colors focus:border-primary/50"
+          className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none transition-colors focus:border-primary/50"
         />
       ) : (
         <div
@@ -189,7 +189,7 @@ export function MediaUploader({
           onDragLeave={() => setDragOver(false)}
           onDrop={onDrop}
           className={cn(
-            "group relative flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border/60 bg-border/40 dark:bg-card/30 px-4 py-6 text-center transition-colors",
+            "group relative flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-border/40 dark:bg-card/30 px-4 py-6 text-center transition-colors",
             dragOver && "border-primary/50 bg-primary/5",
             status === "error" && "border-destructive/50 bg-destructive/5",
           )}
@@ -240,14 +240,14 @@ export function MediaUploader({
                 <button
                   type="button"
                   onClick={retry}
-                  className="rounded-md border border-border/60 bg-background px-3 py-1 text-xs hover:bg-muted"
+                  className="rounded-full border border-border bg-background px-3 py-1 text-xs hover:bg-muted"
                 >
                   重试
                 </button>
                 <button
                   type="button"
                   onClick={reset}
-                  className="rounded-md px-3 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+                  className="rounded-full px-3 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
                 >
                   取消
                 </button>
@@ -299,7 +299,7 @@ function PreviewCard({
 }) {
   return (
     <div className="flex w-full items-center gap-3">
-      <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border/60 bg-muted/40 text-muted-foreground">
+      <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted/40 text-muted-foreground">
         {kind === UPLOAD_KIND.IMAGE ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

@@ -133,7 +133,7 @@ export default async function AdminPage() {
             <Link
               key={href}
               href={href}
-              className="group flex items-start justify-between gap-3 rounded-xl border border-border/60 bg-card/40 p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card/70"
+              className="group flex items-start justify-between gap-3 rounded-xl border border-border bg-card/40 p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card/70"
             >
               <div>
                 <div className="text-xs text-muted-foreground">{label}</div>
@@ -196,7 +196,7 @@ export default async function AdminPage() {
             <Link
               key={m.href}
               href={m.href}
-              className="group flex items-center justify-between rounded-xl border border-border/60 bg-card/40 p-4 transition-all hover:border-primary/40 hover:bg-card/70"
+              className="group flex items-center justify-between rounded-xl border border-border bg-card/40 p-4 transition-all hover:border-primary/40 hover:bg-card/70"
             >
               <div>
                 <div className="text-sm font-medium group-hover:text-primary">

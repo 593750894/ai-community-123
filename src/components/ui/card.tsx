@@ -97,7 +97,7 @@ export function CardFooter({
     <div
       data-slot="card-footer"
       className={cn(
-        "flex items-center gap-2 border-t border-border/40 p-4 sm:p-5",
+        "flex items-center gap-2 border-t border-border p-4 sm:p-5",
         className,
       )}
       {...props}

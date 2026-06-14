@@ -6,12 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterChip } from "@/components/ui/filter-chip";
+import { MoneyText } from "@/components/ui/money-text";
 import { requireUser } from "@/lib/auth/guard";
 import { listMyWorkflowItems } from "@/lib/commerce/queries";
 import {
   WORKFLOW_ITEM_STATUSES,
   WORKFLOW_ITEM_STATUS_LABEL,
-  formatPrice,
   type WorkflowItemStatusValue,
 } from "@/lib/commerce/schemas";
 import {
@@ -102,7 +102,7 @@ export default async function MyWorkflowsPage({ searchParams }: PageProps) {
             }
           />
         ) : (
-          <div className="overflow-hidden rounded-xl border border-border/60">
+          <div className="overflow-hidden rounded-xl border border-border">
             <table className="w-full text-xs">
               <thead className="bg-muted/40 text-muted-foreground">
                 <tr>
@@ -118,7 +118,7 @@ export default async function MyWorkflowsPage({ searchParams }: PageProps) {
                 {items.map((item) => (
                   <tr
                     key={item.id}
-                    className="border-t border-border/40 hover:bg-muted/20"
+                    className="border-t border-border hover:bg-muted/20"
                   >
                     <td className="px-3 py-2">
                       <Link
@@ -131,8 +131,11 @@ export default async function MyWorkflowsPage({ searchParams }: PageProps) {
                     <td className="px-3 py-2 text-muted-foreground">
                       {item.category}
                     </td>
-                    <td className="px-3 py-2 tabular-nums">
-                      {formatPrice(item.priceCents, item.currency)}
+                    <td className="px-3 py-2">
+                      <MoneyText
+                        value={item.priceCents}
+                        currency={item.currency === "CNY" ? "¥" : item.currency}
+                      />
                     </td>
                     <td className="px-3 py-2 tabular-nums text-muted-foreground">
                       {item.salesCount}
@@ -209,7 +212,7 @@ function RowActions({
     <div className="flex items-center justify-end gap-1">
       <Link
         href={`/me/workflows/${id}/edit`}
-        className="rounded-md border border-border/60 px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+        className="rounded-full border border-border px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
       >
         编辑
       </Link>
@@ -217,7 +220,7 @@ function RowActions({
         <form action={transitionWorkflowItemStatusAction}>
           <input type="hidden" name="id" value={id} />
           <input type="hidden" name="status" value="PUBLISHED" />
-          <button className="rounded-md border border-primary/40 bg-primary/10 px-2 py-1 text-[11px] text-primary hover:bg-primary/20">
+          <button className="rounded-full border border-primary/40 bg-primary/10 px-2 py-1 text-[11px] text-primary hover:bg-primary/20">
             上架
           </button>
         </form>
@@ -226,7 +229,7 @@ function RowActions({
         <form action={transitionWorkflowItemStatusAction}>
           <input type="hidden" name="id" value={id} />
           <input type="hidden" name="status" value="ARCHIVED" />
-          <button className="rounded-md border border-border/60 px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground">
+          <button className="rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground">
             下架
           </button>
         </form>
@@ -243,7 +246,7 @@ function RowActions({
       {!hasSales && (
         <form action={deleteWorkflowItemAction}>
           <input type="hidden" name="id" value={id} />
-          <button className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-[11px] text-rose-300 hover:bg-rose-500/20">
+          <button className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-[11px] text-rose-300 hover:bg-rose-500/20">
             删除
           </button>
         </form>
@@ -273,7 +276,7 @@ function PagerLink({
     <Link
       href={href}
       aria-disabled={disabled}
-      className="rounded-md border border-border/60 px-3 py-1 text-muted-foreground hover:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-40"
+      className="rounded-full border border-border px-3 py-1 text-muted-foreground hover:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-40"
     >
       {label}
     </Link>

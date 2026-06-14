@@ -94,7 +94,7 @@ export default async function OrganizationsPage({ searchParams }: PageProps) {
             name="q"
             defaultValue={q}
             placeholder="搜索企业名称或简介…"
-            className="h-9 w-full max-w-sm rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50 sm:w-72"
+            className="h-9 w-full max-w-sm rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50 sm:w-72"
           />
           {industry && <input type="hidden" name="industry" value={industry} />}
           {verifiedOnly && <input type="hidden" name="verifiedOnly" value="1" />}
@@ -184,10 +184,10 @@ function OrgCard({
   return (
     <Link
       href={`/organizations/${org.slug}`}
-      className="group flex flex-col gap-3 rounded-xl border border-border/60 bg-card/40 p-4 transition-colors hover:border-primary/40"
+      className="group flex flex-col gap-3 rounded-xl border border-border bg-card/40 p-4 transition-colors hover:border-primary/40"
     >
       <div className="flex items-start gap-3">
-        <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-muted/40 text-lg">
+        <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/40 text-lg">
           {org.logo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={org.logo} alt={org.name} className="size-full object-cover" />
@@ -229,7 +229,7 @@ function PagerLink({ href, disabled, label }: { href: string; disabled: boolean;
     return <span className="cursor-default px-3 py-1 text-muted-foreground/50">{label}</span>;
   }
   return (
-    <Link href={href} className="rounded-md border border-border/60 px-3 py-1 text-muted-foreground hover:text-foreground">
+    <Link href={href} className="rounded-md border border-border px-3 py-1 text-muted-foreground hover:text-foreground">
       {label}
     </Link>
   );

@@ -9,7 +9,7 @@ export default async function SettingsAccountPage() {
   const user = await requireUser("/settings/account");
   return (
     <div className="space-y-6 px-6 py-6 sm:px-8">
-      <section className="rounded-2xl border border-border/60 bg-card/40 p-5">
+      <section className="rounded-2xl border border-border bg-card/40 p-5">
         <h2 className="mb-1 text-sm font-medium">基本资料</h2>
         <p className="mb-4 text-xs text-muted-foreground">
           这些字段会出现在你的个人主页上。
@@ -28,7 +28,7 @@ export default async function SettingsAccountPage() {
         />
       </section>
 
-      <section className="rounded-2xl border border-border/60 bg-card/40 p-5">
+      <section className="rounded-2xl border border-border bg-card/40 p-5">
         <h2 className="mb-1 text-sm font-medium">账户安全</h2>
         <p className="mb-4 text-xs text-muted-foreground">
           修改邮箱或密码后，所有其他设备上的登录态会失效。

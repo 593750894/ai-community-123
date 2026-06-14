@@ -22,7 +22,7 @@ export function LoadingState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-3 rounded-2xl border border-border/60 bg-border/40 dark:bg-card/30 px-6 py-12 text-center",
+        "flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-border/40 dark:bg-card/30 px-6 py-12 text-center",
         className,
       )}
       role="status"

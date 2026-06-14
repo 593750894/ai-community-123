@@ -33,7 +33,7 @@ export function PostSortSelect({ current = "latest" }: { current?: string }) {
   );
 
   return (
-    <div className="flex items-center gap-0.5 rounded-lg border border-border/40 bg-card/30 p-0.5">
+    <div className="flex items-center gap-0.5 rounded-lg border border-border bg-card/30 p-0.5">
       {SORT_OPTIONS.map((opt) => {
         const active = current === opt.value;
         return (

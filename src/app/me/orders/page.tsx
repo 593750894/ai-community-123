@@ -4,6 +4,7 @@ import { Receipt } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterChip } from "@/components/ui/filter-chip";
+import { MoneyText } from "@/components/ui/money-text";
 import { requireUser } from "@/lib/auth/guard";
 import { listMyOrders } from "@/lib/commerce/order-queries";
 import {
@@ -11,7 +12,6 @@ import {
   ORDER_STATUS_LABEL,
   ORDER_TYPE_LABEL,
   PAYMENT_METHOD_LABEL,
-  formatPrice,
   type OrderStatusValue,
 } from "@/lib/commerce/schemas";
 import { cn, formatRelativeTime } from "@/lib/utils";
@@ -33,7 +33,7 @@ const STATUS_TONE: Record<OrderStatusValue, string> = {
   PENDING: "border-amber-500/40 bg-amber-500/10 text-amber-300",
   PAID: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
   REFUNDED: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
-  CANCELED: "border-border/60 bg-muted/30 text-muted-foreground",
+  CANCELED: "border-border bg-muted/30 text-muted-foreground",
   FAILED: "border-rose-500/40 bg-rose-500/10 text-rose-300",
 };
 
@@ -92,7 +92,7 @@ export default async function MyOrdersPage({ searchParams }: PageProps) {
             }
           />
         ) : (
-          <div className="overflow-hidden rounded-xl border border-border/60 bg-card/40">
+          <div className="overflow-hidden rounded-xl border border-border bg-card/40">
             <table className="w-full text-sm">
               <thead className="bg-muted/30 text-xs text-muted-foreground">
                 <tr>
@@ -105,7 +105,7 @@ export default async function MyOrdersPage({ searchParams }: PageProps) {
                   <th className="px-4 py-2.5 text-right font-medium">操作</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/40">
+              <tbody className="divide-y divide-border">
                 {items.map((o) => {
                   const isRefunded = o.status === "REFUNDED";
                   const hasPartialRefund =
@@ -145,10 +145,19 @@ export default async function MyOrdersPage({ searchParams }: PageProps) {
                         )}
                       </td>
                       <td className="px-4 py-3 text-right text-xs tabular-nums">
-                        <div>{formatPrice(o.amountCents, o.currency)}</div>
+                        <div>
+                          <MoneyText
+                            value={o.amountCents}
+                            currency={o.currency === "CNY" ? "¥" : `${o.currency} `}
+                          />
+                        </div>
                         {o.refundCents > 0 && (
                           <div className="mt-0.5 text-[10px] text-cyan-300">
-                            退款 {formatPrice(o.refundCents, o.currency)}
+                            退款{" "}
+                            <MoneyText
+                              value={o.refundCents}
+                              currency={o.currency === "CNY" ? "¥" : `${o.currency} `}
+                            />
                           </div>
                         )}
                       </td>
@@ -182,14 +191,14 @@ export default async function MyOrdersPage({ searchParams }: PageProps) {
                         {o.status === "PENDING" ? (
                           <Link
                             href={`/checkout/${o.orderNo}`}
-                            className="rounded-md border border-primary/40 bg-primary/10 px-2 py-1 text-[11px] text-primary hover:bg-primary/20"
+                            className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] text-primary hover:bg-primary/20"
                           >
                             去支付
                           </Link>
                         ) : (
                           <Link
                             href={`/checkout/${o.orderNo}`}
-                            className="rounded-md border border-border/60 px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                            className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                           >
                             详情
                           </Link>
@@ -235,7 +244,7 @@ function Pagination({
           href={href(Math.max(1, page - 1))}
           aria-disabled={page <= 1}
           className={cn(
-            "rounded-md border border-border/60 px-3 py-1",
+            "rounded-full border border-border px-3 py-1",
             page <= 1
               ? "pointer-events-none opacity-40"
               : "hover:bg-muted/60 hover:text-foreground",
@@ -247,7 +256,7 @@ function Pagination({
           href={href(Math.min(totalPages, page + 1))}
           aria-disabled={page >= totalPages}
           className={cn(
-            "rounded-md border border-border/60 px-3 py-1",
+            "rounded-full border border-border px-3 py-1",
             page >= totalPages
               ? "pointer-events-none opacity-40"
               : "hover:bg-muted/60 hover:text-foreground",

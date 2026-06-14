@@ -15,7 +15,7 @@ export default function ChannelNotFound() {
       </p>
       <Link
         href="/community"
-        className="mt-6 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
       >
         <ArrowLeft className="size-3.5" />
         返回社区

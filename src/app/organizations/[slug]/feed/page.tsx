@@ -9,9 +9,13 @@ import {
   Play,
   Sparkles,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CountText } from "@/components/ui/count-text";
+import { MoneyText } from "@/components/ui/money-text";
+import { PillTag, type PillTagTint } from "@/components/ui/pill-tag";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getOrganizationBySlug } from "@/lib/organizations/queries";
@@ -20,7 +24,6 @@ import {
   listOrganizationFeed,
   type OrgFeedItem,
 } from "@/lib/organizations/content-attribution";
-import { formatPrice } from "@/lib/commerce/schemas";
 import { formatRelativeTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -31,27 +34,27 @@ interface PageProps {
 
 const KIND_META: Record<
   OrgFeedItem["kind"],
-  { label: string; icon: React.ComponentType<{ className?: string }>; tone: string }
+  { label: string; icon: LucideIcon; tint: PillTagTint }
 > = {
   post: {
     label: "讨论",
     icon: MessageSquare,
-    tone: "border-blue-500/30 bg-blue-500/10 text-blue-300",
+    tint: "blue",
   },
   work: {
     label: "作品",
     icon: Play,
-    tone: "border-purple-500/30 bg-purple-500/10 text-purple-300",
+    tint: "violet",
   },
   collab: {
     label: "合作",
     icon: Handshake,
-    tone: "border-amber-500/30 bg-amber-500/10 text-amber-300",
+    tint: "amber",
   },
   workflow: {
     label: "工作流商品",
     icon: Coins,
-    tone: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+    tint: "emerald",
   },
 };
 
@@ -143,7 +146,7 @@ function StatTile({
       </span>
       <div>
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-xl font-semibold tabular-nums">{value}</p>
+        <CountText value={value} className="text-xl font-semibold" />
       </div>
     </div>
   );
@@ -155,12 +158,9 @@ function FeedRow({ item }: { item: OrgFeedItem }) {
   return (
     <li className="surface-card surface-card-hover">
       <Link href={hrefFor(item)} className="flex items-start gap-3 p-4">
-        <span
-          className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${meta.tone}`}
-        >
-          <Icon className="size-3" />
+        <PillTag tint={meta.tint} icon={Icon} size="sm">
           {meta.label}
-        </span>
+        </PillTag>
         <div className="min-w-0 flex-1">
           <p className="line-clamp-1 text-sm font-medium text-foreground/95">
             {item.title}
@@ -184,7 +184,7 @@ function FeedRow({ item }: { item: OrgFeedItem }) {
           {item.kind === "workflow" && (
             <p className="mt-0.5 text-xs text-muted-foreground">
               {item.coverUrl ? "含封面图 · " : ""}
-              <span className="text-primary">{formatPrice(item.priceCents)}</span>
+              <MoneyText value={item.priceCents} className="text-primary" />
               {item.status === "SOLD_OUT" && (
                 <span className="ml-2 text-destructive">已售罄</span>
               )}

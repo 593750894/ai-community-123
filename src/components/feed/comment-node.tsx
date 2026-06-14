@@ -48,7 +48,7 @@ export function CommentNodeView({
     <li
       id={`comment-${node.id}`}
       className={cn(
-        "rounded-xl border border-border/60 bg-card/40 p-3 sm:p-4",
+        "rounded-xl border border-border bg-card/40 p-3 sm:p-4",
         indentClass,
       )}
     >
@@ -58,7 +58,7 @@ export function CommentNodeView({
           <img
             src={node.author.avatar}
             alt={node.author.name}
-            className="size-6 rounded-full border border-border/60"
+            className="size-6 rounded-full border border-border"
           />
         ) : (
           <span className="flex size-6 items-center justify-center rounded-full bg-muted text-[10px] font-medium">
@@ -139,7 +139,7 @@ export function CommentNodeView({
       )}
 
       {isReplyOpen && viewerId === null && (
-        <div className="mt-2 rounded-md border border-border/60 bg-background/40 px-3 py-2 text-xs text-muted-foreground">
+        <div className="mt-2 rounded-md border border-border bg-background/40 px-3 py-2 text-xs text-muted-foreground">
           请先{" "}
           <Link
             href={`/auth/login?next=${encodeURIComponent(`/post/${postId}#comment-${node.id}`)}`}

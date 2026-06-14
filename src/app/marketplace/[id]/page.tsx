@@ -7,11 +7,12 @@ import { PageHeader } from "@/components/layout/page-header";
 import { PurchaseButton } from "@/components/commerce/purchase-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CountText } from "@/components/ui/count-text";
+import { MoneyText } from "@/components/ui/money-text";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getPublicWorkflowItem } from "@/lib/commerce/queries";
 import {
   WORKFLOW_ITEM_CATEGORY_LABEL,
-  formatPrice,
   type WorkflowItemCategory,
 } from "@/lib/commerce/schemas";
 import { OrgAttributionBadge } from "@/components/publish/org-attribution-badge";
@@ -140,9 +141,11 @@ export default async function WorkflowItemDetailPage({ params }: PageProps) {
               {isSoldOut && <Badge variant="destructive">已售罄</Badge>}
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-primary">
-                {formatPrice(item.priceCents, item.currency)}
-              </span>
+              <MoneyText
+                value={item.priceCents}
+                currency={item.currency === "CNY" ? "¥" : item.currency + " "}
+                className="text-3xl font-bold text-primary"
+              />
             </div>
             <PurchaseButton
               payload={{ type: "WORKFLOW_PURCHASE", workflowItemId: item.id }}
@@ -153,7 +156,7 @@ export default async function WorkflowItemDetailPage({ params }: PageProps) {
               size="lg"
             />
             <p className="text-[11px] text-muted-foreground">
-              已售出 {item.salesCount} 份 · 30 分钟内未付款订单将自动取消
+              已售出 <CountText value={item.salesCount} /> 份 · 30 分钟内未付款订单将自动取消
             </p>
           </div>
 

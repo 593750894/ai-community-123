@@ -57,7 +57,7 @@ export function SidebarCreators({
                     <img
                       src={user.avatar}
                       alt={user.name}
-                      className="size-9 rounded-full border border-border/60"
+                      className="size-9 rounded-full border border-border"
                     />
                   ) : (
                     <span className="flex size-9 items-center justify-center rounded-full bg-muted text-xs font-medium text-foreground">
@@ -90,7 +90,7 @@ export function SidebarCreators({
                 </div>
                 <Link
                   href={`/profile/${user.id}`}
-                  className="shrink-0 rounded-md border border-border/50 px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                  className="shrink-0 rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
                 >
                   <span className="hidden items-center gap-0.5 sm:inline-flex">
                     主页

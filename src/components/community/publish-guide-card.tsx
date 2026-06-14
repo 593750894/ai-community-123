@@ -7,7 +7,7 @@ function publishHref(signedIn: boolean) {
 
 export function PublishGuideCard({ signedIn = false }: { signedIn?: boolean }) {
   return (
-    <div className="surface-card overflow-hidden border-primary/20 bg-gradient-to-br from-primary/8 via-card/40 to-fuchsia-500/5 p-4">
+    <div className="surface-card overflow-hidden border-primary/20 bg-primary/[0.05] p-4">
       <div className="flex items-start gap-3">
         <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15">
           <Sparkles className="size-4 text-primary" />

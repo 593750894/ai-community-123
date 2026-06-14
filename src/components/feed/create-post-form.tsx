@@ -102,7 +102,7 @@ export function CreatePostForm({
                   "rounded-lg border px-3 py-2 text-left text-xs transition-all",
                   active
                     ? `${meta.tone} ring-2 ring-primary/40`
-                    : "border-border/60 bg-card/40 text-muted-foreground hover:border-border hover:bg-muted/40",
+                    : "border-border bg-card/40 text-muted-foreground hover:border-border hover:bg-muted/40",
                 )}
               >
                 <div className="text-sm font-medium text-foreground/95">
@@ -178,14 +178,14 @@ export function CreatePostForm({
       <div className="flex flex-wrap items-center justify-end gap-3">
         <button
           type="reset"
-          className="inline-flex h-10 items-center justify-center rounded-lg border border-border/60 bg-background px-4 text-sm transition-colors hover:bg-muted"
+          className="inline-flex h-10 items-center justify-center rounded-full border border-border bg-background px-4 text-sm transition-colors hover:bg-muted"
         >
           重置
         </button>
         <button
           type="submit"
           disabled={pending || imageStatus === "uploading" || videoStatus === "uploading"}
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending && <Spinner className="size-4 text-primary-foreground" />}
           {pending ? "发布中…" : "发布帖子"}

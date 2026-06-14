@@ -48,7 +48,7 @@ export default async function LoginPage({
           </p>
         )}
 
-        <div className="rounded-2xl border border-border/60 bg-card/50 p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card/50 p-6 shadow-sm">
           <LoginForm redirectTo={next ?? undefined} />
         </div>
 

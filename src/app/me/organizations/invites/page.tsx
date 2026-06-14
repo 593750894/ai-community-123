@@ -50,7 +50,7 @@ export default async function MyInvitesPage() {
               {pending.map((iv) => (
                 <article
                   key={iv.id}
-                  className="rounded-xl border border-border/60 bg-card/40 p-4"
+                  className="rounded-xl border border-border bg-card/40 p-4"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0 flex-1 space-y-1.5">
@@ -74,7 +74,7 @@ export default async function MyInvitesPage() {
                         @{iv.organization.slug} · 由 @{iv.inviter.username} 邀请
                       </p>
                       {iv.message && (
-                        <p className="rounded-md border border-border/60 bg-background/40 px-3 py-2 text-xs text-muted-foreground">
+                        <p className="rounded-md border border-border bg-background/40 px-3 py-2 text-xs text-muted-foreground">
                           {iv.message}
                         </p>
                       )}
@@ -84,7 +84,7 @@ export default async function MyInvitesPage() {
                         <input type="hidden" name="inviteId" value={iv.id} />
                         <input type="hidden" name="action" value="reject" />
                         <button
-                          className="rounded-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+                          className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
                           type="submit"
                         >
                           拒绝
@@ -94,7 +94,7 @@ export default async function MyInvitesPage() {
                         <input type="hidden" name="inviteId" value={iv.id} />
                         <input type="hidden" name="action" value="accept" />
                         <button
-                          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80"
+                          className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80"
                           type="submit"
                         >
                           接受邀请
@@ -111,7 +111,7 @@ export default async function MyInvitesPage() {
         {history.length > 0 && (
           <section>
             <h2 className="mb-3 text-sm font-medium">历史记录</h2>
-            <div className="overflow-hidden rounded-xl border border-border/60">
+            <div className="overflow-hidden rounded-xl border border-border">
               <table className="w-full text-xs">
                 <thead className="bg-muted/40 text-muted-foreground">
                   <tr>
@@ -125,7 +125,7 @@ export default async function MyInvitesPage() {
                   {history.slice(0, 30).map((iv) => (
                     <tr
                       key={iv.id}
-                      className="border-t border-border/40 hover:bg-muted/20"
+                      className="border-t border-border hover:bg-muted/20"
                     >
                       <td className="px-3 py-2">
                         <Link

@@ -3,7 +3,6 @@ import { Play, Sparkles, Wrench } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
-  authorTintFromName,
   workCategoryMeta,
   type WorkCategoryValue,
 } from "@/lib/work-categories";
@@ -77,8 +76,6 @@ export function WorkCard({
         ? "aspect-square"
         : "aspect-video";
   const meta = work.category ? workCategoryMeta(work.category) : null;
-  const coverGradient = work.cover ?? meta?.cover ?? "from-slate-700/60 via-slate-800/60 to-slate-950/80";
-  const tint = work.authorTint ?? authorTintFromName(work.author);
   const likeCount =
     typeof work.likeCount === "number"
       ? work.likeCount
@@ -87,7 +84,7 @@ export function WorkCard({
         : 0;
   const bookmarkCount = work.bookmarkCount ?? 0;
   return (
-    <div className="group surface-glass relative overflow-hidden border-primary/20 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[0_12px_40px_-12px_rgba(56,189,248,0.45)]">
+    <div className="group surface-glass relative overflow-hidden border-border transition-all hover:-translate-y-0.5 hover:border-primary/50">
       {/* 卡片视觉与普通帖子区分：双层光晕 + 顶部强渐变 + 角标 */}
       <Link
         href={`/showcase/${work.id}`}
@@ -102,19 +99,13 @@ export function WorkCard({
             className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
         ) : (
-          <div className={cn("absolute inset-0 bg-gradient-to-br", coverGradient)} />
+          <div className="absolute inset-0 bg-muted" />
         )}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.18),transparent_60%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent" />
 
         {/* 类型 badge —— 突出作品广场属性 */}
         {meta && (
-          <span
-            className={cn(
-              "absolute left-2 top-2 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold backdrop-blur",
-              meta.tone,
-            )}
-          >
+          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full border border-border bg-card/80 px-2 py-0.5 text-[10px] font-semibold text-foreground/90">
             <Sparkles className="size-2.5" />
             {meta.label}
           </span>
@@ -126,13 +117,13 @@ export function WorkCard({
           </span>
         )}
 
-        <span className="absolute right-2 top-2 rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-white backdrop-blur">
+        <span className="absolute right-2 top-2 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-white">
           {formatDuration(work.durationSec, work.duration)}
         </span>
 
         <span className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-          <span className="flex size-14 items-center justify-center rounded-full bg-white/15 backdrop-blur-md ring-1 ring-white/30">
-            <Play className="size-6 fill-white text-white" />
+          <span className="flex size-14 items-center justify-center rounded-full border border-border bg-background/85 text-foreground">
+            <Play className="size-6 fill-current" />
           </span>
         </span>
       </Link>
@@ -152,12 +143,7 @@ export function WorkCard({
         )}
 
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span
-            className={cn(
-              "flex size-5 items-center justify-center rounded-full bg-gradient-to-br text-[10px] font-semibold text-black/70",
-              tint,
-            )}
-          >
+          <span className="flex size-5 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
             {work.author.slice(0, 1)}
           </span>
           <span className="truncate">{work.author}</span>
@@ -176,7 +162,7 @@ export function WorkCard({
             {work.tools.slice(0, 3).map((t) => (
               <span
                 key={t}
-                className="rounded-md border border-border/50 bg-muted/40 px-1.5 py-0.5 text-[10px] text-muted-foreground"
+                className="rounded-md border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] text-muted-foreground"
               >
                 {t}
               </span>
@@ -189,7 +175,7 @@ export function WorkCard({
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-1 border-t border-border/30 pt-2 text-[11px] text-muted-foreground tabular-nums">
+        <div className="flex items-center justify-between gap-1 border-t border-border pt-2 text-[11px] text-muted-foreground tabular-nums">
           <LikeButton
             target={{ kind: "work", id: work.id }}
             initialActive={liked}

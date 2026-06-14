@@ -12,8 +12,8 @@ export function RelatedChannels({
 
   return (
     <section className="surface-card overflow-hidden">
-      <div className="flex items-center gap-1.5 border-b border-border/30 bg-gradient-to-r from-violet-500/8 via-transparent to-transparent px-4 py-3 text-xs font-semibold text-foreground/90">
-        <Hash className="size-3.5 text-violet-400" />
+      <div className="flex items-center gap-1.5 border-b border-border px-4 py-3 text-xs font-semibold text-foreground/90">
+        <Hash className="size-3.5 text-muted-foreground" />
         推荐相关频道
       </div>
       <ul className="p-1.5">
@@ -21,7 +21,7 @@ export function RelatedChannels({
           <li key={ch.id}>
             <Link
               href={`/community/${ch.id}`}
-              className="group flex items-start gap-2.5 rounded-lg px-2.5 py-2.5 transition-colors hover:bg-muted/40"
+              className="group flex items-start gap-2.5 rounded-2xl px-2.5 py-2.5 transition-colors hover:bg-muted/40"
             >
               <span
                 className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border text-base"

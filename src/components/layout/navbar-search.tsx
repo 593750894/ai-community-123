@@ -51,7 +51,7 @@ export function NavbarSearch() {
       onSubmit={handleSubmit}
       className="flex w-full max-w-md items-center"
     >
-      <label className="group/search relative flex h-8 w-full items-center rounded-lg border border-border/60 bg-card/40 px-2.5 text-sm transition-colors focus-within:border-primary/50 focus-within:bg-card/70">
+      <label className="group/search relative flex h-8 w-full items-center rounded-lg border border-border bg-card/40 px-2.5 text-sm transition-colors focus-within:border-primary/50 focus-within:bg-card/70">
         <Search className="size-3.5 text-muted-foreground" />
         <input
           // 当 URL ?q 变化时，key 会让输入框重新挂载，恢复为最新 URL 值
@@ -64,7 +64,7 @@ export function NavbarSearch() {
           aria-label="搜索"
           className="ml-2 h-full flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
-        <kbd className="hidden rounded border border-border/60 bg-muted/40 px-1.5 py-0.5 text-[10px] text-muted-foreground sm:inline-block">
+        <kbd className="hidden rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] text-muted-foreground sm:inline-block">
           /
         </kbd>
       </label>

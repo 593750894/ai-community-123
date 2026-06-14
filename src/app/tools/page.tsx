@@ -120,7 +120,7 @@ export default async function ToolsPage({
                 name="q"
                 defaultValue={query}
                 placeholder="搜索工具 / 标签 / 场景..."
-                className="h-8 w-44 rounded-md border border-border/60 bg-card/40 pl-8 pr-3 text-sm focus-ring sm:w-56"
+                className="h-8 w-44 rounded-md border border-border bg-card/40 pl-8 pr-3 text-sm focus-ring sm:w-56"
               />
             </form>
             <Button
@@ -152,7 +152,6 @@ export default async function ToolsPage({
               label="全部"
               emoji="🌐"
               count={total}
-              tone="bg-primary/15 text-primary border-primary/30"
             />
             {TOOL_CATEGORY_ORDER.map((c) => {
               const meta = toolCategoryMeta(c);
@@ -164,7 +163,7 @@ export default async function ToolsPage({
                   label={meta.label}
                   emoji={meta.emoji}
                   count={counts[c] ?? 0}
-                  tone={meta.tone}
+                  tint={meta.tint}
                 />
               );
             })}

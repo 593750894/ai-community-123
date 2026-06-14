@@ -39,7 +39,7 @@ export function ChannelSearchBar({ current }: { current?: string }) {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="搜索此频道帖子…"
-        className="h-9 w-full rounded-lg border border-border/40 bg-card/30 pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground/60 transition-all focus:border-primary/40 focus:bg-card/50 focus:outline-none focus:ring-2 focus:ring-primary/15 sm:w-60"
+        className="h-9 w-full rounded-lg border border-border bg-card/30 pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground/60 transition-all focus:border-primary/40 focus:bg-card/50 focus:outline-none focus:ring-2 focus:ring-primary/15 sm:w-60"
       />
       {value && (
         <button

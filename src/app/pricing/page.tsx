@@ -8,11 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { MoneyText } from "@/components/ui/money-text";
 import { getCurrentUser } from "@/lib/auth/session";
 import { listActiveMembershipPlans } from "@/lib/commerce/queries";
 import {
   BILLING_CYCLE_LABEL,
-  formatPrice,
   type BillingCycleValue,
 } from "@/lib/commerce/schemas";
 
@@ -112,9 +112,11 @@ function PlanCard({ plan, highlight, unauthenticated }: PlanProps) {
       </header>
 
       <div className="mt-5 flex items-baseline gap-1">
-        <span className="text-3xl font-bold tracking-tight">
-          {formatPrice(plan.priceCents, plan.currency)}
-        </span>
+        <MoneyText
+          value={plan.priceCents}
+          currency={plan.currency === "CNY" ? "¥" : plan.currency}
+          className="text-3xl font-bold tracking-tight"
+        />
         <span className="text-xs text-muted-foreground">/ {cycleLabel}</span>
       </div>
       {plan.trialDays > 0 && (

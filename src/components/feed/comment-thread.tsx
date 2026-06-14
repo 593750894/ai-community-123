@@ -25,7 +25,7 @@ export function CommentThread({
 
   if (thread.roots.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border/60 bg-card/20 px-6 py-10 text-center text-sm text-muted-foreground">
+      <div className="rounded-xl border border-dashed border-border bg-card/20 px-6 py-10 text-center text-sm text-muted-foreground">
         还没有人评论，来抢沙发吧。
       </div>
     );

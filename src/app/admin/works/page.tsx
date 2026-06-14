@@ -36,7 +36,7 @@ export default async function AdminWorksPage() {
       />
 
       <div className="px-6 py-6 sm:px-8">
-        <div className="overflow-hidden rounded-xl border border-border/60 bg-card/40">
+        <div className="overflow-hidden rounded-xl border border-border bg-card/40">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-xs text-muted-foreground">
               <tr>
@@ -51,7 +51,7 @@ export default async function AdminWorksPage() {
                 <th className="px-4 py-2.5 text-right font-medium">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/40">
+            <tbody className="divide-y divide-border">
               {works.map((w) => (
                 <tr key={w.id} className="hover:bg-muted/20">
                   <td className="px-4 py-2.5">
@@ -101,7 +101,7 @@ export default async function AdminWorksPage() {
                       <input type="hidden" name="id" value={w.id} />
                       <button
                         type="submit"
-                        className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-xs text-rose-300 transition-colors hover:bg-rose-500/20"
+                        className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-xs text-rose-300 transition-colors hover:bg-rose-500/20"
                       >
                         删除
                       </button>

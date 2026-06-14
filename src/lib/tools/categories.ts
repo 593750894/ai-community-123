@@ -1,4 +1,5 @@
 import { CATEGORY_TONE } from "@/lib/category-tones";
+import type { PillTagTint } from "@/components/ui/pill-tag";
 
 // 工具库 (Tool) 的 11 个标准分类。
 // Prisma 里 `Tool.category` 仍是 String，这里手写枚举值是为了：
@@ -30,7 +31,10 @@ export type ToolCategoryMeta = {
   label: string;
   desc: string;
   emoji: string;
+  /** @deprecated V1 tailwind classes — use `tint` with `<PillTag>` instead. */
   tone: string;
+  /** V2 PillTag tint (DESIGN.md §7 7-tint vocabulary). */
+  tint: PillTagTint;
 };
 
 export const TOOL_CATEGORY_META: Record<ToolCategoryValue, ToolCategoryMeta> = {
@@ -40,6 +44,7 @@ export const TOOL_CATEGORY_META: Record<ToolCategoryValue, ToolCategoryMeta> = {
     desc: "纯文字描述生成视频",
     emoji: "📝",
     tone: CATEGORY_TONE.cyan,
+    tint: "cyan",
   },
   IMAGE_TO_VIDEO: {
     value: "IMAGE_TO_VIDEO",
@@ -47,6 +52,7 @@ export const TOOL_CATEGORY_META: Record<ToolCategoryValue, ToolCategoryMeta> = {
     desc: "参考图驱动的视频生成",
     emoji: "🖼️",
     tone: CATEGORY_TONE.sky,
+    tint: "blue",
   },
   VIDEO_TO_VIDEO: {
     value: "VIDEO_TO_VIDEO",
@@ -54,6 +60,7 @@ export const TOOL_CATEGORY_META: Record<ToolCategoryValue, ToolCategoryMeta> = {
     desc: "风格迁移 / 重绘 / 增强",
     emoji: "🎞️",
     tone: CATEGORY_TONE.indigo,
+    tint: "blue",
   },
   DIGITAL_HUMAN: {
     value: "DIGITAL_HUMAN",
@@ -61,6 +68,7 @@ export const TOOL_CATEGORY_META: Record<ToolCategoryValue, ToolCategoryMeta> = {
     desc: "形象生成 + 口型 + 表情驱动",
     emoji: "🧑‍💼",
     tone: CATEGORY_TONE.emerald,
+    tint: "emerald",
   },
   VOICE: {
     value: "VOICE",
@@ -68,6 +76,7 @@ export const TOOL_CATEGORY_META: Record<ToolCategoryValue, ToolCategoryMeta> = {
     desc: "TTS · 声音克隆 · 多语言",
     emoji: "🎙️",
     tone: CATEGORY_TONE.purple,
+    tint: "violet",
   },
   SUBTITLE: {
     value: "SUBTITLE",
@@ -75,6 +84,7 @@ export const TOOL_CATEGORY_META: Record<ToolCategoryValue, ToolCategoryMeta> = {
     desc: "自动识别 / 翻译 / 时间轴",
     emoji: "💬",
     tone: CATEGORY_TONE.teal,
+    tint: "emerald",
   },
   EDIT: {
     value: "EDIT",
@@ -82,6 +92,7 @@ export const TOOL_CATEGORY_META: Record<ToolCategoryValue, ToolCategoryMeta> = {
     desc: "时间线 · 调色 · 转场",
     emoji: "✂️",
     tone: CATEGORY_TONE.rose,
+    tint: "rose",
   },
   WORKFLOW: {
     value: "WORKFLOW",
@@ -89,6 +100,7 @@ export const TOOL_CATEGORY_META: Record<ToolCategoryValue, ToolCategoryMeta> = {
     desc: "ComfyUI · 节点图 · 流水线",
     emoji: "🧩",
     tone: CATEGORY_TONE.cyanDeep,
+    tint: "cyan",
   },
   IMAGE_GEN: {
     value: "IMAGE_GEN",
@@ -96,6 +108,7 @@ export const TOOL_CATEGORY_META: Record<ToolCategoryValue, ToolCategoryMeta> = {
     desc: "首尾帧 · 概念图 · 风格图",
     emoji: "🎨",
     tone: CATEGORY_TONE.fuchsia,
+    tint: "violet",
   },
   THREE_D: {
     value: "THREE_D",
@@ -103,6 +116,7 @@ export const TOOL_CATEGORY_META: Record<ToolCategoryValue, ToolCategoryMeta> = {
     desc: "图片/文本 → 3D 模型",
     emoji: "🧊",
     tone: CATEGORY_TONE.violet,
+    tint: "violet",
   },
   MUSIC: {
     value: "MUSIC",
@@ -110,6 +124,7 @@ export const TOOL_CATEGORY_META: Record<ToolCategoryValue, ToolCategoryMeta> = {
     desc: "AI 编曲 / 配乐 / SFX",
     emoji: "🎵",
     tone: CATEGORY_TONE.amber,
+    tint: "amber",
   },
 };
 
@@ -125,6 +140,7 @@ export function toolCategoryMeta(category: string): ToolCategoryMeta {
       desc: "",
       emoji: "🔧",
       tone: CATEGORY_TONE.slate,
+      tint: "slate",
     }
   );
 }
@@ -144,8 +160,15 @@ export const TOOL_PRICING_LABEL: Record<ToolPricingValue, string> = {
   PAID: "付费",
 };
 
+/** @deprecated V1 tailwind classes — use `TOOL_PRICING_TINT` with `<PillTag>`. */
 export const TOOL_PRICING_TONE: Record<ToolPricingValue, string> = {
   FREE: CATEGORY_TONE.emerald,
   FREEMIUM: CATEGORY_TONE.amber,
   PAID: CATEGORY_TONE.rose,
+};
+
+export const TOOL_PRICING_TINT: Record<ToolPricingValue, PillTagTint> = {
+  FREE: "emerald",
+  FREEMIUM: "amber",
+  PAID: "rose",
 };

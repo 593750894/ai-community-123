@@ -11,9 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { MoneyText } from "@/components/ui/money-text";
 import {
   PAYOUT_METHOD_LABEL,
-  formatPrice,
   type PayoutMethodValue,
 } from "@/lib/commerce/schemas";
 
@@ -56,7 +56,7 @@ export function MarkPayoutPaidDialog(props: MarkPayoutPaidDialogProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-300 hover:bg-emerald-500/20"
+        className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-300 hover:bg-emerald-500/20"
       >
         标记已打款
       </button>
@@ -123,12 +123,15 @@ function MarkForm({
 
       <DialogBody>
         <div className="space-y-3">
-          <div className="rounded-lg border border-border/60 bg-muted/20 p-3 text-xs">
+          <div className="rounded-lg border border-border bg-muted/20 p-3 text-xs">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">结算净额</span>
-              <span className="font-semibold tabular-nums text-emerald-300">
-                {formatPrice(netCents, currency)}
-              </span>
+              <MoneyText
+                value={netCents}
+                currency={currency === "CNY" ? "¥" : currency + " "}
+                tone="positive"
+                className="font-semibold"
+              />
             </div>
             <div className="mt-1 flex items-center justify-between">
               <span className="text-muted-foreground">收款渠道</span>
@@ -161,7 +164,7 @@ function MarkForm({
               rows={2}
               maxLength={200}
               placeholder="例：支付宝流水号 20260606xxxx"
-              className="block w-full rounded-lg border border-border/60 bg-background px-2 py-1.5 text-xs outline-none focus:border-primary/60"
+              className="block w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs outline-none focus:border-primary/60"
             />
           </label>
 
@@ -182,7 +185,7 @@ function MarkForm({
           type="button"
           onClick={onClose}
           disabled={submitting}
-          className="rounded-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+          className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
         >
           取消
         </button>
@@ -190,7 +193,7 @@ function MarkForm({
           type="button"
           onClick={submit}
           disabled={submitting}
-          className="rounded-md border border-emerald-500/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? "处理中…" : "确认已打款"}
         </button>

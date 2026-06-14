@@ -196,7 +196,7 @@ function Field({
         placeholder={placeholder}
         required={required}
         aria-invalid={invalid || undefined}
-        className="block h-10 w-full rounded-lg border border-border/60 bg-background px-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/60 focus:ring-2 focus:ring-primary/20 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive/20"
+        className="block h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/60 focus:ring-2 focus:ring-primary/20 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive/20"
       />
       {errors?.map((msg) => (
         <p key={msg} className="text-xs text-destructive">
@@ -240,7 +240,7 @@ function Textarea({
         placeholder={placeholder}
         rows={rows}
         aria-invalid={invalid || undefined}
-        className="block w-full resize-y rounded-lg border border-border/60 bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/60 focus:ring-2 focus:ring-primary/20 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive/20"
+        className="block w-full resize-y rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/60 focus:ring-2 focus:ring-primary/20 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive/20"
       />
       {errors?.map((msg) => (
         <p key={msg} className="text-xs text-destructive">

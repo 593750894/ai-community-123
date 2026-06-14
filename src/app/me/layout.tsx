@@ -39,13 +39,13 @@ export default async function MeLayout({
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-card/30 px-6 py-3 sm:px-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card/30 px-6 py-3 sm:px-8">
         <nav className="flex flex-wrap items-center gap-1">
           {NAV.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
-              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
             >
               <Icon className="size-3.5" />
               {label}

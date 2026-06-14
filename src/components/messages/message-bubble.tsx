@@ -101,7 +101,7 @@ export function MessageBubble({
   // SYSTEM 消息：胶囊样式，永远居中
   if (isSystem) {
     return (
-      <div className="mx-auto max-w-md rounded-full border border-border/40 bg-muted/30 px-3 py-1 text-center text-[11px] text-muted-foreground">
+      <div className="mx-auto max-w-md rounded-full border border-border bg-muted/30 px-3 py-1 text-center text-[11px] text-muted-foreground">
         {content || "系统消息"}
       </div>
     );
@@ -113,7 +113,7 @@ export function MessageBubble({
       <div
         className={`flex gap-2 ${self ? "justify-end" : "justify-start"} text-[11px] text-muted-foreground`}
       >
-        <span className="rounded-full border border-dashed border-border/40 bg-muted/20 px-3 py-1">
+        <span className="rounded-full border border-dashed border-border bg-muted/20 px-3 py-1">
           {self ? "你撤回了一条消息" : `${sender?.name ?? "对方"} 撤回了一条消息`}
         </span>
       </div>
@@ -195,10 +195,10 @@ export function MessageBubble({
           <img
             src={sender.avatar}
             alt={sender.name}
-            className="size-7 shrink-0 rounded-full border border-border/60 object-cover"
+            className="size-7 shrink-0 rounded-full border border-border object-cover"
           />
         ) : (
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-300 to-purple-500 text-[11px] font-semibold text-black/70">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
             {sender?.name?.slice(0, 1) ?? "?"}
           </span>
         ))}
@@ -250,7 +250,7 @@ export function MessageBubble({
                     setErrorMsg(null);
                   }}
                   disabled={pending}
-                  className="inline-flex items-center gap-1 rounded-md border border-border/40 bg-card/30 px-2 py-1 hover:bg-card/60 disabled:opacity-60"
+                  className="inline-flex items-center gap-1 rounded-full border border-border bg-card/30 px-2 py-1 hover:bg-card/60 disabled:opacity-60"
                 >
                   <X className="size-3" /> 取消
                 </button>
@@ -258,7 +258,7 @@ export function MessageBubble({
                   type="button"
                   onClick={() => void submitEdit()}
                   disabled={pending}
-                  className="inline-flex items-center gap-1 rounded-md bg-primary px-2 py-1 font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
+                  className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
                 >
                   <Check className="size-3" /> 保存
                 </button>

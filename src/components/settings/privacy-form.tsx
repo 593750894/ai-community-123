@@ -41,7 +41,7 @@ export function PrivacyForm({
 
   return (
     <div className="space-y-2">
-      <label className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-background/40 px-3 py-2">
+      <label className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background/40 px-3 py-2">
         <div>
           <div className="text-sm">允许公开访问我的主页</div>
           <div className="text-[11px] text-muted-foreground">

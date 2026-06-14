@@ -21,13 +21,12 @@ export function StaticPageShell({
 }) {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="relative overflow-hidden border-b border-border/40 px-6 py-10 sm:px-8 sm:py-12">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-fuchsia-500/6" />
+      <header className="relative overflow-hidden border-b border-border px-6 py-10 sm:px-8 sm:py-12">
         <div className="absolute inset-0 bg-grid opacity-30" />
         <div className="relative space-y-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-1 rounded-full border border-border/40 bg-card/50 px-2.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+            className="inline-flex items-center gap-1 rounded-full border border-border bg-card/50 px-2.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
           >
             <ArrowLeft className="size-3" />
             返回首页
@@ -63,7 +62,7 @@ export function StaticPageShell({
 /** 段落标题 (h2) */
 export function PageH2({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mt-10 border-b border-border/40 pb-2 text-xl font-semibold tracking-tight first:mt-0">
+    <h2 className="mt-10 border-b border-border pb-2 text-xl font-semibold tracking-tight first:mt-0">
       {children}
     </h2>
   );

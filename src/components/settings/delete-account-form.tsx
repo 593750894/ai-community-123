@@ -78,7 +78,7 @@ export function DeleteAccountForm() {
         <button
           type="submit"
           disabled={pending || phrase !== CONFIRM_PHRASE}
-          className="rounded-md border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-medium text-rose-200 hover:bg-rose-500/20 disabled:opacity-50"
+          className="rounded-full border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-medium text-rose-200 hover:bg-rose-500/20 disabled:opacity-50"
         >
           {pending ? "处理中…" : "注销账户"}
         </button>
@@ -88,7 +88,7 @@ export function DeleteAccountForm() {
 }
 
 const inputClass =
-  "h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50";
+  "h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50";
 
 function Field({
   label,

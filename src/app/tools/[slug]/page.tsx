@@ -3,14 +3,16 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Sparkles, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { CountText } from "@/components/ui/count-text";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PillTag } from "@/components/ui/pill-tag";
 import { ToolRatingForm } from "@/components/tools/tool-rating-form";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
 import {
   toolCategoryMeta,
   TOOL_PRICING_LABEL,
-  TOOL_PRICING_TONE,
+  TOOL_PRICING_TINT,
   type ToolPricingValue,
 } from "@/lib/tools/categories";
 import {
@@ -54,7 +56,7 @@ export default async function ToolDetailPage({ params }: PageProps) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="border-b border-border/60 px-4 py-5 sm:px-8 sm:py-6">
+      <header className="border-b border-border px-4 py-5 sm:px-8 sm:py-6">
         <Link
           href="/tools"
           className="mb-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
@@ -64,7 +66,7 @@ export default async function ToolDetailPage({ params }: PageProps) {
         </Link>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-start gap-4">
-            <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-background/50 ring-1 ring-inset ring-border/60">
+            <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-background/50 ring-1 ring-inset ring-border">
               {tool.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -91,23 +93,15 @@ export default async function ToolDetailPage({ params }: PageProps) {
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded-full border px-2 py-0.5",
-                    meta.tone,
-                  )}
-                >
-                  <span aria-hidden>{meta.emoji}</span>
+                <PillTag tint={meta.tint} icon={null}>
+                  <span aria-hidden className="mr-0.5">
+                    {meta.emoji}
+                  </span>
                   {meta.label}
-                </span>
-                <span
-                  className={cn(
-                    "inline-flex items-center rounded-full border px-2 py-0.5",
-                    TOOL_PRICING_TONE[pricing],
-                  )}
-                >
+                </PillTag>
+                <PillTag tint={TOOL_PRICING_TINT[pricing]} icon={null}>
                   {TOOL_PRICING_LABEL[pricing]}
-                </span>
+                </PillTag>
                 {tool.createdBy && (
                   <span className="text-muted-foreground">
                     由{" "}
@@ -282,18 +276,14 @@ function RatingSummaryCard({
             const pct = total > 0 ? (count / total) * 100 : 0;
             return (
               <div key={s} className="flex items-center gap-2 text-[11px]">
-                <span className="w-3 text-muted-foreground tabular-nums">
-                  {s}
-                </span>
+                <CountText value={s} className="w-3 text-muted-foreground" />
                 <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
                   <div
                     className="absolute inset-y-0 left-0 bg-amber-500/80 dark:bg-amber-300/80"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <span className="w-6 text-right text-muted-foreground tabular-nums">
-                  {count}
-                </span>
+                <CountText value={count} className="w-6 text-right text-muted-foreground" />
               </div>
             );
           })}

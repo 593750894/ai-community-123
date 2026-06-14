@@ -4,6 +4,7 @@ import { Banknote, Coins, Hourglass, Receipt, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterChip } from "@/components/ui/filter-chip";
+import { MoneyText } from "@/components/ui/money-text";
 import { PayoutAccountForm } from "@/components/me/payout-account-form";
 import { RequestPayoutButton } from "@/components/me/request-payout-button";
 import { requireUser } from "@/lib/auth/guard";
@@ -28,7 +29,7 @@ const STATUS_TONE: Record<PayoutStatusValue, string> = {
   PENDING: "border-amber-500/40 bg-amber-500/10 text-amber-300",
   AVAILABLE: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
   PAID: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
-  CANCELED: "border-border/60 bg-muted/30 text-muted-foreground",
+  CANCELED: "border-border bg-muted/30 text-muted-foreground",
 };
 
 function parseStatus(raw?: string): PayoutStatusValue | undefined {
@@ -62,28 +63,28 @@ export default async function MyEarningsPage({
   const stats = [
     {
       label: "累计净收益",
-      value: formatPrice(summary.totalNetCents, currency),
+      valueCents: summary.totalNetCents,
       icon: Coins,
       tone: "text-emerald-300",
       hint: `不含已退款 / 取消订单 · 平台抽成 ${feeDisplay}%`,
     },
     {
       label: "冷藏中",
-      value: formatPrice(summary.byStatus.PENDING.netCents, currency),
+      valueCents: summary.byStatus.PENDING.netCents,
       icon: Hourglass,
       tone: "text-amber-300",
       hint: `${summary.byStatus.PENDING.count} 笔 · 付款后 ${summary.payoutHoldDays} 天可申请`,
     },
     {
       label: "可申请提现",
-      value: formatPrice(summary.byStatus.AVAILABLE.netCents, currency),
+      valueCents: summary.byStatus.AVAILABLE.netCents,
       icon: Banknote,
       tone: "text-cyan-300",
       hint: `${summary.byStatus.AVAILABLE.count} 笔 · 含已申请 ${formatPrice(summary.pendingRequestNetCents, currency)}`,
     },
     {
       label: "已结算",
-      value: formatPrice(summary.byStatus.PAID.netCents, currency),
+      valueCents: summary.byStatus.PAID.netCents,
       icon: ShieldCheck,
       tone: "text-sky-300",
       hint: `${summary.byStatus.PAID.count} 笔 · admin 已完成线下打款`,
@@ -104,13 +105,15 @@ export default async function MyEarningsPage({
           {stats.map((s) => (
             <div
               key={s.label}
-              className="flex items-start justify-between gap-3 rounded-xl border border-border/60 bg-card/40 p-4"
+              className="flex items-start justify-between gap-3 rounded-xl border border-border bg-card/40 p-4"
             >
               <div className="space-y-1">
                 <div className="text-xs text-muted-foreground">{s.label}</div>
-                <div className="text-xl font-semibold tabular-nums">
-                  {s.value}
-                </div>
+                <MoneyText
+                  value={s.valueCents}
+                  currency={currency === "CNY" ? "¥" : currency}
+                  className="block text-xl font-semibold"
+                />
                 <div className="text-[10px] text-muted-foreground/80">
                   {s.hint}
                 </div>
@@ -125,7 +128,7 @@ export default async function MyEarningsPage({
         </section>
 
         {/* 提现申请卡 */}
-        <section className="space-y-3 rounded-xl border border-border/60 bg-card/40 p-4">
+        <section className="space-y-3 rounded-xl border border-border bg-card/40 p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-1">
               <h2 className="text-sm font-semibold">提现申请</h2>
@@ -198,7 +201,7 @@ export default async function MyEarningsPage({
               }
             />
           ) : (
-            <div className="overflow-hidden rounded-xl border border-border/60 bg-card/40">
+            <div className="overflow-hidden rounded-xl border border-border bg-card/40">
               <table className="w-full text-sm">
                 <thead className="bg-muted/30 text-xs text-muted-foreground">
                   <tr>
@@ -212,7 +215,7 @@ export default async function MyEarningsPage({
                     <th className="px-4 py-2.5 text-left font-medium">时间</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/40">
+                <tbody className="divide-y divide-border">
                   {items.map((p) => (
                     <tr key={p.id} className="align-top hover:bg-muted/20">
                       <td className="px-4 py-3 text-xs">
@@ -233,13 +236,26 @@ export default async function MyEarningsPage({
                         )}
                       </td>
                       <td className="px-4 py-3 text-right text-xs tabular-nums">
-                        <div>{formatPrice(p.grossCents, p.currency)}</div>
+                        <div>
+                          <MoneyText
+                            value={p.grossCents}
+                            currency={p.currency === "CNY" ? "¥" : p.currency}
+                          />
+                        </div>
                         <div className="text-[10px] text-muted-foreground">
-                          抽成 {formatPrice(p.platformFeeCents, p.currency)}
+                          抽成{" "}
+                          <MoneyText
+                            value={p.platformFeeCents}
+                            currency={p.currency === "CNY" ? "¥" : p.currency}
+                          />
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-right text-xs font-semibold tabular-nums">
-                        {formatPrice(p.netCents, p.currency)}
+                      <td className="px-4 py-3 text-right">
+                        <MoneyText
+                          value={p.netCents}
+                          currency={p.currency}
+                          className="text-xs font-semibold"
+                        />
                       </td>
                       <td className="px-4 py-3 text-xs">
                         <span
@@ -313,7 +329,7 @@ function Pagination({
           href={href(Math.max(1, page - 1))}
           aria-disabled={page <= 1}
           className={cn(
-            "rounded-md border border-border/60 px-3 py-1",
+            "rounded-full border border-border px-3 py-1",
             page <= 1
               ? "pointer-events-none opacity-40"
               : "hover:bg-muted/60 hover:text-foreground",
@@ -325,7 +341,7 @@ function Pagination({
           href={href(Math.min(totalPages, page + 1))}
           aria-disabled={page >= totalPages}
           className={cn(
-            "rounded-md border border-border/60 px-3 py-1",
+            "rounded-full border border-border px-3 py-1",
             page >= totalPages
               ? "pointer-events-none opacity-40"
               : "hover:bg-muted/60 hover:text-foreground",

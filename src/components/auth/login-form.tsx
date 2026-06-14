@@ -56,7 +56,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {pending && <Spinner className="size-4 text-primary-foreground" />}
         {pending ? "登录中…" : "登录"}

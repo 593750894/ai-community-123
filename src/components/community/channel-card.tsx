@@ -47,7 +47,7 @@ export function ChannelCard({
         {description}
       </p>
 
-      <div className="mt-3 flex items-center gap-3 border-t border-border/30 pt-2.5 text-[11px] text-muted-foreground tabular-nums">
+      <div className="mt-3 flex items-center gap-3 border-t border-border pt-2.5 text-[11px] text-muted-foreground tabular-nums">
         <span className="inline-flex items-center gap-1">
           <MessageSquare className="size-3" />
           {postCount} 帖

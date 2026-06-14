@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import {
   WORKFLOW_ITEM_CATEGORY_LABEL,
   WORKFLOW_ITEM_STATUS_LABEL,
-  formatPrice,
   type WorkflowItemCategory,
   type WorkflowItemStatusValue,
 } from "@/lib/commerce/schemas";
@@ -14,6 +13,7 @@ import {
   OrgAttributionBadge,
   type OrgAttribution,
 } from "@/components/publish/org-attribution-badge";
+import { MoneyText } from "@/components/ui/money-text";
 
 export interface WorkflowItemCardProps {
   item: {
@@ -107,7 +107,7 @@ export function WorkflowItemCard({
             </div>
           )}
 
-          <div className="mt-auto flex items-center justify-between gap-2 border-t border-border/40 pt-2 text-xs">
+          <div className="mt-auto flex items-center justify-between gap-2 border-t border-border pt-2 text-xs">
             <div className="flex min-w-0 flex-1 items-center gap-1.5 text-muted-foreground">
               <span className="truncate">
                 by{" "}
@@ -121,7 +121,11 @@ export function WorkflowItemCard({
             </div>
             <span className="inline-flex shrink-0 items-center gap-1 font-semibold text-primary">
               <Coins className="size-3" />
-              {formatPrice(item.priceCents, item.currency)}
+              <MoneyText
+                value={item.priceCents}
+                currency={item.currency === "CNY" ? "¥" : `${item.currency} `}
+                className="text-primary"
+              />
             </span>
           </div>
         </div>

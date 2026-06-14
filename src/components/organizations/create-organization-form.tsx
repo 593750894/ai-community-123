@@ -43,7 +43,7 @@ export function CreateOrganizationForm() {
             placeholder="例如：星辰影业"
             maxLength={80}
             required
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
 
@@ -60,7 +60,7 @@ export function CreateOrganizationForm() {
             minLength={3}
             maxLength={64}
             required
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
 
@@ -74,7 +74,7 @@ export function CreateOrganizationForm() {
             rows={3}
             maxLength={500}
             placeholder="一句话介绍企业方向、代表作品或服务"
-            className="w-full rounded-md border border-border/60 bg-background/40 px-2 py-1.5 text-sm outline-none focus:border-primary/50"
+            className="w-full rounded-md border border-border bg-background/40 px-2 py-1.5 text-sm outline-none focus:border-primary/50"
           />
         </Field>
 
@@ -82,7 +82,7 @@ export function CreateOrganizationForm() {
           <input
             name="logo"
             placeholder="https://..."
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
 
@@ -90,7 +90,7 @@ export function CreateOrganizationForm() {
           <input
             name="website"
             placeholder="https://your.company"
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
 
@@ -98,7 +98,7 @@ export function CreateOrganizationForm() {
           <select
             name="industry"
             defaultValue=""
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           >
             <option value="">未指定</option>
             {ORG_INDUSTRIES.map((ind) => (
@@ -113,7 +113,7 @@ export function CreateOrganizationForm() {
           <select
             name="size"
             defaultValue=""
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           >
             <option value="">未指定</option>
             {ORG_SIZES.map((s) => (
@@ -133,19 +133,19 @@ export function CreateOrganizationForm() {
             name="contactEmail"
             type="email"
             placeholder="hr@company.com"
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
         <p className="text-[11px] text-muted-foreground">
           创建后你自动成为该企业的所有者。每小时最多创建 5 个。
         </p>
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
+          className="rounded-full bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
         >
           {pending ? "创建中…" : "创建企业"}
         </button>

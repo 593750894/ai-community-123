@@ -4,8 +4,7 @@ export default function ChannelDetailLoading() {
   return (
     <div className="flex flex-1 flex-col">
       {/* Header skeleton */}
-      <header className="relative overflow-hidden border-b border-border/40 px-6 py-10 sm:px-8 sm:py-12">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-fuchsia-500/6" />
+      <header className="relative overflow-hidden border-b border-border px-6 py-10 sm:px-8 sm:py-12">
         <div className="absolute inset-0 bg-grid opacity-30" />
         <div className="relative space-y-5">
           <div className="flex items-center gap-2">
@@ -48,7 +47,7 @@ export default function ChannelDetailLoading() {
         <aside className="w-full shrink-0 space-y-5 xl:w-80">
           {/* Stats skeleton */}
           <div className="surface-card overflow-hidden">
-            <div className="border-b border-border/30 bg-gradient-to-r from-primary/8 via-transparent to-transparent px-4 py-3">
+            <div className="border-b border-border px-4 py-3">
               <Skeleton className="h-4 w-20" />
             </div>
             <div className="grid grid-cols-2 gap-2.5 p-3.5">
@@ -59,7 +58,7 @@ export default function ChannelDetailLoading() {
           </div>
           {/* Hot posts skeleton */}
           <div className="surface-card overflow-hidden">
-            <div className="border-b border-border/30 bg-gradient-to-r from-orange-500/8 via-transparent to-transparent px-4 py-3">
+            <div className="border-b border-border px-4 py-3">
               <Skeleton className="h-4 w-20" />
             </div>
             <div className="space-y-1 p-2">
@@ -70,7 +69,7 @@ export default function ChannelDetailLoading() {
           </div>
           {/* Related channels skeleton */}
           <div className="surface-card overflow-hidden">
-            <div className="border-b border-border/30 bg-gradient-to-r from-violet-500/8 via-transparent to-transparent px-4 py-3">
+            <div className="border-b border-border px-4 py-3">
               <Skeleton className="h-4 w-28" />
             </div>
             <div className="space-y-1 p-2">

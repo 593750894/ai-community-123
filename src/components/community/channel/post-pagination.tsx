@@ -4,6 +4,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import { CountText } from "@/components/ui/count-text";
 import { cn } from "@/lib/utils";
 
 export function PostPagination({
@@ -38,7 +39,7 @@ export function PostPagination({
         disabled={page <= 1}
         onClick={() => goTo(page - 1)}
         className={cn(
-          "inline-flex size-9 items-center justify-center rounded-lg border border-border/40 bg-card/30 text-muted-foreground transition-all",
+          "inline-flex size-9 items-center justify-center rounded-full border border-border bg-card/30 text-muted-foreground transition-all",
           page <= 1
             ? "cursor-not-allowed opacity-30"
             : "hover:border-primary/30 hover:bg-primary/10 hover:text-primary",
@@ -47,21 +48,17 @@ export function PostPagination({
         <ChevronLeft className="size-4" />
       </button>
 
-      <div className="flex items-center gap-1 rounded-lg border border-border/30 bg-card/20 px-3 py-1.5">
-        <span className="text-xs font-semibold tabular-nums text-primary">
-          {page}
-        </span>
+      <div className="flex items-center gap-1 rounded-full border border-border bg-card/20 px-3 py-1.5">
+        <CountText value={page} className="text-xs font-semibold text-primary" />
         <span className="text-xs text-muted-foreground/50">/</span>
-        <span className="text-xs tabular-nums text-muted-foreground">
-          {totalPages}
-        </span>
+        <CountText value={totalPages} className="text-xs text-muted-foreground" />
       </div>
 
       <button
         disabled={page >= totalPages}
         onClick={() => goTo(page + 1)}
         className={cn(
-          "inline-flex size-9 items-center justify-center rounded-lg border border-border/40 bg-card/30 text-muted-foreground transition-all",
+          "inline-flex size-9 items-center justify-center rounded-full border border-border bg-card/30 text-muted-foreground transition-all",
           page >= totalPages
             ? "cursor-not-allowed opacity-30"
             : "hover:border-primary/30 hover:bg-primary/10 hover:text-primary",

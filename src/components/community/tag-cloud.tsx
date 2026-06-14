@@ -14,7 +14,7 @@ export function TagCloud({ tags }: { tags: TagData[] }) {
           <Link
             key={tag}
             href={`/community?tag=${encodeURIComponent(tag)}`}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-card/50 px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/50 px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
           >
             <span>#</span>
             <span>{tag}</span>

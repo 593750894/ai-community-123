@@ -24,7 +24,7 @@ import { prisma } from "@/lib/db";
 import {
   COLLAB_CATEGORY_ORDER,
   COLLAB_STATUS_LABEL,
-  COLLAB_STATUS_TONE,
+  COLLAB_STATUS_TINT,
   COLLAB_STATUS_VALUES,
   collabCategoryMeta,
   type CollabCategoryValue,
@@ -198,7 +198,7 @@ export default async function CollaborationPage({
             label="累计合作"
             value={stats.totalCount}
             icon={Handshake}
-            tone="text-fuchsia-300"
+            tone="text-primary"
           />
           <StatCard
             label="平台创作者"
@@ -223,7 +223,6 @@ export default async function CollaborationPage({
               label="全部"
               emoji="🌐"
               count={stats.totalCount}
-              tone="bg-primary/15 text-primary border-primary/30"
             />
             {COLLAB_CATEGORY_ORDER.map((c) => {
               const meta = collabCategoryMeta(c);
@@ -235,7 +234,7 @@ export default async function CollaborationPage({
                   label={meta.label}
                   emoji={meta.emoji}
                   count={counts[c] ?? 0}
-                  tone={meta.tone}
+                  tint={meta.tint}
                 />
               );
             })}
@@ -268,7 +267,6 @@ export default async function CollaborationPage({
               href={queryWithStatus(null)}
               active={!activeStatus}
               label="全部状态"
-              tone="bg-muted/50 text-foreground"
             />
             {COLLAB_STATUS_VALUES.map((s) => (
               <StatusChip
@@ -276,7 +274,7 @@ export default async function CollaborationPage({
                 href={queryWithStatus(s)}
                 active={activeStatus === s}
                 label={COLLAB_STATUS_LABEL[s]}
-                tone={COLLAB_STATUS_TONE[s]}
+                tint={COLLAB_STATUS_TINT[s]}
               />
             ))}
           </div>

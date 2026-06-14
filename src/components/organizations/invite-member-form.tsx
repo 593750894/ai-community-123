@@ -37,7 +37,7 @@ export function InviteMemberForm({ orgId, slug }: { orgId: string; slug: string 
           <input
             name="inviteeUsername"
             placeholder="对方的 @用户名（不含 @）"
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
             maxLength={64}
             required
           />
@@ -54,7 +54,7 @@ export function InviteMemberForm({ orgId, slug }: { orgId: string; slug: string 
           <select
             name="role"
             defaultValue="MEMBER"
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           >
             <option value="MEMBER">成员</option>
             <option value="ADMIN">管理员</option>
@@ -67,7 +67,7 @@ export function InviteMemberForm({ orgId, slug }: { orgId: string; slug: string 
           <input
             name="message"
             placeholder="可留一句邀请理由，对方会在通知中看到"
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
             maxLength={200}
           />
         </div>
@@ -77,7 +77,7 @@ export function InviteMemberForm({ orgId, slug }: { orgId: string; slug: string 
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
+          className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
         >
           {pending ? "发送中…" : "发送邀请"}
         </button>

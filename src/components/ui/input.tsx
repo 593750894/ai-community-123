@@ -12,7 +12,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         type={type}
         data-slot="input"
         className={cn(
-          "block h-10 w-full rounded-lg border border-border/60 bg-background px-3 text-sm placeholder:text-muted-foreground focus-ring",
+          "block h-10 w-full rounded-lg border border-border bg-background px-3 text-sm placeholder:text-muted-foreground focus-ring",
           "disabled:cursor-not-allowed disabled:opacity-50",
           className,
         )}
@@ -32,7 +32,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         rows={rows}
         data-slot="textarea"
         className={cn(
-          "block w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm leading-relaxed placeholder:text-muted-foreground focus-ring",
+          "block w-full rounded-lg border border-border bg-background px-3 py-2 text-sm leading-relaxed placeholder:text-muted-foreground focus-ring",
           "disabled:cursor-not-allowed disabled:opacity-50",
           className,
         )}
@@ -51,7 +51,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         ref={ref}
         data-slot="select"
         className={cn(
-          "block h-10 w-full rounded-lg border border-border/60 bg-background px-3 text-sm focus-ring",
+          "block h-10 w-full rounded-lg border border-border bg-background px-3 text-sm focus-ring",
           "disabled:cursor-not-allowed disabled:opacity-50",
           className,
         )}

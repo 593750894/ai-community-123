@@ -61,7 +61,7 @@ export default async function AdminUsersPage() {
       />
 
       <div className="px-6 py-6 sm:px-8">
-        <div className="overflow-hidden rounded-xl border border-border/60 bg-card/40">
+        <div className="overflow-hidden rounded-xl border border-border bg-card/40">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-xs text-muted-foreground">
               <tr>
@@ -75,7 +75,7 @@ export default async function AdminUsersPage() {
                 <th className="px-4 py-2.5 text-right font-medium">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/40">
+            <tbody className="divide-y divide-border">
               {users.map((u) => {
                 const isSelf = u.id === admin.id;
                 return (
@@ -87,7 +87,7 @@ export default async function AdminUsersPage() {
                           <img
                             src={u.avatar}
                             alt={u.username}
-                            className="size-7 rounded-full border border-border/60 bg-muted"
+                            className="size-7 rounded-full border border-border bg-muted"
                           />
                         )}
                         <div className="min-w-0">
@@ -148,7 +148,7 @@ export default async function AdminUsersPage() {
                                 name="role"
                                 defaultValue={u.role}
                                 aria-label="设置角色"
-                                className="h-6 rounded border border-border/60 bg-background/60 px-1 text-[11px]"
+                                className="h-6 rounded border border-border bg-background/60 px-1 text-[11px]"
                               >
                                 {ADMIN_ROLE_VALUES.map((r) => (
                                   <option key={r} value={r}>
@@ -158,7 +158,7 @@ export default async function AdminUsersPage() {
                               </select>
                               <button
                                 type="submit"
-                                className="rounded border border-border/60 px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                                className="rounded border border-border px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                               >
                                 保存
                               </button>
@@ -172,7 +172,7 @@ export default async function AdminUsersPage() {
                                 name="status"
                                 defaultValue={u.status}
                                 aria-label="设置状态"
-                                className="h-6 rounded border border-border/60 bg-background/60 px-1 text-[11px]"
+                                className="h-6 rounded border border-border bg-background/60 px-1 text-[11px]"
                               >
                                 {ADMIN_STATUS_VALUES.map((s) => (
                                   <option key={s} value={s}>
@@ -182,7 +182,7 @@ export default async function AdminUsersPage() {
                               </select>
                               <button
                                 type="submit"
-                                className="rounded border border-border/60 px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                                className="rounded border border-border px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                               >
                                 保存
                               </button>

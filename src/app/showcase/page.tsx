@@ -136,7 +136,6 @@ export default async function ShowcasePage({
               active={!activeCategory}
               label="全部"
               count={total}
-              tone="bg-primary/15 text-primary border-primary/30"
             />
             {WORK_CATEGORY_ORDER.map((c) => {
               const meta = workCategoryMeta(c);
@@ -147,7 +146,7 @@ export default async function ShowcasePage({
                   active={activeCategory === c}
                   label={meta.label}
                   count={counts[c] ?? 0}
-                  tone={meta.tone}
+                  tint={meta.tint}
                 />
               );
             })}

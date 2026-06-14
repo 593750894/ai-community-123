@@ -171,7 +171,7 @@ export function ToolRatingForm({
         disabled={pending || !signedIn}
         placeholder="（可选）说说你的真实使用体验、最适合的场景、踩过的坑..."
         rows={3}
-        className="resize-y rounded-md border border-border/60 bg-card/40 px-3 py-2 text-sm placeholder:text-muted-foreground/60 focus-ring disabled:opacity-50"
+        className="resize-y rounded-md border border-border bg-card/40 px-3 py-2 text-sm placeholder:text-muted-foreground/60 focus-ring disabled:opacity-50"
       />
       <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
         <span>{comment.length}/500</span>
@@ -181,7 +181,7 @@ export function ToolRatingForm({
               type="button"
               onClick={remove}
               disabled={pending}
-              className="inline-flex items-center gap-1 rounded-md border border-rose-500/40 px-2.5 py-1 text-xs text-rose-300 transition-colors hover:bg-rose-500/15 disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-full border border-rose-500/40 px-2.5 py-1 text-xs text-rose-300 transition-colors hover:bg-rose-500/15 disabled:opacity-50"
             >
               <Trash2 className="size-3" />
               撤回
@@ -191,7 +191,7 @@ export function ToolRatingForm({
             type="button"
             onClick={submit}
             disabled={pending || stars < 1}
-            className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
             {pending ? "保存中..." : hasExisting ? "更新评分" : "提交评分"}
           </button>

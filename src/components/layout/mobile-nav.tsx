@@ -24,7 +24,7 @@ export function MobileBottomNav() {
   const pathname = usePathname();
   return (
     <nav
-      className="sticky bottom-0 z-40 flex h-14 w-full items-stretch border-t border-border/60 bg-background/85 backdrop-blur pb-safe lg:hidden"
+      className="sticky bottom-0 z-40 flex h-14 w-full items-stretch border-t border-border bg-background pb-safe lg:hidden"
       aria-label="主导航"
     >
       {MOBILE_NAV_ITEMS.map(({ href, label, icon: Icon, primary }) => {
@@ -45,7 +45,7 @@ export function MobileBottomNav() {
               className={cn(
                 "flex size-7 items-center justify-center rounded-md transition-colors",
                 primary
-                  ? "bg-gradient-to-br from-cyan-400 to-blue-600 text-background shadow-[0_0_10px_-2px_rgba(56,189,248,0.5)]"
+                  ? "bg-primary text-primary-foreground"
                   : active
                     ? "bg-primary/15"
                     : "bg-transparent",

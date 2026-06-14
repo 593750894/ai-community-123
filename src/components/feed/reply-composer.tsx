@@ -43,7 +43,7 @@ export function ReplyComposer({
     <form action={action} className="mt-2 space-y-2">
       <input type="hidden" name="postId" value={postId} />
       <input type="hidden" name="parentId" value={parentId} />
-      <div className="flex items-start gap-2 rounded-lg border border-border/60 bg-background/40 p-2 focus-within:border-primary/40">
+      <div className="flex items-start gap-2 rounded-lg border border-border bg-background/40 p-2 focus-within:border-primary/40">
         <textarea
           ref={textareaRef}
           name="content"
@@ -72,7 +72,7 @@ export function ReplyComposer({
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex h-7 items-center gap-1 rounded-md border border-border/60 px-2 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+          className="inline-flex h-7 items-center gap-1 rounded-full border border-border px-2 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
         >
           <X className="size-3" />
           取消
@@ -80,7 +80,7 @@ export function ReplyComposer({
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex h-7 items-center gap-1 rounded-md bg-primary px-2.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-7 items-center gap-1 rounded-full bg-primary px-2.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Send className="size-3" />
           {pending ? "发布中…" : "发表回复"}

@@ -58,7 +58,7 @@ export function EditToolDialog({ tool }: { tool: ToolInitial }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md border border-border/60 px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+        className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
       >
         编辑
       </button>
@@ -89,14 +89,14 @@ export function EditToolDialog({ tool }: { tool: ToolInitial }) {
                   <input
                     name="name"
                     defaultValue={tool.name}
-                    className="h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+                    className="h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
                   />
                 </Field>
                 <Field label="官网" error={state.fieldErrors?.url?.[0]} required>
                   <input
                     name="url"
                     defaultValue={tool.url}
-                    className="h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+                    className="h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
                   />
                 </Field>
                 <Field
@@ -107,7 +107,7 @@ export function EditToolDialog({ tool }: { tool: ToolInitial }) {
                   <select
                     name="category"
                     defaultValue={tool.category}
-                    className="h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+                    className="h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
                   >
                     {TOOL_CATEGORY_ORDER.map((c) => (
                       <option key={c} value={c}>
@@ -124,7 +124,7 @@ export function EditToolDialog({ tool }: { tool: ToolInitial }) {
                   <select
                     name="pricing"
                     defaultValue={tool.pricing}
-                    className="h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+                    className="h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
                   >
                     {TOOL_PRICING_VALUES.map((p) => (
                       <option key={p} value={p}>
@@ -143,21 +143,21 @@ export function EditToolDialog({ tool }: { tool: ToolInitial }) {
                     name="description"
                     rows={3}
                     defaultValue={tool.description}
-                    className="w-full rounded-md border border-border/60 bg-background/40 px-2 py-1.5 text-sm outline-none focus:border-primary/50"
+                    className="w-full rounded-md border border-border bg-background/40 px-2 py-1.5 text-sm outline-none focus:border-primary/50"
                   />
                 </Field>
                 <Field label="适用场景（可选）" className="sm:col-span-2">
                   <input
                     name="useCase"
                     defaultValue={tool.useCase ?? ""}
-                    className="h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+                    className="h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
                   />
                 </Field>
                 <Field label="标签（逗号分隔）" className="sm:col-span-2">
                   <input
                     name="tags"
                     defaultValue={tool.tags.join(", ")}
-                    className="h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+                    className="h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
                   />
                 </Field>
               </div>
@@ -167,7 +167,7 @@ export function EditToolDialog({ tool }: { tool: ToolInitial }) {
                   type="checkbox"
                   name="isOfficial"
                   defaultChecked={tool.isOfficial}
-                  className="size-3.5 rounded border-border/60"
+                  className="size-3.5 rounded border-border"
                 />
                 官方推荐
               </label>
@@ -187,14 +187,14 @@ export function EditToolDialog({ tool }: { tool: ToolInitial }) {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
               >
                 取消
               </button>
               <button
                 type="submit"
                 disabled={pending}
-                className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/80 disabled:opacity-50"
+                className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/80 disabled:opacity-50"
               >
                 {pending ? "保存中…" : "保存"}
               </button>

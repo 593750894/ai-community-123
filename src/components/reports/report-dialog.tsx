@@ -121,7 +121,7 @@ export function ReportDialog({
                   value={reason}
                   onChange={(e) => setReason(e.target.value as ReportReason)}
                   disabled={submitting}
-                  className="block h-10 w-full rounded-lg border border-border/60 bg-background px-3 text-sm outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
+                  className="block h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
                 >
                   {REPORT_REASONS.map((r) => (
                     <option key={r} value={r}>
@@ -147,7 +147,7 @@ export function ReportDialog({
                   disabled={submitting}
                   placeholder="详细描述违规情况，方便管理员判断。"
                   rows={4}
-                  className="block w-full resize-y rounded-lg border border-border/60 bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
+                  className="block w-full resize-y rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
@@ -166,14 +166,14 @@ export function ReportDialog({
                 type="button"
                 onClick={onClose}
                 disabled={submitting}
-                className="inline-flex h-9 items-center gap-1 rounded-lg border border-border/60 px-3 text-sm text-muted-foreground hover:bg-muted/60 hover:text-foreground disabled:opacity-50"
+                className="inline-flex h-9 items-center gap-1 rounded-full border border-border px-3 text-sm text-muted-foreground hover:bg-muted/60 hover:text-foreground disabled:opacity-50"
               >
                 取消
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex h-9 items-center justify-center rounded-lg bg-rose-500/90 px-4 text-sm font-medium text-white transition-colors hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-9 items-center justify-center rounded-full bg-rose-500/90 px-4 text-sm font-medium text-white transition-colors hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submitting ? "提交中…" : "提交举报"}
               </button>

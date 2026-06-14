@@ -70,20 +70,13 @@ export function PostCard({
   return (
     <article
       className={cn(
-        "group surface-card overflow-hidden p-4 transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:bg-card/60 hover:shadow-[0_0_20px_rgba(var(--color-primary)/0.06)] sm:p-5",
+        "group surface-card overflow-hidden p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 sm:p-5",
         post.pinned && "border-amber-500/40 bg-amber-500/5 hover:border-amber-500/60",
       )}
     >
       {/* Top row: type badge + meta */}
       <div className="flex items-center gap-2 text-[11px]">
-        <span
-          className={cn(
-            "inline-flex shrink-0 items-center rounded-full border px-2.5 py-0.5 font-medium",
-            meta.tone,
-          )}
-        >
-          {meta.label}
-        </span>
+        <Badge variant="default">{meta.label}</Badge>
         {post.pinned && (
           <Badge variant="warning" className="gap-1">
             <Pin className="size-3" />
@@ -92,18 +85,8 @@ export function PostCard({
         )}
         {hasMedia && (
           <div className="flex items-center gap-1.5">
-            {post.videoUrl && (
-              <Badge variant="primary">
-                <Play className="size-3" />
-                视频
-              </Badge>
-            )}
-            {post.imageUrl && (
-              <Badge variant="cyan">
-                <ImageIcon className="size-3" />
-                图片
-              </Badge>
-            )}
+            {post.videoUrl && <Play className="size-3.5 text-muted-foreground" />}
+            {post.imageUrl && <ImageIcon className="size-3.5 text-muted-foreground" />}
           </div>
         )}
         {showChannel && post.channel && (
@@ -134,14 +117,14 @@ export function PostCard({
       </p>
 
       {/* Author + interaction footer */}
-      <div className="mt-3.5 flex flex-wrap items-center gap-3 border-t border-border/25 pt-3 text-xs text-muted-foreground">
+      <div className="mt-3.5 flex flex-wrap items-center gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
         <div className="flex items-center gap-2">
           {post.author.avatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={post.author.avatar}
               alt={post.author.name}
-              className="size-6 rounded-full border border-border/60 ring-1 ring-border/20"
+              className="size-6 rounded-full border border-border"
             />
           ) : (
             <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">

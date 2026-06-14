@@ -10,6 +10,7 @@ import {
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
+import { CountText } from "@/components/ui/count-text";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
   SEARCH_TYPES,
@@ -86,7 +87,7 @@ export default async function SearchPage({
       <div className="flex flex-col gap-5 px-4 py-5 sm:px-8 sm:py-6">
         {q ? (
           <>
-            <div className="-mx-4 flex items-center gap-1 overflow-x-auto border-b border-border/40 px-4 pb-2 sm:-mx-8 sm:px-8">
+            <div className="-mx-4 flex items-center gap-1 overflow-x-auto border-b border-border px-4 pb-2 sm:-mx-8 sm:px-8">
               {TYPE_TABS.map((t) => {
                 const count =
                   t.key === "all"
@@ -198,7 +199,7 @@ function ResultRow({ hit, q }: { hit: SearchHit; q: string }) {
       return (
         <Link
           href={hit.href}
-          className="block rounded-lg border border-border/60 bg-card/30 p-4 transition-colors hover:border-primary/40 hover:bg-card/60"
+          className="block rounded-2xl border border-border bg-card/30 p-4 transition-colors hover:border-primary/40 hover:bg-card/60"
         >
           <div className="mb-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
             <FileText className="size-3" />
@@ -222,8 +223,8 @@ function ResultRow({ hit, q }: { hit: SearchHit; q: string }) {
             </p>
           )}
           <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
-            <span>{hit.likeCount} 赞</span>
-            <span>{hit.commentCount} 评论</span>
+            <span><CountText value={hit.likeCount} /> 赞</span>
+            <span><CountText value={hit.commentCount} /> 评论</span>
           </div>
         </Link>
       );
@@ -231,9 +232,9 @@ function ResultRow({ hit, q }: { hit: SearchHit; q: string }) {
       return (
         <Link
           href={hit.href}
-          className="flex gap-3 rounded-lg border border-border/60 bg-card/30 p-3 transition-colors hover:border-primary/40 hover:bg-card/60"
+          className="flex gap-3 rounded-2xl border border-border bg-card/30 p-3 transition-colors hover:border-primary/40 hover:bg-card/60"
         >
-          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border/60 bg-muted/30 text-muted-foreground">
+          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted/30 text-muted-foreground">
             {hit.thumbnailUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -270,9 +271,9 @@ function ResultRow({ hit, q }: { hit: SearchHit; q: string }) {
       return (
         <Link
           href={hit.href}
-          className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/30 p-3 transition-colors hover:border-primary/40 hover:bg-card/60"
+          className="flex items-center gap-3 rounded-2xl border border-border bg-card/30 p-3 transition-colors hover:border-primary/40 hover:bg-card/60"
         >
-          <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border/60 bg-muted/40 text-muted-foreground">
+          <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-muted/40 text-muted-foreground">
             {hit.avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -301,7 +302,7 @@ function ResultRow({ hit, q }: { hit: SearchHit; q: string }) {
       return (
         <Link
           href={hit.href}
-          className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/30 p-3 transition-colors hover:border-primary/40 hover:bg-card/60"
+          className="flex items-center gap-3 rounded-2xl border border-border bg-card/30 p-3 transition-colors hover:border-primary/40 hover:bg-card/60"
         >
           <span
             className="flex size-10 shrink-0 items-center justify-center rounded-md border text-base"
@@ -326,8 +327,8 @@ function ResultRow({ hit, q }: { hit: SearchHit; q: string }) {
               </p>
             )}
             <div className="mt-1 flex items-center gap-3 text-[11px] text-muted-foreground">
-              <span>{hit.postCount} 帖子</span>
-              <span>{hit.memberCount} 成员</span>
+              <span><CountText value={hit.postCount} /> 帖子</span>
+              <span><CountText value={hit.memberCount} /> 成员</span>
             </div>
           </div>
         </Link>
@@ -336,9 +337,9 @@ function ResultRow({ hit, q }: { hit: SearchHit; q: string }) {
       return (
         <Link
           href={hit.href}
-          className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/30 p-3 transition-colors hover:border-primary/40 hover:bg-card/60"
+          className="flex items-center gap-3 rounded-2xl border border-border bg-card/30 p-3 transition-colors hover:border-primary/40 hover:bg-card/60"
         >
-          <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border/60 bg-muted/30 text-muted-foreground">
+          <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted/30 text-muted-foreground">
             {hit.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img

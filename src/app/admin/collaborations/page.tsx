@@ -47,7 +47,7 @@ export default async function AdminCollaborationsPage() {
       />
 
       <div className="px-6 py-6 sm:px-8">
-        <div className="overflow-hidden rounded-xl border border-border/60 bg-card/40">
+        <div className="overflow-hidden rounded-xl border border-border bg-card/40">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-xs text-muted-foreground">
               <tr>
@@ -61,7 +61,7 @@ export default async function AdminCollaborationsPage() {
                 <th className="px-4 py-2.5 text-right font-medium">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/40">
+            <tbody className="divide-y divide-border">
               {collabs.map((c) => {
                 const meta = collabCategoryMeta(c.category);
                 return (
@@ -113,7 +113,7 @@ export default async function AdminCollaborationsPage() {
                         </select>
                         <button
                           type="submit"
-                          className="rounded-md border border-border/60 bg-muted/40 px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                          className="rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-[11px] text-muted-foreground hover:bg-muted/70 hover:text-foreground"
                         >
                           保存
                         </button>
@@ -127,7 +127,7 @@ export default async function AdminCollaborationsPage() {
                         <input type="hidden" name="id" value={c.id} />
                         <button
                           type="submit"
-                          className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-xs text-rose-300 transition-colors hover:bg-rose-500/20"
+                          className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-xs text-rose-300 transition-colors hover:bg-rose-500/20"
                         >
                           删除
                         </button>

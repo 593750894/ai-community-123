@@ -35,11 +35,11 @@ export function CommentForm({
 
   if (!signedIn) {
     return (
-      <div className="flex items-center justify-between rounded-xl border border-border/60 bg-card/30 px-4 py-3 text-sm text-muted-foreground">
+      <div className="flex items-center justify-between rounded-xl border border-border bg-card/30 px-4 py-3 text-sm text-muted-foreground">
         <span>登录后即可发表评论。</span>
         <Link
           href={`/auth/login?next=${encodeURIComponent(`/post/${postId}`)}`}
-          className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
           <LogIn className="size-3" />
           去登录
@@ -51,13 +51,13 @@ export function CommentForm({
   return (
     <form action={action} className="space-y-2">
       <input type="hidden" name="postId" value={postId} />
-      <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-card/40 p-3 focus-within:border-primary/40">
+      <div className="flex items-start gap-3 rounded-xl border border-border bg-card/40 p-3 focus-within:border-primary/40">
         {currentUser?.avatar ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={currentUser.avatar}
             alt={currentUser.name}
-            className="size-8 rounded-full border border-border/60"
+            className="size-8 rounded-full border border-border"
           />
         ) : (
           <span className="flex size-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
@@ -93,7 +93,7 @@ export function CommentForm({
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Send className="size-3.5" />
           {pending ? "发布中…" : "发表评论"}

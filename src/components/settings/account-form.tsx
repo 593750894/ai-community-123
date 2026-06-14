@@ -160,7 +160,7 @@ export function AccountForm({ initial }: { initial: Initial }) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
+          className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
         >
           {pending ? "保存中…" : "保存"}
         </button>
@@ -170,9 +170,9 @@ export function AccountForm({ initial }: { initial: Initial }) {
 }
 
 const inputClass =
-  "h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50";
+  "h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50";
 const textareaClass =
-  "w-full rounded-md border border-border/60 bg-background/40 px-2 py-1.5 text-sm outline-none focus:border-primary/50";
+  "w-full rounded-md border border-border bg-background/40 px-2 py-1.5 text-sm outline-none focus:border-primary/50";
 
 function Field({
   label,

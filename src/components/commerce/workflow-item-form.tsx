@@ -86,7 +86,7 @@ export function WorkflowItemForm({
             name="title"
             defaultValue={defaults?.title ?? ""}
             placeholder="例如：电商爆款 · ComfyUI 数字人工作流"
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
             maxLength={80}
             required
           />
@@ -104,7 +104,7 @@ export function WorkflowItemForm({
             defaultValue={defaults?.description ?? ""}
             rows={6}
             placeholder="工作流的目标、核心节点、所需输入..."
-            className="w-full rounded-md border border-border/60 bg-background/40 px-2 py-1.5 text-sm outline-none focus:border-primary/50"
+            className="w-full rounded-md border border-border bg-background/40 px-2 py-1.5 text-sm outline-none focus:border-primary/50"
             maxLength={2000}
             required
           />
@@ -114,7 +114,7 @@ export function WorkflowItemForm({
           <select
             name="category"
             defaultValue={defaults?.category ?? "COMFYUI_WORKFLOW"}
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
             required
           >
             {WORKFLOW_ITEM_CATEGORIES.map((c) => (
@@ -139,7 +139,7 @@ export function WorkflowItemForm({
             max="9999.99"
             defaultValue={priceYuan}
             placeholder="例如 19.90"
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
             required
           />
         </Field>
@@ -153,7 +153,7 @@ export function WorkflowItemForm({
             name="coverUrl"
             defaultValue={defaults?.coverUrl ?? ""}
             placeholder="https://..."
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
 
@@ -166,7 +166,7 @@ export function WorkflowItemForm({
             name="downloadUrl"
             defaultValue={defaults?.downloadUrl ?? ""}
             placeholder="https://..."
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
 
@@ -180,7 +180,7 @@ export function WorkflowItemForm({
             name="toolStack"
             defaultValue={(defaults?.toolStack ?? []).join(", ")}
             placeholder="ComfyUI, SD 1.5, FaceFusion"
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
 
@@ -194,16 +194,16 @@ export function WorkflowItemForm({
             name="tags"
             defaultValue={(defaults?.tags ?? []).join(", ")}
             placeholder="数字人, 电商, 短视频"
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
       </div>
 
-      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border/40 pt-4">
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/80 disabled:opacity-50"
+          className="rounded-full bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/80 disabled:opacity-50"
         >
           {pending ? (isEdit ? "保存中…" : "创建中…") : isEdit ? "保存修改" : "创建草稿"}
         </button>

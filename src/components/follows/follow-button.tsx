@@ -139,21 +139,21 @@ export function FollowButton({
       return isFollowing
         ? hover
           ? "border-rose-500/50 bg-rose-500/15 text-rose-300"
-          : "border-border/60 bg-card/70 text-foreground/85"
+          : "border-border bg-card/70 text-foreground/85"
         : "border-primary/50 bg-primary/15 text-primary hover:bg-primary/25";
     }
     if (variant === "outline") {
       return isFollowing
         ? hover
           ? "border-rose-500/50 bg-rose-500/15 text-rose-300"
-          : "border-border/60 bg-background text-foreground/85"
+          : "border-border bg-background text-foreground/85"
         : "border-primary/60 bg-transparent text-primary hover:bg-primary/10";
     }
     // default
     return isFollowing
       ? hover
         ? "border-rose-500/50 bg-rose-500/15 text-rose-300"
-        : "border-border/60 bg-card text-foreground"
+        : "border-border bg-card text-foreground"
       : "border-transparent bg-primary text-primary-foreground hover:bg-primary/90";
   })();
 

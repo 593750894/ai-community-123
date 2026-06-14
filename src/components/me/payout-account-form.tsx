@@ -70,7 +70,7 @@ export function PayoutAccountForm({ initial }: PayoutAccountFormProps) {
   return (
     <form
       onSubmit={submit}
-      className="space-y-3 rounded-xl border border-border/60 bg-card/40 p-4"
+      className="space-y-3 rounded-xl border border-border bg-card/40 p-4"
     >
       <div className="grid gap-3 sm:grid-cols-3">
         <label className="block space-y-1">
@@ -80,7 +80,7 @@ export function PayoutAccountForm({ initial }: PayoutAccountFormProps) {
           <select
             value={method}
             onChange={(e) => setMethod(e.target.value as PayoutMethodValue)}
-            className="block h-9 w-full rounded-lg border border-border/60 bg-background px-2 text-sm outline-none focus:border-primary/60"
+            className="block h-9 w-full rounded-lg border border-border bg-background px-2 text-sm outline-none focus:border-primary/60"
           >
             {PAYOUT_METHODS.map((m) => (
               <option key={m} value={m}>
@@ -106,7 +106,7 @@ export function PayoutAccountForm({ initial }: PayoutAccountFormProps) {
                 ? "微信号 / 收款绑定手机号"
                 : "银行卡号"
             }
-            className="block h-9 w-full rounded-lg border border-border/60 bg-background px-2 text-sm outline-none focus:border-primary/60"
+            className="block h-9 w-full rounded-lg border border-border bg-background px-2 text-sm outline-none focus:border-primary/60"
           />
         </label>
         <label className="block space-y-1">
@@ -120,7 +120,7 @@ export function PayoutAccountForm({ initial }: PayoutAccountFormProps) {
             maxLength={64}
             required
             placeholder="与账号实名一致"
-            className="block h-9 w-full rounded-lg border border-border/60 bg-background px-2 text-sm outline-none focus:border-primary/60"
+            className="block h-9 w-full rounded-lg border border-border bg-background px-2 text-sm outline-none focus:border-primary/60"
           />
         </label>
       </div>
@@ -144,7 +144,7 @@ export function PayoutAccountForm({ initial }: PayoutAccountFormProps) {
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? "保存中…" : "保存账号"}
         </button>

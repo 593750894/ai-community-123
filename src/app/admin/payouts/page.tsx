@@ -3,6 +3,7 @@ import { Banknote, Coins, Hourglass, ShieldCheck } from "lucide-react";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { FilterChip } from "@/components/ui/filter-chip";
+import { MoneyText } from "@/components/ui/money-text";
 import { MarkPayoutPaidDialog } from "@/components/admin/mark-payout-paid-dialog";
 import {
   getAdminPayoutOverview,
@@ -25,7 +26,7 @@ const STATUS_TONE: Record<PayoutStatusValue, string> = {
   PENDING: "border-amber-500/40 bg-amber-500/10 text-amber-300",
   AVAILABLE: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
   PAID: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
-  CANCELED: "border-border/60 bg-muted/30 text-muted-foreground",
+  CANCELED: "border-border bg-muted/30 text-muted-foreground",
 };
 
 function parseStatus(raw?: string): PayoutStatusValue | undefined {
@@ -65,31 +66,52 @@ export default async function AdminPayoutsPage({
   const hasAnyFilter = !!(status || pendingRequest || q);
   const currency = items[0]?.currency ?? "CNY";
 
+  const currencyPrefix = currency === "CNY" ? "¥" : `${currency} `;
   const stats = [
     {
       label: "待申请提现（等冷藏期结束）",
-      value: formatPrice(overview.pendingNetCents, currency),
+      value: (
+        <MoneyText
+          value={overview.pendingNetCents}
+          currency={currencyPrefix}
+        />
+      ),
       icon: Hourglass,
       tone: "text-amber-300",
       href: "/admin/payouts?status=PENDING",
     },
     {
       label: "可申请提现总额",
-      value: formatPrice(overview.availableNetCents, currency),
+      value: (
+        <MoneyText
+          value={overview.availableNetCents}
+          currency={currencyPrefix}
+        />
+      ),
       icon: Banknote,
       tone: "text-emerald-300",
       href: "/admin/payouts?status=AVAILABLE",
     },
     {
       label: `待处理提现（${overview.pendingRequestCount} 笔）`,
-      value: formatPrice(overview.requestedNetCents, currency),
+      value: (
+        <MoneyText
+          value={overview.requestedNetCents}
+          currency={currencyPrefix}
+        />
+      ),
       icon: Coins,
       tone: "text-rose-300",
       href: "/admin/payouts?pendingRequest=1",
     },
     {
       label: "已结算累计",
-      value: formatPrice(overview.paidNetCents, currency),
+      value: (
+        <MoneyText
+          value={overview.paidNetCents}
+          currency={currencyPrefix}
+        />
+      ),
       icon: ShieldCheck,
       tone: "text-cyan-300",
       href: "/admin/payouts?status=PAID",
@@ -112,7 +134,7 @@ export default async function AdminPayoutsPage({
             <Link
               key={s.label}
               href={s.href}
-              className="group flex items-start justify-between gap-3 rounded-xl border border-border/60 bg-card/40 p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card/70"
+              className="group flex items-start justify-between gap-3 rounded-xl border border-border bg-card/40 p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card/70"
             >
               <div>
                 <div className="text-xs text-muted-foreground">{s.label}</div>
@@ -131,7 +153,7 @@ export default async function AdminPayoutsPage({
 
         <form
           method="GET"
-          className="flex flex-wrap items-end gap-3 rounded-xl border border-border/60 bg-card/40 p-3"
+          className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card/40 p-3"
         >
           <Labeled label="搜索（卖家 / 订单号）">
             <input
@@ -139,7 +161,7 @@ export default async function AdminPayoutsPage({
               name="q"
               defaultValue={q ?? ""}
               placeholder="@username 或 完整订单号"
-              className="block h-9 w-64 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-64 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             />
           </Labeled>
           {status && <input type="hidden" name="status" value={status} />}
@@ -148,14 +170,14 @@ export default async function AdminPayoutsPage({
           )}
           <button
             type="submit"
-            className="inline-flex h-9 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+            className="inline-flex h-9 items-center gap-1 rounded-full bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
           >
             搜索
           </button>
           {hasAnyFilter && (
             <Link
               href="/admin/payouts"
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-border/60 px-3 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              className="inline-flex h-9 items-center gap-1 rounded-full border border-border px-3 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
             >
               清除筛选
             </Link>
@@ -185,7 +207,7 @@ export default async function AdminPayoutsPage({
           ))}
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-border/60 bg-card/40">
+        <div className="overflow-hidden rounded-xl border border-border bg-card/40">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-xs text-muted-foreground">
               <tr>
@@ -201,7 +223,7 @@ export default async function AdminPayoutsPage({
                 <th className="px-4 py-2.5 text-right font-medium">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/40">
+            <tbody className="divide-y divide-border">
               {items.map((p) => (
                 <tr key={p.id} className="align-top hover:bg-muted/20">
                   <td className="px-4 py-3 text-xs">
@@ -233,9 +255,18 @@ export default async function AdminPayoutsPage({
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right text-xs tabular-nums">
-                    <div>{formatPrice(p.grossCents, p.currency)}</div>
+                    <div>
+                      <MoneyText
+                        value={p.grossCents}
+                        currency={p.currency === "CNY" ? "¥" : `${p.currency} `}
+                      />
+                    </div>
                     <div className="text-[10px] text-muted-foreground">
-                      抽成 {formatPrice(p.platformFeeCents, p.currency)}
+                      抽成{" "}
+                      <MoneyText
+                        value={p.platformFeeCents}
+                        currency={p.currency === "CNY" ? "¥" : `${p.currency} `}
+                      />
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right text-xs font-semibold tabular-nums">
@@ -385,7 +416,7 @@ function Pagination({
           href={href(Math.max(1, page - 1))}
           aria-disabled={page <= 1}
           className={cn(
-            "rounded-md border border-border/60 px-3 py-1",
+            "rounded-full border border-border px-3 py-1",
             page <= 1
               ? "pointer-events-none opacity-40"
               : "hover:bg-muted/60 hover:text-foreground",
@@ -397,7 +428,7 @@ function Pagination({
           href={href(Math.min(totalPages, page + 1))}
           aria-disabled={page >= totalPages}
           className={cn(
-            "rounded-md border border-border/60 px-3 py-1",
+            "rounded-full border border-border px-3 py-1",
             page >= totalPages
               ? "pointer-events-none opacity-40"
               : "hover:bg-muted/60 hover:text-foreground",

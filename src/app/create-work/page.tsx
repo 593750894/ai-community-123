@@ -41,7 +41,7 @@ export default async function CreateWorkPage() {
               的身份发布。作品将公开展示在作品广场。
             </span>
           </div>
-          <div className="rounded-2xl border border-border/60 bg-card/30 p-6 sm:p-8">
+          <div className="rounded-2xl border border-border bg-card/30 p-6 sm:p-8">
             <CreateWorkForm organizations={organizations} />
           </div>
         </div>

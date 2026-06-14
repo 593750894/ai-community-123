@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+import { CountText } from "@/components/ui/count-text";
 import { InlineError } from "@/components/ui/error-state";
 
 type StatItem = {
@@ -49,13 +50,11 @@ export function CommunityStatsCard({
           {stats.map((s) => (
             <div
               key={s.label}
-              className="rounded-lg border border-border/30 bg-muted/30 px-3 py-3 text-center transition-colors hover:bg-muted/50"
+              className="rounded-lg border border-border bg-muted/30 px-3 py-3 text-center transition-colors hover:bg-muted/50"
             >
               <div className="flex items-center justify-center gap-1.5">
                 <s.icon className={`size-3.5 ${s.color}`} />
-                <span className="text-lg font-bold tabular-nums text-foreground">
-                  {s.value}
-                </span>
+                <CountText value={s.value} className="text-lg font-bold text-foreground" />
               </div>
               <span className="mt-0.5 block text-[11px] text-muted-foreground">{s.label}</span>
             </div>

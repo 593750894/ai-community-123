@@ -160,7 +160,7 @@ function Pager({
       <Link
         href={makeHref(prev)}
         aria-disabled={page <= 1}
-        className="rounded-md border border-border/60 px-3 py-1 text-muted-foreground hover:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-40"
+        className="rounded-full border border-border px-3 py-1 text-muted-foreground hover:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-40"
       >
         ← 上一页
       </Link>
@@ -170,7 +170,7 @@ function Pager({
       <Link
         href={makeHref(next)}
         aria-disabled={page >= totalPages}
-        className="rounded-md border border-border/60 px-3 py-1 text-muted-foreground hover:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-40"
+        className="rounded-full border border-border px-3 py-1 text-muted-foreground hover:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-40"
       >
         下一页 →
       </Link>

@@ -114,8 +114,8 @@ export function LikeButton({
         isActive
           ? "border-rose-500/40 bg-rose-500/15 text-rose-300"
           : variant === "solid"
-            ? "border-border/60 bg-card/70 text-foreground/85 hover:border-rose-500/40 hover:text-rose-300"
-            : "border-border/40 bg-transparent text-muted-foreground hover:border-rose-500/40 hover:text-rose-300",
+            ? "border-border bg-card/70 text-foreground/85 hover:border-rose-500/40 hover:text-rose-300"
+            : "border-border bg-transparent text-muted-foreground hover:border-rose-500/40 hover:text-rose-300",
       )}
       title={error ?? (isActive ? "取消点赞" : "点赞")}
     >
@@ -209,8 +209,8 @@ export function BookmarkButton({
         isActive
           ? "border-amber-500/40 bg-amber-500/15 text-amber-300"
           : variant === "solid"
-            ? "border-border/60 bg-card/70 text-foreground/85 hover:border-amber-500/40 hover:text-amber-300"
-            : "border-border/40 bg-transparent text-muted-foreground hover:border-amber-500/40 hover:text-amber-300",
+            ? "border-border bg-card/70 text-foreground/85 hover:border-amber-500/40 hover:text-amber-300"
+            : "border-border bg-transparent text-muted-foreground hover:border-amber-500/40 hover:text-amber-300",
       )}
       title={error ?? (isActive ? "取消收藏" : "收藏")}
     >

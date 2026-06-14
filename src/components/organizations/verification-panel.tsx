@@ -53,7 +53,7 @@ export function VerificationPanel({ defaults }: { defaults: Defaults }) {
                   ? "rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-amber-300"
                   : defaults.status === "REJECTED"
                     ? "rounded-full border border-rose-500/40 bg-rose-500/10 px-2 py-0.5 text-rose-300"
-                    : "rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-muted-foreground"
+                    : "rounded-full border border-border bg-muted/40 px-2 py-0.5 text-muted-foreground"
             }
           >
             {statusLabel}
@@ -69,7 +69,7 @@ export function VerificationPanel({ defaults }: { defaults: Defaults }) {
             <input type="hidden" name="id" value={defaults.id} />
             <input type="hidden" name="slug" value={defaults.slug} />
             <button
-              className="rounded-md border border-border/60 px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+              className="rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
               type="submit"
             >
               撤回申请
@@ -130,7 +130,7 @@ export function VerificationPanel({ defaults }: { defaults: Defaults }) {
               maxLength={120}
               required
               disabled={!canSubmit}
-              className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm disabled:opacity-60 outline-none focus:border-primary/50"
+              className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm disabled:opacity-60 outline-none focus:border-primary/50"
             />
           </Field>
 
@@ -148,7 +148,7 @@ export function VerificationPanel({ defaults }: { defaults: Defaults }) {
               pattern="[A-Za-z0-9]{8,30}"
               required
               disabled={!canSubmit}
-              className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm disabled:opacity-60 outline-none focus:border-primary/50"
+              className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm disabled:opacity-60 outline-none focus:border-primary/50"
             />
           </Field>
 
@@ -159,7 +159,7 @@ export function VerificationPanel({ defaults }: { defaults: Defaults }) {
               maxLength={60}
               required
               disabled={!canSubmit}
-              className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm disabled:opacity-60 outline-none focus:border-primary/50"
+              className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm disabled:opacity-60 outline-none focus:border-primary/50"
             />
           </Field>
 
@@ -170,7 +170,7 @@ export function VerificationPanel({ defaults }: { defaults: Defaults }) {
               maxLength={120}
               required
               disabled={!canSubmit}
-              className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm disabled:opacity-60 outline-none focus:border-primary/50"
+              className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm disabled:opacity-60 outline-none focus:border-primary/50"
             />
           </Field>
 
@@ -187,7 +187,7 @@ export function VerificationPanel({ defaults }: { defaults: Defaults }) {
               placeholder="https://..."
               required
               disabled={!canSubmit}
-              className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm disabled:opacity-60 outline-none focus:border-primary/50"
+              className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm disabled:opacity-60 outline-none focus:border-primary/50"
             />
           </Field>
 
@@ -203,19 +203,19 @@ export function VerificationPanel({ defaults }: { defaults: Defaults }) {
               maxLength={500}
               disabled={!canSubmit}
               placeholder="例如：企业近期更名 / 营业范围调整 / 证件号变更原因..."
-              className="w-full rounded-md border border-border/60 bg-background/40 px-2 py-1.5 text-sm disabled:opacity-60 outline-none focus:border-primary/50"
+              className="w-full rounded-md border border-border bg-background/40 px-2 py-1.5 text-sm disabled:opacity-60 outline-none focus:border-primary/50"
             />
           </Field>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
           <p className="text-[11px] text-muted-foreground">
             提交资料将进入人工审核；每小时最多提交 5 次。
           </p>
           <button
             type="submit"
             disabled={pending || !canSubmit}
-            className="rounded-md bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
+            className="rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
           >
             {pending
               ? "提交中…"

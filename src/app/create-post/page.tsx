@@ -59,7 +59,7 @@ export default async function CreatePostPage({
       />
 
       <div className="px-6 py-6 sm:px-8">
-        <div className="mx-auto max-w-3xl rounded-2xl border border-border/60 bg-card/30 p-6 sm:p-8">
+        <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-card/30 p-6 sm:p-8">
           <CreatePostForm
             channels={channels}
             defaultChannelId={defaultChannelId}

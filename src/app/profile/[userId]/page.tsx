@@ -67,7 +67,7 @@ export default async function ProfilePage({
   if (user.status === "DELETED" && !viewerIsAdmin) {
     return (
       <div className="flex flex-1 items-center justify-center px-6 py-16 text-center">
-        <div className="rounded-2xl border border-border/60 bg-card/40 px-6 py-10">
+        <div className="rounded-2xl border border-border bg-card/40 px-6 py-10">
           <h1 className="text-lg font-medium">该账号已注销</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             用户已主动删除账号。已发布的内容仍由社区保留。
@@ -79,7 +79,7 @@ export default async function ProfilePage({
   if (!user.isProfilePublic && !isOwner && !viewer && !viewerIsAdmin) {
     return (
       <div className="flex flex-1 items-center justify-center px-6 py-16 text-center">
-        <div className="rounded-2xl border border-border/60 bg-card/40 px-6 py-10">
+        <div className="rounded-2xl border border-border bg-card/40 px-6 py-10">
           <h1 className="text-lg font-medium">该主页已隐藏</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             <Link href="/auth/login" className="text-primary hover:underline">
@@ -143,7 +143,7 @@ export default async function ProfilePage({
                 contact: user.contact ?? "",
               }}
               trigger={
-                <button className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border/60 bg-background px-3 text-sm hover:bg-muted">
+                <button className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-background px-3 text-sm hover:bg-muted">
                   <Edit3 className="size-3.5" />
                   编辑资料
                 </button>
@@ -165,7 +165,7 @@ export default async function ProfilePage({
                 <input type="hidden" name="targetUserId" value={user.id} />
                 <button
                   type="submit"
-                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border/60 bg-card px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
                 >
                   <MessageSquare className="size-3.5" />
                   私信
@@ -186,7 +186,7 @@ export default async function ProfilePage({
 
       <div className="grid gap-6 px-6 py-6 sm:px-8 lg:grid-cols-[280px_1fr]">
         <aside className="space-y-5">
-          <div className="rounded-2xl border border-border/60 bg-card/40 p-5 text-center">
+          <div className="rounded-2xl border border-border bg-card/40 p-5 text-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={
@@ -194,7 +194,7 @@ export default async function ProfilePage({
                 `https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(user.username)}`
               }
               alt={user.name}
-              className="mx-auto size-24 rounded-2xl border border-border/60 object-cover"
+              className="mx-auto size-24 rounded-2xl border border-border object-cover"
             />
             <div className="mt-3 text-base font-semibold">{user.name}</div>
             <div className="text-xs text-muted-foreground">@{user.username}</div>
@@ -204,12 +204,12 @@ export default async function ProfilePage({
                 {user.industryRole}
               </div>
             )}
-            <div className="mt-4 flex justify-around border-t border-border/40 pt-3 text-center">
+            <div className="mt-4 flex justify-around border-t border-border pt-3 text-center">
               <Stat label="作品" value={user._count.works} />
               <Stat label="帖子" value={user._count.posts} />
               <Stat label="合作" value={user._count.collaborations} />
             </div>
-            <div className="mt-3 flex justify-around border-t border-border/40 pt-3 text-center">
+            <div className="mt-3 flex justify-around border-t border-border pt-3 text-center">
               <StatLink
                 href={`/profile/${user.id}/followers`}
                 label="粉丝"
@@ -237,7 +237,7 @@ export default async function ProfilePage({
             items={user.favoriteTools}
           />
 
-          <div className="rounded-2xl border border-border/60 bg-card/40 p-4 text-xs text-muted-foreground">
+          <div className="rounded-2xl border border-border bg-card/40 p-4 text-xs text-muted-foreground">
             <div className="mb-2 flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground/80">
               <Calendar className="size-3" />
               加入时间
@@ -256,7 +256,7 @@ export default async function ProfilePage({
         </aside>
 
         <main className="space-y-6">
-          <section className="rounded-2xl border border-border/60 bg-card/40 p-5">
+          <section className="rounded-2xl border border-border bg-card/40 p-5">
             <h2 className="mb-3 flex items-center gap-1.5 text-sm font-medium">
               <ExternalLink className="size-3.5" />
               作品链接
@@ -305,7 +305,7 @@ export default async function ProfilePage({
               )}
             </div>
             {works.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-border/60 bg-card/20 p-6 text-center text-sm text-muted-foreground">
+              <p className="rounded-xl border border-dashed border-border bg-card/20 p-6 text-center text-sm text-muted-foreground">
                 {isOwner
                   ? "你还没有发布作品。"
                   : "这位创作者还没有发布作品。"}
@@ -315,9 +315,9 @@ export default async function ProfilePage({
                 {works.map((w) => (
                   <div
                     key={w.id}
-                    className="group overflow-hidden rounded-xl border border-border/60 bg-card/40 transition-colors hover:border-primary/40"
+                    className="group overflow-hidden rounded-xl border border-border bg-card/40 transition-colors hover:border-primary/40"
                   >
-                    <div className="relative aspect-video w-full bg-gradient-to-br from-slate-800 to-slate-950">
+                    <div className="relative aspect-video w-full bg-muted">
                       {w.thumbnailUrl && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -377,7 +377,7 @@ function StatLink({
   return (
     <Link
       href={href}
-      className="group rounded-md px-1 transition-colors hover:bg-muted/50"
+      className="group rounded-full px-2.5 transition-colors hover:bg-muted/50"
     >
       <div className="text-base font-semibold group-hover:text-primary">
         {value}
@@ -399,7 +399,7 @@ function InfoCard({
   empty: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/40 p-4">
+    <div className="rounded-2xl border border-border bg-card/40 p-4">
       <div className="mb-2 flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground/80">
         {icon}
         {label}
@@ -411,7 +411,7 @@ function InfoCard({
           {items.map((it) => (
             <span
               key={it}
-              className="rounded-md border border-border/50 bg-background/60 px-2 py-0.5 text-xs"
+              className="rounded-md border border-border bg-background/60 px-2 py-0.5 text-xs"
             >
               {it}
             </span>

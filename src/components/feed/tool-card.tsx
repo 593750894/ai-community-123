@@ -2,10 +2,11 @@ import Link from "next/link";
 import { ArrowUpRight, ExternalLink, Sparkles, Star, Target } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { PillTag } from "@/components/ui/pill-tag";
 import {
   toolCategoryMeta,
   TOOL_PRICING_LABEL,
-  TOOL_PRICING_TONE,
+  TOOL_PRICING_TINT,
   type ToolPricingValue,
 } from "@/lib/tools/categories";
 
@@ -36,8 +37,8 @@ export function ToolCard({ tool }: { tool: ToolCardItem }) {
       className={cn(
         "group relative flex h-full flex-col gap-3 overflow-hidden rounded-2xl border bg-card/40 p-4 transition-all hover:-translate-y-0.5",
         tool.isOfficial
-          ? "border-primary/40 bg-gradient-to-br from-primary/10 via-card/40 to-card/20 hover:border-primary/60 hover:shadow-[0_12px_40px_-12px_rgba(56,189,248,0.45)]"
-          : "border-border/60 hover:border-primary/40",
+          ? "border-primary/40 bg-primary/[0.06] hover:border-primary/60"
+          : "border-border hover:border-primary/40",
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -46,7 +47,7 @@ export function ToolCard({ tool }: { tool: ToolCardItem }) {
           className="flex flex-1 items-start gap-3 outline-none focus-visible:opacity-90"
           aria-label={`${tool.name} 详情`}
         >
-          <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-background/50 ring-1 ring-inset ring-border/60">
+          <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-background/50 ring-1 ring-inset ring-border">
             {tool.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={tool.logoUrl} alt={tool.name} className="size-full object-cover" />
@@ -69,23 +70,13 @@ export function ToolCard({ tool }: { tool: ToolCardItem }) {
               )}
             </div>
             <div className="mt-0.5 flex flex-wrap items-center gap-1">
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px]",
-                  meta.tone,
-                )}
-              >
-                <span aria-hidden>{meta.emoji}</span>
+              <PillTag tint={meta.tint} size="sm" icon={null}>
+                <span aria-hidden className="mr-0.5">{meta.emoji}</span>
                 {meta.label}
-              </span>
-              <span
-                className={cn(
-                  "inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px]",
-                  TOOL_PRICING_TONE[tool.pricing],
-                )}
-              >
+              </PillTag>
+              <PillTag tint={TOOL_PRICING_TINT[tool.pricing]} size="sm" icon={null}>
                 {TOOL_PRICING_LABEL[tool.pricing]}
-              </span>
+              </PillTag>
             </div>
           </div>
         </Link>
@@ -93,7 +84,7 @@ export function ToolCard({ tool }: { tool: ToolCardItem }) {
           href={externalUrl}
           target={isInternal ? undefined : "_blank"}
           rel={isInternal ? undefined : "noreferrer noopener"}
-          className="inline-flex shrink-0 items-center gap-0.5 rounded-md border border-border/50 bg-background/40 px-1.5 py-1 text-[10px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+          className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-border bg-background/40 px-2.5 py-1 text-[10px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
           aria-label={`前往 ${tool.name} 官网`}
           title="前往官网"
         >
@@ -111,7 +102,7 @@ export function ToolCard({ tool }: { tool: ToolCardItem }) {
         </p>
 
         {tool.useCase && (
-          <div className="flex items-start gap-1.5 rounded-md border border-border/40 bg-muted/30 px-2.5 py-1.5 text-[11px] leading-snug text-muted-foreground">
+          <div className="flex items-start gap-1.5 rounded-md border border-border bg-muted/30 px-2.5 py-1.5 text-[11px] leading-snug text-muted-foreground">
             <Target className="mt-0.5 size-3 shrink-0 text-primary/70" />
             <span className="line-clamp-2">{tool.useCase}</span>
           </div>
@@ -130,7 +121,7 @@ export function ToolCard({ tool }: { tool: ToolCardItem }) {
           </div>
         )}
 
-        <div className="mt-auto flex items-center justify-between gap-2 border-t border-border/30 pt-2 text-[11px] text-muted-foreground tabular-nums">
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-border pt-2 text-[11px] text-muted-foreground tabular-nums">
           <ToolRatingPill
             avg={tool.avgRating ?? null}
             count={tool.ratingCount ?? 0}

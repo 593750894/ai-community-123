@@ -171,7 +171,7 @@ export function JoinChannelButton({
   const styleCls = isMember
     ? showLeave
       ? "border-rose-500/50 bg-rose-500/15 text-rose-300"
-      : "border-border/60 bg-card/70 text-foreground/85"
+      : "border-border bg-card/70 text-foreground/85"
     : "border-transparent bg-primary text-primary-foreground hover:bg-primary/90";
 
   const label = isMember ? (showLeave ? "退出频道" : "已加入") : "加入频道";

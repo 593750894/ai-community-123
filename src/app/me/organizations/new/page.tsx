@@ -26,7 +26,7 @@ export default async function NewOrganizationPage() {
       />
 
       <div className="px-4 py-5 sm:px-8 sm:py-6">
-        <div className="rounded-xl border border-border/60 bg-card/40 p-4">
+        <div className="rounded-xl border border-border bg-card/40 p-4">
           <CreateOrganizationForm />
         </div>
       </div>

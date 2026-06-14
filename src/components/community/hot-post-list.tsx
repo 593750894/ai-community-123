@@ -25,9 +25,9 @@ function hotScore(p: HotPostData) {
 }
 
 const rankStyle = [
-  "bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-sm shadow-amber-500/30",
-  "bg-gradient-to-br from-slate-400 to-slate-500 text-white shadow-sm shadow-slate-400/30",
-  "bg-gradient-to-br from-amber-700 to-amber-800 text-white shadow-sm shadow-amber-700/30",
+  "bg-amber-500 text-white",
+  "bg-muted text-foreground",
+  "bg-amber-700/80 text-white",
 ] as const;
 
 export function HotPostList({
@@ -61,7 +61,7 @@ export function HotPostList({
           description="社区正在升温，近 7 天内还没有高互动帖子。"
         />
       ) : (
-        <div className="surface-card divide-y divide-border/30 overflow-hidden">
+        <div className="surface-card divide-y divide-border overflow-hidden">
           {posts.map((post, i) => (
             <div
               key={post.id}

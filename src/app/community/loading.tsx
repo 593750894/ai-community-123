@@ -4,7 +4,7 @@ export default function CommunityLoading() {
   return (
     <div className="flex flex-1 flex-col">
       {/* Hero */}
-      <section className="border-b border-border/60 px-6 py-10 sm:px-8 sm:py-14">
+      <section className="border-b border-border px-6 py-10 sm:px-8 sm:py-14">
         <Skeleton className="mb-2 h-5 w-20 rounded-full" />
         <Skeleton className="mb-2 h-8 w-64" />
         <Skeleton className="mb-5 h-4 w-96" />

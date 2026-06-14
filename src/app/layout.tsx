@@ -81,7 +81,7 @@ export default async function RootLayout({
       <body className="flex min-h-full flex-col">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground focus:shadow-lg"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground focus:shadow-lg"
         >
           跳到主要内容
         </a>
@@ -109,7 +109,10 @@ export default async function RootLayout({
             <MobileBottomNav />
           </RealtimeProvider>
         </ThemeProvider>
-      </body>
+      {/* impeccable-live-start */}
+<script src="http://localhost:8400/live.js"></script>
+{/* impeccable-live-end */}
+</body>
     </html>
   );
 }

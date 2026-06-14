@@ -26,7 +26,7 @@ const STATUS_TONE: Record<ReportStatusValue, string> = {
   PENDING: "border-amber-500/40 bg-amber-500/10 text-amber-300",
   REVIEWING: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
   RESOLVED: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-  DISMISSED: "border-border/60 bg-muted/30 text-muted-foreground",
+  DISMISSED: "border-border bg-muted/30 text-muted-foreground",
 };
 
 const PAGE_SIZE = 20;
@@ -89,7 +89,7 @@ export default async function AdminReportsPage({
         {/* 筛选栏 —— 原生 GET form，不需要 JS */}
         <form
           method="GET"
-          className="flex flex-wrap items-end gap-3 rounded-xl border border-border/60 bg-card/40 p-3"
+          className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card/40 p-3"
         >
           <div className="space-y-1">
             <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -98,7 +98,7 @@ export default async function AdminReportsPage({
             <select
               name="status"
               defaultValue={status ?? ""}
-              className="block h-9 w-36 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-36 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             >
               <option value="">全部</option>
               {REPORT_STATUSES.map((s) => (
@@ -115,7 +115,7 @@ export default async function AdminReportsPage({
             <select
               name="targetType"
               defaultValue={targetType ?? ""}
-              className="block h-9 w-36 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-36 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             >
               <option value="">全部</option>
               {REPORT_TARGET_TYPES.map((t) => (
@@ -127,21 +127,21 @@ export default async function AdminReportsPage({
           </div>
           <button
             type="submit"
-            className="inline-flex h-9 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+            className="inline-flex h-9 items-center gap-1 rounded-full bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
           >
             筛选
           </button>
           {(status || targetType) && (
             <Link
               href="/admin/reports"
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-border/60 px-3 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              className="inline-flex h-9 items-center gap-1 rounded-full border border-border px-3 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
             >
               清除
             </Link>
           )}
         </form>
 
-        <div className="overflow-hidden rounded-xl border border-border/60 bg-card/40">
+        <div className="overflow-hidden rounded-xl border border-border bg-card/40">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-xs text-muted-foreground">
               <tr>
@@ -153,7 +153,7 @@ export default async function AdminReportsPage({
                 <th className="px-4 py-2.5 text-right font-medium">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/40">
+            <tbody className="divide-y divide-border">
               {items.map((r) => {
                 const isOpen = r.status === "PENDING" || r.status === "REVIEWING";
                 return (
@@ -253,7 +253,7 @@ export default async function AdminReportsPage({
                             </label>
                             <button
                               type="submit"
-                              className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-300 hover:bg-emerald-500/20"
+                              className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-300 hover:bg-emerald-500/20"
                             >
                               处理
                             </button>
@@ -262,7 +262,7 @@ export default async function AdminReportsPage({
                             <input type="hidden" name="id" value={r.id} />
                             <button
                               type="submit"
-                              className="rounded-md border border-border/60 px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                              className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                             >
                               驳回
                             </button>
@@ -333,7 +333,7 @@ function Pagination({
           href={buildHref(Math.max(1, page - 1))}
           aria-disabled={page <= 1}
           className={cn(
-            "rounded-md border border-border/60 px-3 py-1",
+            "rounded-full border border-border px-3 py-1",
             page <= 1
               ? "pointer-events-none opacity-40"
               : "hover:bg-muted/60 hover:text-foreground",
@@ -345,7 +345,7 @@ function Pagination({
           href={buildHref(Math.min(totalPages, page + 1))}
           aria-disabled={page >= totalPages}
           className={cn(
-            "rounded-md border border-border/60 px-3 py-1",
+            "rounded-full border border-border px-3 py-1",
             page >= totalPages
               ? "pointer-events-none opacity-40"
               : "hover:bg-muted/60 hover:text-foreground",

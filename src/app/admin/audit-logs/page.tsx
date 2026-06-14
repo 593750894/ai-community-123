@@ -103,7 +103,7 @@ export default async function AdminAuditLogsPage({
       <div className="space-y-4 px-6 py-6 sm:px-8">
         <form
           method="GET"
-          className="flex flex-wrap items-end gap-3 rounded-xl border border-border/60 bg-card/40 p-3"
+          className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card/40 p-3"
         >
           <Labeled label="操作人（用户名 / 昵称）">
             <input
@@ -111,14 +111,14 @@ export default async function AdminAuditLogsPage({
               name="actor"
               defaultValue={actor ?? ""}
               placeholder="@alice 或 张三"
-              className="block h-9 w-44 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-44 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             />
           </Labeled>
           <Labeled label="动作">
             <select
               name="action"
               defaultValue={action ?? ""}
-              className="block h-9 w-44 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-44 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             >
               <option value="">全部</option>
               {AUDIT_ACTIONS.map((a) => (
@@ -132,7 +132,7 @@ export default async function AdminAuditLogsPage({
             <select
               name="targetType"
               defaultValue={targetType ?? ""}
-              className="block h-9 w-32 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-32 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             >
               <option value="">全部</option>
               {AUDIT_TARGET_TYPES.map((t) => (
@@ -147,7 +147,7 @@ export default async function AdminAuditLogsPage({
               type="date"
               name="from"
               defaultValue={sp.from ?? ""}
-              className="block h-9 w-36 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-36 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             />
           </Labeled>
           <Labeled label="结束日期">
@@ -155,26 +155,26 @@ export default async function AdminAuditLogsPage({
               type="date"
               name="to"
               defaultValue={sp.to ?? ""}
-              className="block h-9 w-36 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-36 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             />
           </Labeled>
           <button
             type="submit"
-            className="inline-flex h-9 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+            className="inline-flex h-9 items-center gap-1 rounded-full bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
           >
             筛选
           </button>
           {(actor || action || targetType || from || to) && (
             <Link
               href="/admin/audit-logs"
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-border/60 px-3 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              className="inline-flex h-9 items-center gap-1 rounded-full border border-border px-3 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
             >
               清除
             </Link>
           )}
         </form>
 
-        <div className="overflow-hidden rounded-xl border border-border/60 bg-card/40">
+        <div className="overflow-hidden rounded-xl border border-border bg-card/40">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-xs text-muted-foreground">
               <tr>
@@ -186,7 +186,7 @@ export default async function AdminAuditLogsPage({
                 <th className="px-4 py-2.5 text-left font-medium">IP</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/40">
+            <tbody className="divide-y divide-border">
               {items.map((log) => {
                 const targetLink = buildTargetLink(log.targetType, log.targetId);
                 return (
@@ -215,7 +215,7 @@ export default async function AdminAuditLogsPage({
                       )}
                     </td>
                     <td className="px-4 py-3 text-xs">
-                      <span className="inline-flex items-center rounded-full border border-border/60 bg-background/40 px-2 py-0.5 text-[10px] text-foreground/90">
+                      <span className="inline-flex items-center rounded-full border border-border bg-background/40 px-2 py-0.5 text-[10px] text-foreground/90">
                         {AUDIT_ACTION_LABEL[log.action] ?? log.action}
                       </span>
                       <div className="mt-0.5 font-mono text-[10px] text-muted-foreground/70">
@@ -342,7 +342,7 @@ function Pagination({
           href={href(Math.max(1, page - 1))}
           aria-disabled={page <= 1}
           className={cn(
-            "rounded-md border border-border/60 px-3 py-1",
+            "rounded-full border border-border px-3 py-1",
             page <= 1
               ? "pointer-events-none opacity-40"
               : "hover:bg-muted/60 hover:text-foreground",
@@ -354,7 +354,7 @@ function Pagination({
           href={href(Math.min(totalPages, page + 1))}
           aria-disabled={page >= totalPages}
           className={cn(
-            "rounded-md border border-border/60 px-3 py-1",
+            "rounded-full border border-border px-3 py-1",
             page >= totalPages
               ? "pointer-events-none opacity-40"
               : "hover:bg-muted/60 hover:text-foreground",

@@ -101,7 +101,7 @@ function ChangePasswordForm() {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
+          className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
         >
           {pending ? "提交中…" : "修改密码"}
         </button>
@@ -143,7 +143,7 @@ function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
   };
 
   return (
-    <form onSubmit={submit} className="space-y-3 border-t border-border/40 pt-4">
+    <form onSubmit={submit} className="space-y-3 border-t border-border pt-4">
       <h3 className="text-xs font-medium text-foreground/90">修改邮箱</h3>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="新邮箱">
@@ -180,7 +180,7 @@ function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
         <button
           type="submit"
           disabled={pending || email === currentEmail}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
+          className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
         >
           {pending ? "提交中…" : "修改邮箱"}
         </button>
@@ -190,7 +190,7 @@ function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
 }
 
 const inputClass =
-  "h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50";
+  "h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50";
 
 function Field({
   label,

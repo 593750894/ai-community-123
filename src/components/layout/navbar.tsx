@@ -44,24 +44,25 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/50">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
       <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-3 px-3 sm:gap-4 sm:px-6 lg:px-8">
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setMobileOpen((v) => !v)}
           aria-label="切换导航"
           aria-expanded={mobileOpen}
-          className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
+          className="shrink-0 md:hidden"
         >
           {mobileOpen ? <X className="size-4" /> : <Menu className="size-4" />}
-        </button>
+        </Button>
 
         <Link href="/" className="flex shrink-0 items-center gap-2">
-          <span className="flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-cyan-400 to-blue-600 text-background shadow-[0_0_18px_-2px_rgba(56,189,248,0.5)]">
+          <span className="flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <Sparkles className="size-4" />
           </span>
           <span className="font-semibold tracking-tight">SeedLand</span>
-          <span className="rounded border border-border/60 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+          <span className="rounded border border-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
             V
           </span>
         </Link>
@@ -85,7 +86,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
               >
                 {item.label}
                 {active && (
-                  <span className="absolute inset-x-3 -bottom-[15px] h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
+                  <span className="absolute inset-x-3 -bottom-[15px] h-px bg-primary" />
                 )}
               </Link>
             );
@@ -143,7 +144,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-border/60 bg-background/95 backdrop-blur md:hidden">
+        <div className="border-t border-border bg-background md:hidden">
           <nav className="mx-auto flex w-full max-w-[1600px] flex-col px-3 py-2 sm:px-6">
             {NAV_ITEMS.map((item) => {
               const active =
@@ -183,7 +184,7 @@ function UserMenu({ user }: { user: NavbarUser }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-8 items-center gap-2 rounded-lg border border-border/60 bg-background px-2 text-sm transition-colors hover:bg-muted"
+        className="flex h-8 items-center gap-2 rounded-full border border-border bg-background px-2 text-sm transition-colors hover:bg-muted"
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -205,7 +206,7 @@ function UserMenu({ user }: { user: NavbarUser }) {
         <div
           role="menu"
           aria-orientation="vertical"
-          className="absolute right-0 top-9 z-50 min-w-[180px] overflow-hidden rounded-lg border border-border/60 bg-popover shadow-lg"
+          className="absolute right-0 top-9 z-50 min-w-[180px] overflow-hidden rounded-lg border border-border bg-popover shadow-lg"
         >
           <Link
             href={`/profile/${user.id}`}

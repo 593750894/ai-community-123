@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import {
   COLLAB_LOCATION_LABEL,
   COLLAB_STATUS_LABEL,
-  COLLAB_STATUS_TONE,
+  COLLAB_STATUS_TINT,
   COLLAB_WORK_MODE_LABEL,
   collabCategoryMeta,
   type CollabCategoryValue,
@@ -18,12 +18,12 @@ import {
   type CollabStatusValue,
   type CollabWorkModeValue,
 } from "@/lib/collaborations/categories";
-import { authorTintFromName } from "@/lib/work-categories";
 import { ReportButton } from "@/components/reports/report-button";
 import {
   OrgAttributionBadge,
   type OrgAttribution,
 } from "@/components/publish/org-attribution-badge";
+import { PillTag } from "@/components/ui/pill-tag";
 
 export type CollabCardItem = {
   id: string;
@@ -64,7 +64,6 @@ export function CollaborationCard({
   viewerId?: string | null;
 }) {
   const meta = collabCategoryMeta(item.category);
-  const tint = authorTintFromName(item.author.name);
   const isClosed = item.status === "CLOSED";
 
   return (
@@ -102,22 +101,13 @@ export function CollaborationCard({
             <h3 className="line-clamp-1 text-sm font-medium text-foreground/95 group-hover:text-primary">
               {item.title}
             </h3>
-            <span
-              className={cn(
-                "rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                COLLAB_STATUS_TONE[item.status],
-              )}
-            >
+            <PillTag tint={COLLAB_STATUS_TINT[item.status]} icon={null}>
               {COLLAB_STATUS_LABEL[item.status]}
-            </span>
-            <span
-              className={cn(
-                "rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                meta.tone,
-              )}
-            >
+            </PillTag>
+            <PillTag tint={meta.tint} icon={null}>
+              {meta.emoji ? <span aria-hidden className="mr-0.5">{meta.emoji}</span> : null}
               {meta.label}
-            </span>
+            </PillTag>
           </div>
 
           {/* 描述 */}
@@ -172,15 +162,10 @@ export function CollaborationCard({
                 <img
                   src={item.author.avatar}
                   alt={item.author.name}
-                  className="size-5 rounded-full border border-border/60"
+                  className="size-5 rounded-full border border-border"
                 />
               ) : (
-                <span
-                  className={cn(
-                    "flex size-5 items-center justify-center rounded-full bg-gradient-to-br text-[10px] font-semibold text-black/70",
-                    tint,
-                  )}
-                >
+                <span className="flex size-5 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
                   {item.author.name.slice(0, 1)}
                 </span>
               )}

@@ -42,7 +42,7 @@ export function SidebarTags({
             <Link
               key={tag}
               href={`/community?tag=${encodeURIComponent(tag)}`}
-              className={`inline-flex items-center gap-1 rounded-md border border-border/30 bg-card/20 px-2.5 py-1 text-[11px] text-muted-foreground transition-all ${TAG_COLORS[i % TAG_COLORS.length]}`}
+              className={`inline-flex items-center gap-1 rounded-full border border-border bg-card/20 px-2.5 py-1 text-[11px] text-muted-foreground transition-all ${TAG_COLORS[i % TAG_COLORS.length]}`}
             >
               #{tag}
               {count > 0 && (

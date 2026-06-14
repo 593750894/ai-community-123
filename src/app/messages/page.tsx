@@ -98,7 +98,7 @@ export default async function MessagesPage() {
             }
           />
         ) : (
-          <ul className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card/30">
+          <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card/30">
             {conversations.map((c) => {
               const other = c.otherUser;
               const isGroup = c.isGroup;
@@ -127,16 +127,10 @@ export default async function MessagesPage() {
                         <img
                           src={avatar}
                           alt={displayName}
-                          className="size-11 rounded-full border border-border/60 object-cover"
+                          className="size-11 rounded-full border border-border object-cover"
                         />
                       ) : (
-                        <span
-                          className={`flex size-11 items-center justify-center rounded-full text-sm font-semibold text-black/70 ${
-                            isGroup
-                              ? "bg-gradient-to-br from-emerald-300 to-teal-500"
-                              : "bg-gradient-to-br from-indigo-300 to-purple-500"
-                          }`}
-                        >
+                        <span className="flex size-11 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
                           {initials}
                         </span>
                       )}

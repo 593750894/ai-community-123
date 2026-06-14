@@ -10,11 +10,11 @@ import {
   ORDER_TYPE_LABEL,
   PAYMENT_METHODS,
   PAYMENT_METHOD_LABEL,
-  formatPrice,
   type OrderStatusValue,
   type OrderTypeValue,
   type PaymentMethodValue,
 } from "@/lib/commerce/schemas";
+import { MoneyText } from "@/components/ui/money-text";
 import { cn, formatRelativeTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,7 @@ const STATUS_TONE: Record<OrderStatusValue, string> = {
   PENDING: "border-amber-500/40 bg-amber-500/10 text-amber-300",
   PAID: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
   REFUNDED: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
-  CANCELED: "border-border/60 bg-muted/30 text-muted-foreground",
+  CANCELED: "border-border bg-muted/30 text-muted-foreground",
   FAILED: "border-rose-500/40 bg-rose-500/10 text-rose-300",
 };
 
@@ -95,13 +95,13 @@ export default async function AdminOrdersPage({
       <div className="space-y-4 px-6 py-6 sm:px-8">
         <form
           method="GET"
-          className="flex flex-wrap items-end gap-3 rounded-xl border border-border/60 bg-card/40 p-3"
+          className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card/40 p-3"
         >
           <Labeled label="状态">
             <select
               name="status"
               defaultValue={status ?? ""}
-              className="block h-9 w-32 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-32 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             >
               <option value="">全部</option>
               {ORDER_STATUSES.map((s) => (
@@ -115,7 +115,7 @@ export default async function AdminOrdersPage({
             <select
               name="type"
               defaultValue={type ?? ""}
-              className="block h-9 w-36 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-36 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             >
               <option value="">全部</option>
               {ORDER_TYPES.map((t) => (
@@ -129,7 +129,7 @@ export default async function AdminOrdersPage({
             <select
               name="paymentMethod"
               defaultValue={paymentMethod ?? ""}
-              className="block h-9 w-32 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-32 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             >
               <option value="">全部</option>
               {PAYMENT_METHODS.map((m) => (
@@ -145,7 +145,7 @@ export default async function AdminOrdersPage({
               name="q"
               defaultValue={q ?? ""}
               placeholder="完整订单号 或 @username"
-              className="block h-9 w-56 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-56 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             />
           </Labeled>
           <Labeled label="起始日期">
@@ -153,7 +153,7 @@ export default async function AdminOrdersPage({
               type="date"
               name="from"
               defaultValue={sp.from ?? ""}
-              className="block h-9 w-36 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-36 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             />
           </Labeled>
           <Labeled label="结束日期">
@@ -161,26 +161,26 @@ export default async function AdminOrdersPage({
               type="date"
               name="to"
               defaultValue={sp.to ?? ""}
-              className="block h-9 w-36 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none focus:border-primary/60"
+              className="block h-9 w-36 rounded-lg border border-border bg-background px-2 text-xs outline-none focus:border-primary/60"
             />
           </Labeled>
           <button
             type="submit"
-            className="inline-flex h-9 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+            className="inline-flex h-9 items-center gap-1 rounded-full bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
           >
             筛选
           </button>
           {hasAnyFilter && (
             <Link
               href="/admin/orders"
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-border/60 px-3 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              className="inline-flex h-9 items-center gap-1 rounded-full border border-border px-3 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
             >
               清除
             </Link>
           )}
         </form>
 
-        <div className="overflow-hidden rounded-xl border border-border/60 bg-card/40">
+        <div className="overflow-hidden rounded-xl border border-border bg-card/40">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-xs text-muted-foreground">
               <tr>
@@ -194,7 +194,7 @@ export default async function AdminOrdersPage({
                 <th className="px-4 py-2.5 text-right font-medium">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/40">
+            <tbody className="divide-y divide-border">
               {items.map((o) => {
                 const refundable =
                   o.status === "PAID" && o.refundCents < o.amountCents;
@@ -244,10 +244,19 @@ export default async function AdminOrdersPage({
                       )}
                     </td>
                     <td className="px-4 py-3 text-right text-xs tabular-nums">
-                      <div>{formatPrice(o.amountCents, o.currency)}</div>
+                      <div>
+                        <MoneyText
+                          value={o.amountCents}
+                          currency={o.currency === "CNY" ? "¥" : `${o.currency} `}
+                        />
+                      </div>
                       {o.refundCents > 0 && (
                         <div className="mt-0.5 text-[10px] text-cyan-300">
-                          已退 {formatPrice(o.refundCents, o.currency)}
+                          已退{" "}
+                          <MoneyText
+                            value={o.refundCents}
+                            currency={o.currency === "CNY" ? "¥" : `${o.currency} `}
+                          />
                         </div>
                       )}
                     </td>
@@ -388,7 +397,7 @@ function Pagination({
           href={href(Math.max(1, page - 1))}
           aria-disabled={page <= 1}
           className={cn(
-            "rounded-md border border-border/60 px-3 py-1",
+            "rounded-full border border-border px-3 py-1",
             page <= 1
               ? "pointer-events-none opacity-40"
               : "hover:bg-muted/60 hover:text-foreground",
@@ -400,7 +409,7 @@ function Pagination({
           href={href(Math.min(totalPages, page + 1))}
           aria-disabled={page >= totalPages}
           className={cn(
-            "rounded-md border border-border/60 px-3 py-1",
+            "rounded-full border border-border px-3 py-1",
             page >= totalPages
               ? "pointer-events-none opacity-40"
               : "hover:bg-muted/60 hover:text-foreground",

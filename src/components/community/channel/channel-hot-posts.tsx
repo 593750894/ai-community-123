@@ -9,9 +9,9 @@ function hotScore(p: PostOverview) {
 }
 
 const rankStyle = [
-  "bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-sm shadow-amber-500/30",
-  "bg-gradient-to-br from-slate-400 to-slate-500 text-white shadow-sm shadow-slate-400/30",
-  "bg-gradient-to-br from-amber-700 to-amber-800 text-white shadow-sm shadow-amber-700/30",
+  "bg-amber-500 text-white",
+  "bg-muted text-foreground",
+  "bg-amber-700/80 text-white",
 ] as const;
 
 export function ChannelHotPosts({ posts }: { posts: PostOverview[] }) {
@@ -19,12 +19,12 @@ export function ChannelHotPosts({ posts }: { posts: PostOverview[] }) {
 
   return (
     <section className="surface-card overflow-hidden">
-      <div className="flex items-center gap-1.5 border-b border-border/30 bg-gradient-to-r from-orange-500/8 via-transparent to-transparent px-4 py-3 text-xs font-semibold text-foreground/90">
+      <div className="flex items-center gap-1.5 border-b border-border px-4 py-3 text-xs font-semibold text-foreground/90">
         <Flame className="size-3.5 text-orange-400" />
         频道热帖
       </div>
 
-      <div className="divide-y divide-border/20">
+      <div className="divide-y divide-border">
         {posts.map((post, i) => (
           <div
             key={post.id}

@@ -66,7 +66,7 @@ export default async function OrganizationSettingsPage({
           </div>
         )}
 
-        <section className="rounded-xl border border-border/60 bg-card/40 p-4">
+        <section className="rounded-xl border border-border bg-card/40 p-4">
           <h2 className="mb-3 text-sm font-medium">基础信息</h2>
           <OrganizationSettingsForm
             defaults={{
@@ -83,7 +83,7 @@ export default async function OrganizationSettingsPage({
           />
         </section>
 
-        <section className="rounded-xl border border-border/60 bg-card/40 p-4">
+        <section className="rounded-xl border border-border bg-card/40 p-4">
           <h2 className="mb-3 text-sm font-medium">企业认证</h2>
           <p className="mb-3 text-[11px] text-muted-foreground">
             提交营业执照与法人信息进行企业认证；通过后将在公开页展示 ✔ 认证徽标。
@@ -123,7 +123,7 @@ export default async function OrganizationSettingsPage({
                   解散后所有成员资格、邀请记录均会被移除，操作不可恢复。
                 </p>
               </div>
-              <button className="rounded-md border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs text-rose-200 hover:bg-rose-500/25">
+              <button className="rounded-full border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs text-rose-200 hover:bg-rose-500/25">
                 解散企业
               </button>
             </form>
@@ -139,7 +139,7 @@ export default async function OrganizationSettingsPage({
                   退出后将失去管理员权限。重新加入需所有者再次邀请。
                 </p>
               </div>
-              <button className="rounded-md border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs text-rose-200 hover:bg-rose-500/25">
+              <button className="rounded-full border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs text-rose-200 hover:bg-rose-500/25">
                 退出企业
               </button>
             </form>

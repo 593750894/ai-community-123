@@ -21,9 +21,9 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { MoneyText } from "@/components/ui/money-text";
 import { simulateMockPaymentAction } from "@/lib/commerce/checkout-actions";
 import {
-  formatPrice,
   ORDER_STATUS_LABEL,
   PAYMENT_METHOD_LABEL,
   type OrderStatusValue,
@@ -144,7 +144,7 @@ export function CheckoutPanel({ order: initial, provider, mockEnabled }: Props) 
 
         {/* 商品 / 计划信息 */}
         {order.plan && (
-          <div className="surface-card border border-border/40 p-4">
+          <div className="surface-card border border-border p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold">{order.plan.name}</p>
@@ -160,7 +160,7 @@ export function CheckoutPanel({ order: initial, provider, mockEnabled }: Props) 
         {order.workflowItem && (
           <Link
             href={`/marketplace/${order.workflowItem.id}`}
-            className="surface-card flex items-center gap-3 border border-border/40 p-3 hover:border-primary/40"
+            className="surface-card flex items-center gap-3 border border-border p-3 hover:border-primary/40"
           >
             <div className="relative aspect-video w-24 flex-none overflow-hidden rounded-md bg-muted/40">
               {order.workflowItem.coverUrl && (
@@ -189,9 +189,11 @@ export function CheckoutPanel({ order: initial, provider, mockEnabled }: Props) 
         <div className="surface-card sticky top-4 space-y-4 p-6">
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">应付金额</p>
-            <p className="text-3xl font-bold text-primary tabular-nums">
-              {formatPrice(order.amountCents, order.currency)}
-            </p>
+            <MoneyText
+              value={order.amountCents}
+              currency={order.currency === "CNY" ? "¥" : order.currency + " "}
+              className="block text-3xl font-bold text-primary"
+            />
           </div>
 
           {order.status === "PENDING" && (

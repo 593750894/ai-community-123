@@ -46,14 +46,14 @@ export function ReviewVerificationDialog({
       <button
         type="button"
         onClick={() => setDecision("APPROVE")}
-        className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-300 hover:bg-emerald-500/20"
+        className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-300 hover:bg-emerald-500/20"
       >
         通过
       </button>
       <button
         type="button"
         onClick={() => setDecision("REJECT")}
-        className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[11px] text-rose-300 hover:bg-rose-500/20"
+        className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[11px] text-rose-300 hover:bg-rose-500/20"
       >
         驳回
       </button>
@@ -163,7 +163,7 @@ function ReviewForm({
             {details.note && (
               <div>
                 <p className="text-muted-foreground">企业补充说明</p>
-                <p className="mt-1 rounded-md border border-border/60 bg-muted/20 px-2 py-1.5">
+                <p className="mt-1 rounded-md border border-border bg-muted/20 px-2 py-1.5">
                   {details.note}
                 </p>
               </div>
@@ -184,7 +184,7 @@ function ReviewForm({
                     ? "例：资料完整、与公开信息一致"
                     : "例：营业执照号与企业名称不匹配，请重新提交"
                 }
-                className="block w-full rounded-lg border border-border/60 bg-background px-2 py-1.5 text-xs outline-none focus:border-primary/60"
+                className="block w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs outline-none focus:border-primary/60"
               />
             </label>
 
@@ -201,7 +201,7 @@ function ReviewForm({
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="rounded-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+            className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
           >
             取消
           </button>
@@ -211,8 +211,8 @@ function ReviewForm({
             disabled={submitting}
             className={
               approve
-                ? "rounded-md border border-emerald-500/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/25 disabled:opacity-50"
-                : "rounded-md border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs font-medium text-rose-300 hover:bg-rose-500/25 disabled:opacity-50"
+                ? "rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/25 disabled:opacity-50"
+                : "rounded-full border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs font-medium text-rose-300 hover:bg-rose-500/25 disabled:opacity-50"
             }
           >
             {submitting ? "处理中…" : approve ? "确认通过" : "确认驳回"}

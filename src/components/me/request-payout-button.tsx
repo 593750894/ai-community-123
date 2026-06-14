@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { formatPrice } from "@/lib/commerce/schemas";
+import { MoneyText } from "@/components/ui/money-text";
 
 /**
  * Stage 10.5：卖家「申请提现」按钮。
@@ -64,13 +65,13 @@ export function RequestPayoutButton({
         {hasPendingRequest ? (
           <>
             <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-300">
-              已申请 {formatPrice(pendingRequestNetCents, currency)} · 等待打款
+              已申请 <MoneyText value={pendingRequestNetCents} currency={currency} /> · 等待打款
             </span>
             <button
               type="button"
               onClick={() => call("DELETE")}
               disabled={submitting}
-              className="rounded-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? "处理中…" : "撤回申请"}
             </button>
@@ -80,7 +81,7 @@ export function RequestPayoutButton({
             type="button"
             onClick={() => call("POST")}
             disabled={!canRequest || submitting}
-            className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting
               ? "提交中…"

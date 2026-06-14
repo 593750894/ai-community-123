@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+import { CountText } from "@/components/ui/count-text";
 import type { ChannelStats } from "@/types/community";
 
 type StatItem = {
@@ -26,7 +27,7 @@ export function ChannelStatsCard({ stats }: { stats: ChannelStats }) {
 
   return (
     <section className="surface-card overflow-hidden">
-      <div className="flex items-center gap-1.5 border-b border-border/30 bg-gradient-to-r from-primary/8 via-transparent to-transparent px-4 py-3 text-xs font-semibold text-foreground/90">
+      <div className="flex items-center gap-1.5 border-b border-border px-4 py-3 text-xs font-semibold text-foreground/90">
         <TrendingUp className="size-3.5 text-primary" />
         频道数据
       </div>
@@ -34,13 +35,11 @@ export function ChannelStatsCard({ stats }: { stats: ChannelStats }) {
         {items.map((s) => (
           <div
             key={s.label}
-            className="group rounded-lg border border-border/25 bg-muted/20 px-3 py-3 text-center transition-all hover:border-border/40 hover:bg-muted/40"
+            className="group rounded-lg border border-border bg-muted/20 px-3 py-3 text-center transition-all hover:border-hairline-strong hover:bg-muted/40"
           >
             <div className="flex items-center justify-center gap-1.5">
               <s.icon className={`size-3.5 ${s.color} transition-transform duration-200 group-hover:scale-110`} />
-              <span className="text-lg font-bold tabular-nums text-foreground">
-                {s.value}
-              </span>
+              <CountText value={s.value} className="text-lg font-bold text-foreground" />
             </div>
             <span className="mt-0.5 block text-[11px] text-muted-foreground">
               {s.label}

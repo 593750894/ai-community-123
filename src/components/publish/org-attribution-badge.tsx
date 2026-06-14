@@ -39,7 +39,7 @@ export function OrgAttributionBadge({
     <Link
       href={`/organizations/${org.slug}`}
       className={cn(
-        "inline-flex max-w-[150px] items-center gap-1 rounded-full border border-border/50 bg-muted/40 text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground",
+        "inline-flex max-w-[150px] items-center gap-1 rounded-full border border-border bg-muted/40 text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground",
         px,
         text,
         className,

@@ -1,4 +1,5 @@
 import { CATEGORY_TONE } from "@/lib/category-tones";
+import type { PillTagTint } from "@/components/ui/pill-tag";
 
 // 与 Prisma `WorkCategory` enum 一一对应。
 // 这里手写一份是为了让 client component 可以导入而不拖入 Prisma runtime。
@@ -21,9 +22,10 @@ export type WorkCategoryMeta = {
   value: WorkCategoryValue;
   label: string;
   desc: string;
-  // 卡片用的渐变色（封面缺省占位用）+ badge 配色
-  cover: string;
+  /** @deprecated V1 tailwind classes — use `tint` with `<PillTag>` instead. */
   tone: string;
+  /** V2 PillTag tint (DESIGN.md §7 7-tint vocabulary). */
+  tint: PillTagTint;
 };
 
 export const WORK_CATEGORY_META: Record<WorkCategoryValue, WorkCategoryMeta> = {
@@ -31,64 +33,64 @@ export const WORK_CATEGORY_META: Record<WorkCategoryValue, WorkCategoryMeta> = {
     value: "AI_COMIC",
     label: "AI 漫剧",
     desc: "漫画分镜叙事，节奏明快",
-    cover: "from-fuchsia-500/60 via-purple-700/60 to-slate-900/80",
     tone: CATEGORY_TONE.fuchsia,
+    tint: "violet",
   },
   AI_DRAMA: {
     value: "AI_DRAMA",
     label: "AI 短剧",
     desc: "竖屏微短剧，1-3 分钟一集",
-    cover: "from-rose-500/60 via-pink-700/60 to-slate-900/80",
     tone: CATEGORY_TONE.rose,
+    tint: "rose",
   },
   AI_ANIMATION: {
     value: "AI_ANIMATION",
     label: "AI 动画",
     desc: "二次元 / 三维动画风格",
-    cover: "from-sky-500/60 via-blue-700/60 to-indigo-900/80",
     tone: CATEGORY_TONE.sky,
+    tint: "blue",
   },
   DIGITAL_HUMAN: {
     value: "DIGITAL_HUMAN",
     label: "数字人视频",
     desc: "数字人口播 / 角色扮演",
-    cover: "from-emerald-500/60 via-teal-700/60 to-slate-900/80",
     tone: CATEGORY_TONE.emerald,
+    tint: "emerald",
   },
   ECOMMERCE_AD: {
     value: "ECOMMERCE_AD",
     label: "电商广告视频",
     desc: "5-15 秒商品种草短视频",
-    cover: "from-amber-500/60 via-orange-700/60 to-red-900/80",
     tone: CATEGORY_TONE.amber,
+    tint: "amber",
   },
   PRODUCT_SHOW: {
     value: "PRODUCT_SHOW",
     label: "产品展示视频",
     desc: "产品 360° / 功能演示",
-    cover: "from-stone-400/60 via-amber-700/60 to-stone-950/80",
     tone: CATEGORY_TONE.stoneSoft,
+    tint: "slate",
   },
   KNOWLEDGE: {
     value: "KNOWLEDGE",
     label: "知识讲解视频",
     desc: "科普 / 教程 / 知识可视化",
-    cover: "from-blue-500/60 via-cyan-700/60 to-emerald-900/80",
     tone: CATEGORY_TONE.blue,
+    tint: "blue",
   },
   STORY: {
     value: "STORY",
     label: "故事类视频",
     desc: "叙事短片，剧情驱动",
-    cover: "from-indigo-500/60 via-purple-700/60 to-slate-900/80",
     tone: CATEGORY_TONE.indigo,
+    tint: "violet",
   },
   EXPERIMENT: {
     value: "EXPERIMENT",
     label: "实验短片",
     desc: "风格 / 工作流 / VFX 实验",
-    cover: "from-yellow-500/60 via-orange-700/60 to-rose-900/80",
     tone: CATEGORY_TONE.yellowDeep,
+    tint: "amber",
   },
 };
 
@@ -99,23 +101,4 @@ export function workCategoryMeta(category: string): WorkCategoryMeta {
     WORK_CATEGORY_META[category as WorkCategoryValue] ??
     WORK_CATEGORY_META.STORY
   );
-}
-
-// 卡片 / 下拉框中作者头像的色块（在没头像时使用）
-export function authorTintFromName(name: string): string {
-  const palettes = [
-    "from-cyan-300 to-blue-500",
-    "from-fuchsia-300 to-purple-500",
-    "from-amber-300 to-orange-500",
-    "from-emerald-300 to-teal-500",
-    "from-rose-300 to-pink-500",
-    "from-indigo-300 to-purple-500",
-    "from-sky-300 to-cyan-500",
-    "from-yellow-300 to-orange-500",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  }
-  return palettes[hash % palettes.length];
 }

@@ -68,7 +68,7 @@ export function ChannelFilters({
       </div>
 
       {activeFilters.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-border/20 bg-card/20 px-3 py-2">
+        <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-border bg-card/20 px-3 py-2">
           <span className="text-[11px] font-medium text-muted-foreground/70">筛选中</span>
           <span className="h-3 w-px bg-border/40" />
           {activeFilters.map((f) => (

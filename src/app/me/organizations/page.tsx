@@ -90,10 +90,10 @@ export default async function MyOrganizationsPage() {
             {items.map(({ role, organization: org }) => (
               <div
                 key={org.id}
-                className="flex flex-col gap-3 rounded-xl border border-border/60 bg-card/40 p-4"
+                className="flex flex-col gap-3 rounded-xl border border-border bg-card/40 p-4"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-muted/40">
+                  <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/40">
                     {org.logo ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -137,14 +137,14 @@ export default async function MyOrganizationsPage() {
                   <div className="flex items-center gap-1.5">
                     <Link
                       href={`/organizations/${org.slug}/members`}
-                      className="inline-flex items-center gap-1 rounded-md border border-border/60 px-2 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
+                      className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
                     >
                       <Users className="size-3" /> 成员
                     </Link>
                     {(role === "OWNER" || role === "ADMIN") && (
                       <Link
                         href={`/organizations/${org.slug}/settings`}
-                        className="inline-flex items-center gap-1 rounded-md border border-border/60 px-2 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
+                        className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
                       >
                         <SettingsIcon className="size-3" /> 设置
                       </Link>

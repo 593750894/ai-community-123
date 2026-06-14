@@ -81,12 +81,12 @@ export default async function AdminVerificationsPage({ searchParams }: PageProps
             name="q"
             defaultValue={q ?? ""}
             placeholder="搜索企业名 / slug / 注册号…"
-            className="h-9 w-64 rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-64 rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
           {currentStatus !== "PENDING" && (
             <input type="hidden" name="status" value={currentStatus} />
           )}
-          <button className="rounded-md border border-border/60 px-3 py-1.5 text-xs hover:bg-muted/60">
+          <button className="rounded-full border border-border px-3 py-1.5 text-xs hover:bg-muted/60">
             搜索
           </button>
         </form>
@@ -121,7 +121,7 @@ export default async function AdminVerificationsPage({ searchParams }: PageProps
             description="切换筛选或等待新的认证申请提交。"
           />
         ) : (
-          <div className="overflow-hidden rounded-xl border border-border/60">
+          <div className="overflow-hidden rounded-xl border border-border">
             <table className="w-full text-xs">
               <thead className="bg-muted/40 text-muted-foreground">
                 <tr>
@@ -138,7 +138,7 @@ export default async function AdminVerificationsPage({ searchParams }: PageProps
                 {items.map((row) => (
                   <tr
                     key={row.id}
-                    className="border-t border-border/40 hover:bg-muted/20"
+                    className="border-t border-border hover:bg-muted/20"
                   >
                     <td className="px-3 py-2">
                       <Link
@@ -191,7 +191,7 @@ export default async function AdminVerificationsPage({ searchParams }: PageProps
                             href={row.verificationLicenseUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="rounded-md border border-border/60 px-2 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
+                            className="rounded-md border border-border px-2 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
                           >
                             查看执照
                           </a>
@@ -268,7 +268,7 @@ function PagerLink({
   return (
     <Link
       href={href}
-      className="rounded-md border border-border/60 px-3 py-1 text-muted-foreground hover:text-foreground"
+      className="rounded-md border border-border px-3 py-1 text-muted-foreground hover:text-foreground"
     >
       {label}
     </Link>

@@ -98,7 +98,7 @@ export function CreateCollaborationForm({
                   "rounded-lg border px-3 py-2 text-left text-xs transition-all",
                   active
                     ? `${meta.tone} ring-2 ring-primary/40`
-                    : "border-border/60 bg-card/40 text-muted-foreground hover:border-border hover:bg-muted/40",
+                    : "border-border bg-card/40 text-muted-foreground hover:bg-muted/40",
                 )}
               >
                 <div className="text-sm font-medium text-foreground/95">
@@ -174,7 +174,7 @@ export function CreateCollaborationForm({
                 key={b}
                 type="button"
                 onClick={() => setBudget(b)}
-                className="rounded-md border border-border/60 bg-card/40 px-2 py-0.5 text-[10px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                className="rounded-full border border-border bg-card/40 px-2.5 py-0.5 text-[10px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
               >
                 {b}
               </button>
@@ -200,7 +200,7 @@ export function CreateCollaborationForm({
                     "rounded-md border px-2 py-1.5 text-xs transition-colors",
                     active
                       ? "border-primary/40 bg-primary/10 text-primary"
-                      : "border-border/60 bg-card/40 text-muted-foreground hover:border-primary/30 hover:text-foreground",
+                      : "border-border bg-card/40 text-muted-foreground hover:border-primary/30 hover:text-foreground",
                   )}
                 >
                   {COLLAB_WORK_MODE_LABEL[m]}
@@ -228,7 +228,7 @@ export function CreateCollaborationForm({
                     "rounded-md border px-2 py-1.5 text-xs transition-colors",
                     active
                       ? "border-primary/40 bg-primary/10 text-primary"
-                      : "border-border/60 bg-card/40 text-muted-foreground hover:border-primary/30 hover:text-foreground",
+                      : "border-border bg-card/40 text-muted-foreground hover:border-primary/30 hover:text-foreground",
                   )}
                 >
                   {COLLAB_LOCATION_LABEL[m]}
@@ -278,7 +278,7 @@ export function CreateCollaborationForm({
               key={t}
               type="button"
               onClick={() => appendTag(t)}
-              className="rounded-md border border-border/60 bg-card/40 px-2 py-0.5 text-[11px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+              className="rounded-full border border-border bg-card/40 px-2.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
             >
               + {t}
             </button>
@@ -288,7 +288,7 @@ export function CreateCollaborationForm({
 
       {state.message && !state.ok && <FormError message={state.message} />}
 
-      <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border/40 pt-4">
+      <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-4">
         <button
           type="reset"
           onClick={() => {
@@ -299,14 +299,14 @@ export function CreateCollaborationForm({
             setBudget("");
             setDescLen(0);
           }}
-          className="inline-flex h-10 items-center justify-center rounded-lg border border-border/60 bg-background px-4 text-sm transition-colors hover:bg-muted"
+          className="inline-flex h-10 items-center justify-center rounded-full border border-border bg-background px-4 text-sm transition-colors hover:bg-muted"
         >
           重置
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending && <Spinner className="size-4 text-primary-foreground" />}
           {pending ? "发布中…" : "发布合作需求"}

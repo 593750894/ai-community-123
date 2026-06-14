@@ -15,12 +15,14 @@ import {
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
+import { PillTag } from "@/components/ui/pill-tag";
 import { prisma } from "@/lib/db";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth/session";
 import {
   COLLAB_LOCATION_LABEL,
   COLLAB_STATUS_LABEL,
+  COLLAB_STATUS_TINT,
   COLLAB_STATUS_TONE,
   COLLAB_STATUS_VALUES,
   COLLAB_TYPE_LABEL,
@@ -32,7 +34,6 @@ import {
   type CollabTypeValue,
   type CollabWorkModeValue,
 } from "@/lib/collaborations/categories";
-import { authorTintFromName } from "@/lib/work-categories";
 import { updateCollaborationStatusAction } from "@/lib/collaborations/actions";
 import { OrgAttributionBadge } from "@/components/publish/org-attribution-badge";
 
@@ -89,7 +90,6 @@ export default async function CollaborationDetailPage({
   if (!collab) notFound();
 
   const meta = collabCategoryMeta(collab.category);
-  const tint = authorTintFromName(collab.author.name);
   const moreLikeThis = await getMoreInCategory(collab.category, collab.id);
 
   const isOwner = currentUser?.id === collab.authorId;
@@ -117,27 +117,17 @@ export default async function CollaborationDetailPage({
       <div className="grid gap-6 px-6 py-6 sm:px-8 lg:grid-cols-[1fr_340px]">
         <main className="space-y-6">
           {/* 标题卡 */}
-          <section className="overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-card/60 to-card/20">
+          <section className="surface-card overflow-hidden rounded-2xl border-primary/20">
             <div className="space-y-3 p-5 sm:p-6">
               <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
-                    meta.tone,
-                  )}
-                >
-                  <span aria-hidden>{meta.emoji}</span>
+                <PillTag tint={meta.tint} icon={null} size="md">
+                  <span aria-hidden className="mr-0.5">{meta.emoji}</span>
                   {meta.label}
-                </span>
-                <span
-                  className={cn(
-                    "rounded-full border px-2.5 py-0.5 text-xs font-medium",
-                    COLLAB_STATUS_TONE[collab.status as CollabStatusValue],
-                  )}
-                >
+                </PillTag>
+                <PillTag tint={COLLAB_STATUS_TINT[collab.status as CollabStatusValue]} size="md">
                   {COLLAB_STATUS_LABEL[collab.status as CollabStatusValue]}
-                </span>
-                <span className="rounded-full border border-border/60 bg-muted/30 px-2.5 py-0.5 text-xs text-muted-foreground">
+                </PillTag>
+                <span className="rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-xs text-muted-foreground">
                   {COLLAB_TYPE_LABEL[collab.type as CollabTypeValue]}
                 </span>
               </div>
@@ -146,7 +136,7 @@ export default async function CollaborationDetailPage({
                 {collab.title}
               </h1>
 
-              <div className="grid gap-2 border-y border-border/40 py-3 text-xs sm:grid-cols-3">
+              <div className="grid gap-2 border-y border-border py-3 text-xs sm:grid-cols-3">
                 <MetaRow icon={<Banknote className="size-3.5" />} label="预算" value={collab.budget ?? "面议"} />
                 <MetaRow
                   icon={<Briefcase className="size-3.5" />}
@@ -178,7 +168,7 @@ export default async function CollaborationDetailPage({
                     {collab.tags.map((t) => (
                       <span
                         key={t}
-                        className="rounded-full bg-muted/40 px-2 py-0.5 text-[11px] text-muted-foreground"
+                        className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
                       >
                         #{t}
                       </span>
@@ -190,14 +180,14 @@ export default async function CollaborationDetailPage({
           </section>
 
           {/* 联系方式 */}
-          <section className="rounded-2xl border border-border/60 bg-card/40 p-5">
+          <section className="surface-card rounded-2xl p-5">
             <div className="mb-3 flex items-center gap-2 text-sm font-medium">
               <Contact className="size-4 text-primary" />
               联系方式
             </div>
             {collab.contact ? (
               isLoggedIn ? (
-                <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+                <div className="surface-glass-accent rounded-lg p-3">
                   <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
                     发布者预留的联系方式
                   </div>
@@ -209,7 +199,7 @@ export default async function CollaborationDetailPage({
                   </p>
                 </div>
               ) : (
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-border/60 p-3">
+                <div className="surface-dashed flex flex-wrap items-center justify-between gap-3 rounded-lg p-3">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Lock className="size-3.5" />
                     登录后可查看联系方式
@@ -252,7 +242,7 @@ export default async function CollaborationDetailPage({
                         "inline-flex h-7 items-center rounded-md border px-2.5 text-xs transition-colors",
                         collab.status === s
                           ? `${COLLAB_STATUS_TONE[s as CollabStatusValue]} cursor-default`
-                          : "border-border/60 bg-background hover:border-primary/40 hover:text-foreground",
+                          : "border-border bg-background hover:border-primary/40 hover:text-foreground",
                       )}
                     >
                       标记为 {COLLAB_STATUS_LABEL[s as CollabStatusValue]}
@@ -274,7 +264,7 @@ export default async function CollaborationDetailPage({
                   <Link
                     key={m.id}
                     href={`/collaboration/${m.id}`}
-                    className="rounded-xl border border-border/60 bg-card/40 p-3 transition-colors hover:border-primary/40"
+                    className="surface-card rounded-xl p-3 transition-colors hover:border-primary/40"
                   >
                     <div className="line-clamp-1 text-sm font-medium">{m.title}</div>
                     <div className="mt-1 line-clamp-2 text-[11px] text-muted-foreground">
@@ -293,7 +283,7 @@ export default async function CollaborationDetailPage({
 
         <aside className="space-y-4">
           {/* 分类卡 */}
-          <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
+          <section className="surface-card rounded-2xl p-4">
             <div className="mb-2 text-[11px] uppercase tracking-wide text-muted-foreground/80">
               合作类型
             </div>
@@ -313,7 +303,7 @@ export default async function CollaborationDetailPage({
           </section>
 
           {/* 作者卡 */}
-          <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
+          <section className="surface-card rounded-2xl p-4">
             <div className="mb-3 flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground/80">
               <UserCircle className="size-3.5" />
               发布者
@@ -324,15 +314,10 @@ export default async function CollaborationDetailPage({
                 <img
                   src={collab.author.avatar}
                   alt={collab.author.name}
-                  className="size-12 rounded-xl border border-border/60"
+                  className="size-12 rounded-xl border border-border"
                 />
               ) : (
-                <span
-                  className={cn(
-                    "flex size-12 items-center justify-center rounded-xl bg-gradient-to-br text-sm font-medium text-black/70",
-                    tint,
-                  )}
-                >
+                <span className="flex size-12 items-center justify-center rounded-xl bg-muted text-sm font-medium text-muted-foreground">
                   {collab.author.name.slice(0, 1)}
                 </span>
               )}
@@ -365,7 +350,7 @@ export default async function CollaborationDetailPage({
               查看 {collab.author.name} 主页 →
             </Link>
             {collab.organization && (
-              <div className="mt-3 border-t border-border/40 pt-3">
+              <div className="mt-3 border-t border-border pt-3">
                 <p className="mb-1.5 text-[11px] uppercase tracking-wide text-muted-foreground/80">
                   企业发布
                 </p>
@@ -375,7 +360,7 @@ export default async function CollaborationDetailPage({
           </section>
 
           {/* 提示 */}
-          <section className="rounded-2xl border border-dashed border-border/60 bg-card/30 p-4">
+          <section className="surface-dashed rounded-2xl p-4">
             <div className="mb-2 flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground/80">
               <Sparkles className="size-3.5 text-primary" />
               提示
@@ -387,7 +372,7 @@ export default async function CollaborationDetailPage({
           </section>
 
           {/* 时间 */}
-          <section className="rounded-2xl border border-border/60 bg-card/40 p-4 text-xs">
+          <section className="surface-card rounded-2xl p-4 text-xs">
             <div className="mb-2 flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground/80">
               <Clock className="size-3.5" />
               发布时间
@@ -415,7 +400,7 @@ function MetaRow({
   value: string;
 }) {
   return (
-    <div className="rounded-lg border border-border/40 bg-background/30 px-3 py-2">
+    <div className="rounded-lg border border-border bg-background px-3 py-2">
       <div className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
         {icon}
         {label}

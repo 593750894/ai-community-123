@@ -20,6 +20,7 @@ import {
 } from "@/components/feed/interaction-buttons";
 import { ReportButton } from "@/components/reports/report-button";
 import { OrgAttributionBadge } from "@/components/publish/org-attribution-badge";
+import { PillTag } from "@/components/ui/pill-tag";
 import { getCurrentUser } from "@/lib/auth/session";
 import { collectCommentIds, getCommentThread } from "@/lib/comments/queries";
 import { prisma } from "@/lib/db";
@@ -121,7 +122,7 @@ export default async function PostDetailPage({
                   />
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-1 rounded-md border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-200 hover:bg-amber-500/20"
+                    className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-200 hover:bg-amber-500/20"
                   >
                     <Pin className="size-3.5" />
                     {post.pinned ? "取消置顶" : "置顶"}
@@ -136,7 +137,7 @@ export default async function PostDetailPage({
                   />
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-background/40 px-2.5 py-1 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                    className="inline-flex items-center gap-1 rounded-full border border-border bg-background/40 px-2.5 py-1 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                   >
                     <Lock className="size-3.5" />
                     {post.locked ? "解锁评论" : "锁定评论"}
@@ -146,13 +147,9 @@ export default async function PostDetailPage({
             </section>
           )}
 
-          <article className="rounded-2xl border border-border/60 bg-card/40 p-5 sm:p-6">
+          <article className="rounded-2xl border border-border bg-card/40 p-5 sm:p-6">
             <div className="flex flex-wrap items-center gap-2 text-[11px]">
-              <span
-                className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 font-medium ${meta.tone}`}
-              >
-                {meta.label}
-              </span>
+              <PillTag tint={meta.tint}>{meta.label}</PillTag>
               {post.pinned && (
                 <span className="inline-flex items-center gap-1 text-amber-400">
                   <Pin className="size-3" />
@@ -180,14 +177,14 @@ export default async function PostDetailPage({
               {post.title}
             </h1>
 
-            <div className="mt-3 flex flex-wrap items-center gap-3 border-y border-border/40 py-3 text-xs text-muted-foreground">
+            <div className="mt-3 flex flex-wrap items-center gap-3 border-y border-border py-3 text-xs text-muted-foreground">
               <div className="flex items-center gap-2">
                 {post.author.avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={post.author.avatar}
                     alt={post.author.name}
-                    className="size-7 rounded-full border border-border/60"
+                    className="size-7 rounded-full border border-border"
                   />
                 ) : (
                   <span className="flex size-7 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-foreground">
@@ -254,7 +251,7 @@ export default async function PostDetailPage({
             {(post.videoUrl || post.imageUrl) && (
               <div className="mt-5 space-y-3">
                 {post.videoUrl && (
-                  <div className="rounded-xl border border-border/60 bg-background/40 p-3">
+                  <div className="rounded-xl border border-border bg-background/40 p-3">
                     <div className="mb-2 inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-[11px] text-primary">
                       <Play className="size-3" />
                       视频链接
@@ -270,7 +267,7 @@ export default async function PostDetailPage({
                   </div>
                 )}
                 {post.imageUrl && (
-                  <div className="rounded-xl border border-border/60 bg-background/40 p-3">
+                  <div className="rounded-xl border border-border bg-background/40 p-3">
                     <div className="mb-2 inline-flex items-center gap-1 rounded-md bg-cyan-500/10 px-2 py-0.5 text-[11px] text-cyan-300">
                       <ImageIcon className="size-3" />
                       图片
@@ -279,7 +276,7 @@ export default async function PostDetailPage({
                     <img
                       src={post.imageUrl}
                       alt={post.title}
-                      className="max-h-[480px] w-full rounded-lg border border-border/60 object-contain"
+                      className="max-h-[480px] w-full rounded-lg border border-border object-contain"
                     />
                     <a
                       href={post.imageUrl}
@@ -307,7 +304,7 @@ export default async function PostDetailPage({
             </div>
 
             {post.locked ? (
-              <div className="rounded-xl border border-border/60 bg-card/30 px-4 py-3 text-sm text-muted-foreground">
+              <div className="rounded-xl border border-border bg-card/30 px-4 py-3 text-sm text-muted-foreground">
                 <Lock className="mr-1 inline size-3.5 align-text-bottom" />
                 该帖子已被锁定，暂不接受新评论。
               </div>
@@ -333,7 +330,7 @@ export default async function PostDetailPage({
         </main>
 
         <aside className="space-y-4">
-          <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
+          <section className="rounded-2xl border border-border bg-card/40 p-4">
             <div className="mb-2 text-[11px] uppercase tracking-wide text-muted-foreground/80">
               所属频道
             </div>
@@ -361,7 +358,7 @@ export default async function PostDetailPage({
             </Link>
           </section>
 
-          <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
+          <section className="rounded-2xl border border-border bg-card/40 p-4">
             <div className="mb-3 text-[11px] uppercase tracking-wide text-muted-foreground/80">
               作者
             </div>
@@ -371,7 +368,7 @@ export default async function PostDetailPage({
                 <img
                   src={post.author.avatar}
                   alt={post.author.name}
-                  className="size-12 rounded-xl border border-border/60"
+                  className="size-12 rounded-xl border border-border"
                 />
               ) : (
                 <span className="flex size-12 items-center justify-center rounded-xl bg-muted text-sm font-medium">

@@ -5,13 +5,14 @@ import { ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CountText } from "@/components/ui/count-text";
+import { MoneyText } from "@/components/ui/money-text";
 import { WorkflowItemForm } from "@/components/commerce/workflow-item-form";
 import { requireUser } from "@/lib/auth/guard";
 import { getMyWorkflowItem } from "@/lib/commerce/queries";
 import { listMyPostableOrganizations } from "@/lib/organizations/content-attribution";
 import {
   WORKFLOW_ITEM_STATUS_LABEL,
-  formatPrice,
   type WorkflowItemStatusValue,
 } from "@/lib/commerce/schemas";
 import {
@@ -107,21 +108,23 @@ export default async function EditWorkflowItemPage({
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">销量</span>
-              <span className="tabular-nums">{item.salesCount}</span>
+              <CountText value={item.salesCount} />
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">价格</span>
-              <span className="tabular-nums text-primary">
-                {formatPrice(item.priceCents, item.currency)}
-              </span>
+              <MoneyText
+                value={item.priceCents}
+                currency={item.currency === "CNY" ? "¥" : item.currency + " "}
+                className="text-primary"
+              />
             </div>
 
-            <div className="space-y-2 border-t border-border/40 pt-3">
+            <div className="space-y-2 border-t border-border pt-3">
               {status === "DRAFT" && (
                 <form action={transitionWorkflowItemStatusAction}>
                   <input type="hidden" name="id" value={item.id} />
                   <input type="hidden" name="status" value="PUBLISHED" />
-                  <button className="w-full rounded-md bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/80">
+                  <button className="w-full rounded-full bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/80">
                     上架到市集
                   </button>
                 </form>
@@ -130,7 +133,7 @@ export default async function EditWorkflowItemPage({
                 <form action={transitionWorkflowItemStatusAction}>
                   <input type="hidden" name="id" value={item.id} />
                   <input type="hidden" name="status" value="ARCHIVED" />
-                  <button className="w-full rounded-md border border-border/60 px-3 py-2 text-xs text-muted-foreground hover:text-foreground">
+                  <button className="w-full rounded-full border border-border px-3 py-2 text-xs text-muted-foreground hover:text-foreground">
                     下架商品
                   </button>
                 </form>
@@ -139,7 +142,7 @@ export default async function EditWorkflowItemPage({
                 <form action={transitionWorkflowItemStatusAction}>
                   <input type="hidden" name="id" value={item.id} />
                   <input type="hidden" name="status" value="PUBLISHED" />
-                  <button className="w-full rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-xs text-primary hover:bg-primary/20">
+                  <button className="w-full rounded-full border border-primary/40 bg-primary/10 px-3 py-2 text-xs text-primary hover:bg-primary/20">
                     重新上架
                   </button>
                 </form>
@@ -147,7 +150,7 @@ export default async function EditWorkflowItemPage({
               {!hasSales && (
                 <form action={deleteWorkflowItemAction}>
                   <input type="hidden" name="id" value={item.id} />
-                  <button className="w-full rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-300 hover:bg-rose-500/20">
+                  <button className="w-full rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-300 hover:bg-rose-500/20">
                     删除商品
                   </button>
                 </form>

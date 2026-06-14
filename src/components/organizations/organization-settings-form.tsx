@@ -55,7 +55,7 @@ export function OrganizationSettingsForm({ defaults }: { defaults: Defaults }) {
             defaultValue={defaults.name}
             maxLength={80}
             required
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
 
@@ -64,7 +64,7 @@ export function OrganizationSettingsForm({ defaults }: { defaults: Defaults }) {
             value={defaults.slug}
             readOnly
             disabled
-            className="h-9 w-full rounded-md border border-border/60 bg-background/30 px-2 text-sm text-muted-foreground"
+            className="h-9 w-full rounded-md border border-border bg-background/30 px-2 text-sm text-muted-foreground"
           />
         </Field>
 
@@ -78,7 +78,7 @@ export function OrganizationSettingsForm({ defaults }: { defaults: Defaults }) {
             defaultValue={defaults.description ?? ""}
             rows={3}
             maxLength={500}
-            className="w-full rounded-md border border-border/60 bg-background/40 px-2 py-1.5 text-sm outline-none focus:border-primary/50"
+            className="w-full rounded-md border border-border bg-background/40 px-2 py-1.5 text-sm outline-none focus:border-primary/50"
           />
         </Field>
 
@@ -87,7 +87,7 @@ export function OrganizationSettingsForm({ defaults }: { defaults: Defaults }) {
             name="logo"
             defaultValue={defaults.logo ?? ""}
             placeholder="https://..."
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
 
@@ -96,7 +96,7 @@ export function OrganizationSettingsForm({ defaults }: { defaults: Defaults }) {
             name="website"
             defaultValue={defaults.website ?? ""}
             placeholder="https://your.company"
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
 
@@ -104,7 +104,7 @@ export function OrganizationSettingsForm({ defaults }: { defaults: Defaults }) {
           <select
             name="industry"
             defaultValue={(defaults.industry as OrgIndustry) ?? ""}
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           >
             <option value="">未指定</option>
             {ORG_INDUSTRIES.map((ind) => (
@@ -119,7 +119,7 @@ export function OrganizationSettingsForm({ defaults }: { defaults: Defaults }) {
           <select
             name="size"
             defaultValue={(defaults.size as OrgSize) ?? ""}
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           >
             <option value="">未指定</option>
             {ORG_SIZES.map((s) => (
@@ -140,16 +140,16 @@ export function OrganizationSettingsForm({ defaults }: { defaults: Defaults }) {
             type="email"
             defaultValue={defaults.contactEmail ?? ""}
             placeholder="hr@company.com"
-            className="h-9 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-9 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
       </div>
 
-      <div className="flex justify-end gap-2 border-t border-border/40 pt-4">
+      <div className="flex justify-end gap-2 border-t border-border pt-4">
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
+          className="rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
         >
           {pending ? "保存中…" : "保存修改"}
         </button>

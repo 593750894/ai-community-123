@@ -16,7 +16,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "flex flex-col gap-3 border-b border-border/60 px-6 py-6 sm:px-8 sm:py-7",
+        "flex flex-col gap-3 border-b border-border px-6 py-6 sm:px-8 sm:py-7",
         className,
       )}
     >

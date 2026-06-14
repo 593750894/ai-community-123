@@ -113,7 +113,7 @@ export function PurchaseButton({
                   className={`flex-1 cursor-pointer rounded-md border px-3 py-2 text-center text-xs transition-colors ${
                     active
                       ? "border-primary/60 bg-primary/10 text-primary"
-                      : "border-border/50 text-muted-foreground hover:border-border"
+                      : "border-border text-muted-foreground hover:border-border"
                   }`}
                 >
                   <input

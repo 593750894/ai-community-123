@@ -24,7 +24,7 @@ export function CreateToolForm() {
   return (
     <form
       action={action}
-      className="space-y-3 rounded-xl border border-border/60 bg-card/40 p-4"
+      className="space-y-3 rounded-xl border border-border bg-card/40 p-4"
     >
       <div className="flex items-center justify-between gap-3">
         <div>
@@ -45,14 +45,14 @@ export function CreateToolForm() {
           <input
             name="name"
             placeholder="例如 Seedance 2.0"
-            className="h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
         <Field label="官网 / 链接" error={state.fieldErrors?.url?.[0]} required>
           <input
             name="url"
             placeholder="https://..."
-            className="h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
         <Field
@@ -63,7 +63,7 @@ export function CreateToolForm() {
           <select
             name="category"
             defaultValue="TEXT_TO_VIDEO"
-            className="h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           >
             {TOOL_CATEGORY_ORDER.map((c) => (
               <option key={c} value={c}>
@@ -76,7 +76,7 @@ export function CreateToolForm() {
           <select
             name="pricing"
             defaultValue="FREE"
-            className="h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           >
             {TOOL_PRICING_VALUES.map((p) => (
               <option key={p} value={p}>
@@ -95,21 +95,21 @@ export function CreateToolForm() {
             name="description"
             rows={2}
             placeholder="一句话讲清楚这个工具是干嘛的"
-            className="w-full rounded-md border border-border/60 bg-background/40 px-2 py-1.5 text-sm outline-none focus:border-primary/50"
+            className="w-full rounded-md border border-border bg-background/40 px-2 py-1.5 text-sm outline-none focus:border-primary/50"
           />
         </Field>
         <Field label="适用场景（可选）" className="sm:col-span-2">
           <input
             name="useCase"
             placeholder="例如 电商批量短视频"
-            className="h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
         <Field label="标签（逗号分隔）" className="sm:col-span-2">
           <input
             name="tags"
             placeholder="文生视频, 火山方舟"
-            className="h-8 w-full rounded-md border border-border/60 bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
+            className="h-8 w-full rounded-md border border-border bg-background/40 px-2 text-sm outline-none focus:border-primary/50"
           />
         </Field>
       </div>
@@ -119,7 +119,7 @@ export function CreateToolForm() {
           <input
             type="checkbox"
             name="isOfficial"
-            className="size-3.5 rounded border-border/60"
+            className="size-3.5 rounded border-border"
           />
           官方推荐（置顶展示）
         </label>
@@ -130,7 +130,7 @@ export function CreateToolForm() {
           <button
             type="submit"
             disabled={pending}
-            className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/80 disabled:opacity-50"
+            className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/80 disabled:opacity-50"
           >
             {pending ? "提交中…" : "添加工具"}
           </button>

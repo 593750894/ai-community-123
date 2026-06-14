@@ -308,14 +308,14 @@ export function MessageComposer({
       />
 
       {drafts.length > 0 && (
-        <ul className="flex flex-wrap gap-2 rounded-xl border border-border/60 bg-card/40 p-2">
+        <ul className="flex flex-wrap gap-2 rounded-xl border border-border bg-card/40 p-2">
           {drafts.map((d) => {
             const cat = categorizeAttachment(d.file.type);
             return (
               <li
                 key={d.id}
                 className={cn(
-                  "relative flex w-40 shrink-0 flex-col gap-1 rounded-lg border border-border/60 bg-card/60 p-2 text-xs",
+                  "relative flex w-40 shrink-0 flex-col gap-1 rounded-lg border border-border bg-card/60 p-2 text-xs",
                   d.status === "error" && "border-destructive/50",
                 )}
               >
@@ -376,14 +376,14 @@ export function MessageComposer({
 
       <div
         className={cn(
-          "flex items-end gap-2 rounded-xl border border-border/60 bg-card/40 p-2 transition-colors focus-within:border-primary/50",
+          "flex items-end gap-2 rounded-xl border border-border bg-card/40 p-2 transition-colors focus-within:border-primary/50",
           dragOver && "border-primary bg-primary/5",
         )}
       >
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-border/60 text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
+          className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
           aria-label="添加附件"
           title={`添加附件（最多 ${MESSAGE_ATTACHMENT_MAX_COUNT} 个，单文件 ${Math.round(MAX_MESSAGE_ATTACHMENT_SIZE / 1024 / 1024)}MB 上限）`}
         >
@@ -414,7 +414,7 @@ export function MessageComposer({
         <button
           type="submit"
           disabled={pending || hasUploadingAttachment}
-          className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-8 items-center gap-1.5 rounded-full bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending || hasUploadingAttachment ? (
             <Loader2 className="size-3.5 animate-spin" />

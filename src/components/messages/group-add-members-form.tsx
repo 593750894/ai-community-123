@@ -40,7 +40,7 @@ export function GroupAddMembersForm({
           required
           rows={3}
           placeholder="@charlie&#10;@diana"
-          className="block w-full resize-y rounded-md border border-border/60 bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-primary/60"
+          className="block w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-primary/60"
         />
       </FormField>
       {state.message && state.ok && (
@@ -55,7 +55,7 @@ export function GroupAddMembersForm({
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <UserPlus className="size-4" />
         {pending ? "添加中…" : "添加成员"}

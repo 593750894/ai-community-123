@@ -70,14 +70,14 @@ export function CreateGroupForm() {
           required
           rows={4}
           placeholder="@alice&#10;@bob"
-          className="block w-full resize-y rounded-md border border-border/60 bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-primary/60"
+          className="block w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-primary/60"
         />
       </FormField>
       <FormError message={state.ok ? null : state.message ?? null} />
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Users className="size-4" />
         {pending ? "创建中…" : "创建群聊"}

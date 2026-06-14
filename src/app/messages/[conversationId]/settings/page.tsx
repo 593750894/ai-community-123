@@ -73,7 +73,7 @@ export default async function GroupSettingsPage({
       />
 
       <div className="space-y-6 px-4 py-5 sm:px-8 sm:py-6">
-        <section className="space-y-3 rounded-2xl border border-border/60 bg-card/30 p-5">
+        <section className="space-y-3 rounded-2xl border border-border bg-card/30 p-5">
           <h2 className="text-sm font-semibold">基础信息</h2>
           <p className="text-xs text-muted-foreground">
             {canEditInfo
@@ -89,7 +89,7 @@ export default async function GroupSettingsPage({
         </section>
 
         {canAddMembers && (
-          <section className="space-y-3 rounded-2xl border border-border/60 bg-card/30 p-5">
+          <section className="space-y-3 rounded-2xl border border-border bg-card/30 p-5">
             <h2 className="text-sm font-semibold">添加成员</h2>
             <p className="text-xs text-muted-foreground">
               输入对方用户名（@username），可换行或逗号分隔批量添加。已在群内的会被跳过。
@@ -98,7 +98,7 @@ export default async function GroupSettingsPage({
           </section>
         )}
 
-        <section className="space-y-3 rounded-2xl border border-border/60 bg-card/30 p-5">
+        <section className="space-y-3 rounded-2xl border border-border bg-card/30 p-5">
           <div className="flex items-baseline justify-between gap-3">
             <h2 className="text-sm font-semibold">
               成员列表 · {detail.participants.length} 人
@@ -133,7 +133,7 @@ export default async function GroupSettingsPage({
                 />
                 <button
                   type="submit"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 text-sm font-medium text-rose-300 transition-colors hover:bg-rose-500/20"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-rose-500/40 bg-rose-500/10 px-3 text-sm font-medium text-rose-300 transition-colors hover:bg-rose-500/20"
                 >
                   <Trash2 className="size-4" />
                   解散群聊
@@ -156,7 +156,7 @@ export default async function GroupSettingsPage({
                 />
                 <button
                   type="submit"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 text-sm font-medium text-rose-300 transition-colors hover:bg-rose-500/20"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-rose-500/40 bg-rose-500/10 px-3 text-sm font-medium text-rose-300 transition-colors hover:bg-rose-500/20"
                 >
                   <LogOut className="size-4" />
                   退出群聊
