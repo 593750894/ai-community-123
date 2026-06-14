@@ -109,7 +109,7 @@ export function NotificationBell({ isLoggedIn }: NotificationBellProps) {
       {isLoggedIn && count > 0 && (
         <span
           className={cn(
-            "absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground shadow-[0_0_10px_-1px_rgba(56,189,248,0.6)]",
+            "absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground ring-2 ring-background",
           )}
         >
           {display}

@@ -34,8 +34,8 @@ export function PostTypeFilter({ current }: { current?: string }) {
         className={cn(
           "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all",
           !current
-            ? "border-primary/40 bg-primary/10 text-primary shadow-[0_0_12px_rgba(var(--color-primary)/0.15)]"
-            : "border-border bg-card/30 text-muted-foreground hover:border-primary/30 hover:bg-card/50 hover:text-foreground",
+            ? "border-primary bg-primary/10 text-primary"
+            : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground",
         )}
       >
         {ALL_LABEL}
