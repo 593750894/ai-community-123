@@ -30,9 +30,11 @@ export function MuteToggle({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const [errMsg, setErrMsg] = useState<string | null>(null);
 
   async function submit(hours: number) {
     setPending(true);
+    setErrMsg(null);
     try {
       const res = await fetch(`/api/conversations/${conversationId}/mute`, {
         method: "PUT",
@@ -43,7 +45,7 @@ export function MuteToggle({
         const json = (await res.json().catch(() => null)) as
           | { error?: { message?: string } }
           | null;
-        window.alert(json?.error?.message ?? `操作失败 (${res.status})`);
+        setErrMsg(json?.error?.message ?? `操作失败 (${res.status})`);
         return;
       }
       setOpen(false);
@@ -55,20 +57,23 @@ export function MuteToggle({
 
   if (isMuted) {
     return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => void submit(0)}
-        disabled={pending}
-        title="点击取消免打扰"
-      >
-        {pending ? (
-          <Loader2 className="size-3.5 animate-spin" />
-        ) : (
-          <BellOff className="size-3.5 text-amber-300" />
-        )}
-        免打扰 {mutedHours > 0 ? `(${mutedHours}h)` : ""}
-      </Button>
+      <div className="flex flex-col items-start gap-1">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => void submit(0)}
+          disabled={pending}
+          title="点击取消免打扰"
+        >
+          {pending ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <BellOff className="size-3.5 text-amber-300" />
+          )}
+          免打扰 {mutedHours > 0 ? `(${mutedHours}h)` : ""}
+        </Button>
+        {errMsg && <p className="text-sm text-destructive">{errMsg}</p>}
+      </div>
     );
   }
 
@@ -105,6 +110,7 @@ export function MuteToggle({
           ))}
         </div>
       )}
+      {errMsg && <p className="mt-1 text-sm text-destructive">{errMsg}</p>}
     </div>
   );
 }

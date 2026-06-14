@@ -147,7 +147,7 @@ export function ToolRatingForm({
               onClick={() => signedIn ? setStars(n) : gotoLogin()}
               onMouseEnter={() => setHoverStars(n)}
               aria-label={`${n} 星`}
-              className="rounded p-1 transition-transform hover:scale-110 disabled:cursor-not-allowed"
+              className="rounded p-1 transition-transform duration-200 hover:scale-110 disabled:cursor-not-allowed"
             >
               <Star
                 className={cn(

@@ -74,7 +74,7 @@ export function PayoutAccountForm({ initial }: PayoutAccountFormProps) {
     >
       <div className="grid gap-3 sm:grid-cols-3">
         <label className="block space-y-1">
-          <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+          <span className="label-section-strong">
             收款渠道
           </span>
           <select
@@ -90,7 +90,7 @@ export function PayoutAccountForm({ initial }: PayoutAccountFormProps) {
           </select>
         </label>
         <label className="block space-y-1">
-          <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+          <span className="label-section-strong">
             收款账号
           </span>
           <input
@@ -110,7 +110,7 @@ export function PayoutAccountForm({ initial }: PayoutAccountFormProps) {
           />
         </label>
         <label className="block space-y-1">
-          <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+          <span className="label-section-strong">
             收款人姓名
           </span>
           <input

@@ -35,7 +35,7 @@ export default async function PricingPage() {
       <PageHeader
         eyebrow="会员计划"
         title="解锁更多 AI 视频创作能力"
-        description="选择适合你的订阅档位 — 高级模型额度、商业授权、社区荣誉与早期功能。"
+        description="为不同创作节奏准备的订阅方案，覆盖模型额度、商业授权与社区荣誉等核心权益。"
       />
       <div className="space-y-6 px-4 py-6 sm:px-8 sm:py-8">
         {hasPlans ? (
