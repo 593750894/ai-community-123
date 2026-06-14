@@ -84,7 +84,7 @@ export function WorkCard({
         : 0;
   const bookmarkCount = work.bookmarkCount ?? 0;
   return (
-    <div className="group surface-glass relative overflow-hidden border-border transition-all hover:-translate-y-0.5 hover:border-primary/50">
+    <div className="group surface-card relative overflow-hidden border border-border transition-all hover:-translate-y-0.5 hover:border-primary/50">
       {/* 卡片视觉与普通帖子区分：双层光晕 + 顶部强渐变 + 角标 */}
       <Link
         href={`/showcase/${work.id}`}

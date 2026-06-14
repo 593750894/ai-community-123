@@ -375,9 +375,9 @@
   }
 }
 
-/* surface-glass → V2 card-default shim. The V1 "milled bezel inset highlight"
- * is retired; surfaces now wear paper-halo elevation. Existing callers keep
- * working until §11 migration replaces them. */
+/* @deprecated surface-glass — V1 shim consolidated into surface-card (stage
+ * 13.7). Behaviourally identical. Slated for deletion in step 7; left for one
+ * release cycle so any out-of-tree caller (storybook, MDX) doesn't break. */
 @utility surface-glass {
   background-color: var(--card);
   border-radius: var(--radius);

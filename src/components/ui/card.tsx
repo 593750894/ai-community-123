@@ -2,12 +2,10 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-type CardVariant = "default" | "glass" | "accent" | "dashed" | "plain";
+type CardVariant = "default" | "accent" | "dashed" | "plain";
 
 const VARIANT_CLASS: Record<CardVariant, string> = {
   default: "surface-card surface-card-hover",
-  glass:
-    "surface-glass transition-all hover:-translate-y-0.5 hover:border-primary/50",
   accent: "surface-glass-accent",
   dashed: "surface-dashed",
   plain: "rounded-xl bg-muted/50 dark:bg-card/30",
