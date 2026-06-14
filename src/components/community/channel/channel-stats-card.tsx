@@ -37,7 +37,7 @@ export function ChannelStatsCard({ stats }: { stats: ChannelStats }) {
             className="group rounded-lg border border-border/25 bg-muted/20 px-3 py-3 text-center transition-all hover:border-border/40 hover:bg-muted/40"
           >
             <div className="flex items-center justify-center gap-1.5">
-              <s.icon className={`size-3.5 ${s.color} transition-transform group-hover:scale-110`} />
+              <s.icon className={`size-3.5 ${s.color} transition-transform duration-200 group-hover:scale-110`} />
               <span className="text-lg font-bold tabular-nums text-foreground">
                 {s.value}
               </span>

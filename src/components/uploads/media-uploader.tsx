@@ -189,7 +189,7 @@ export function MediaUploader({
           onDragLeave={() => setDragOver(false)}
           onDrop={onDrop}
           className={cn(
-            "group relative flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border/60 bg-card/30 px-4 py-6 text-center transition-colors",
+            "group relative flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border/60 bg-border/40 dark:bg-card/30 px-4 py-6 text-center transition-colors",
             dragOver && "border-primary/50 bg-primary/5",
             status === "error" && "border-destructive/50 bg-destructive/5",
           )}

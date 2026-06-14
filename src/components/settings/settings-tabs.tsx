@@ -14,7 +14,7 @@ const TABS = [
 export function SettingsTabs() {
   const pathname = usePathname();
   return (
-    <div className="border-b border-border/60 bg-card/30 px-6 sm:px-8">
+    <div className="border-b border-border/60 bg-border/40 dark:bg-card/30 px-6 sm:px-8">
       <nav className="flex flex-wrap gap-1 py-2" aria-label="设置子导航">
         {TABS.map((t) => {
           const active = pathname === t.href;

@@ -17,19 +17,19 @@ export function ChannelBeginnerGuide({ channelId }: { channelId: string }) {
       icon: BookOpen,
       label: "社区公约",
       href: "/community/rules",
-      color: "text-cyan-400",
+      color: "text-cyan-700 dark:text-cyan-400",
     },
     {
       icon: MessageCircle,
       label: "发帖指南",
       href: `/create-post?channelId=${channelId}`,
-      color: "text-emerald-400",
+      color: "text-emerald-700 dark:text-emerald-400",
     },
     {
       icon: Compass,
       label: "浏览全部频道",
       href: "/community",
-      color: "text-violet-400",
+      color: "text-violet-600 dark:text-violet-400",
     },
   ];
 
@@ -52,7 +52,7 @@ export function ChannelBeginnerGuide({ channelId }: { channelId: string }) {
               href={g.href}
               className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-muted/40"
             >
-              <g.icon className={`size-4 ${g.color} transition-transform group-hover:scale-110`} />
+              <g.icon className={`size-4 ${g.color} transition-transform duration-200 group-hover:scale-110`} />
               <span className="flex-1 text-sm text-foreground/90 transition-colors group-hover:text-foreground">
                 {g.label}
               </span>

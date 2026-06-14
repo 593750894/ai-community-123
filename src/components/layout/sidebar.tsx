@@ -84,7 +84,7 @@ export function Sidebar({
       : pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-60 shrink-0 overflow-y-auto border-r border-border/60 bg-background/40 px-3 py-4 lg:block">
+    <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-60 shrink-0 overflow-y-auto border-r border-border/60 bg-muted/40 dark:bg-background/40 px-3 py-4 lg:block">
       <ul className="space-y-0.5">
         {TOP_LINKS.map((item) => (
           <li key={item.href}>
@@ -224,7 +224,7 @@ function TagLink({ tag }: { tag: string }) {
 
 function SectionTitle({ children }: { children: string }) {
   return (
-    <div className="mb-1.5 px-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
+    <div className="label-section mb-1.5 px-3">
       {children}
     </div>
   );

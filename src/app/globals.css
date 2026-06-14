@@ -8,7 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-system-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -50,7 +50,7 @@
 
 :root {
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-  --font-geist-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-system-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -136,6 +136,20 @@
     background-image:
       radial-gradient(
         ellipse 80% 50% at 50% -20%,
+        oklch(0.7 0.16 220 / 0.06),
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 60% 50% at 80% 110%,
+        oklch(0.6 0.18 280 / 0.04),
+        transparent 70%
+      );
+    background-attachment: fixed;
+  }
+  .dark body {
+    background-image:
+      radial-gradient(
+        ellipse 80% 50% at 50% -20%,
         oklch(0.7 0.16 220 / 0.18),
         transparent 70%
       ),
@@ -144,7 +158,6 @@
         oklch(0.6 0.18 280 / 0.12),
         transparent 70%
       );
-    background-attachment: fixed;
   }
   html {
     @apply font-sans;
@@ -157,46 +170,77 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: oklch(1 0 0 / 0.06);
+    background: oklch(0 0 0 / 0.12);
     border-radius: 8px;
   }
   ::-webkit-scrollbar-thumb:hover {
+    background: oklch(0 0 0 / 0.22);
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: oklch(1 0 0 / 0.06);
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
     background: oklch(1 0 0 / 0.12);
   }
 }
 
 @utility bg-grid {
   background-image:
+    linear-gradient(to right, oklch(0 0 0 / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0 0 0 / 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.dark .bg-grid {
+  background-image:
     linear-gradient(to right, oklch(1 0 0 / 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, oklch(1 0 0 / 0.04) 1px, transparent 1px);
-  background-size: 32px 32px;
 }
 
 /* ─────────────────────────── 统一组件样式工具类 ─────────────────────────── */
 
 /* 卡片 · 玻璃质感面板 */
 @utility surface-card {
-  @apply rounded-xl border border-border/60 bg-card/40 transition-colors;
+  @apply rounded-xl border border-border/60 bg-card transition-colors;
+}
+.dark .surface-card {
+  @apply bg-card/40;
 }
 @utility surface-card-hover {
-  @apply hover:border-primary/40 hover:bg-card/70;
+  @apply hover:border-primary/40 hover:bg-muted/40;
+}
+.dark .surface-card-hover {
+  @apply hover:bg-card/70;
 }
 @utility surface-glass {
-  @apply rounded-2xl border border-border/60 bg-gradient-to-br from-card/70 via-card/40 to-card/20 shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset];
+  @apply rounded-2xl border border-border/60 bg-gradient-to-br from-card/80 via-card/45 to-card/15 shadow-[0_1px_0_0_rgba(0,0,0,0.07)_inset];
+}
+.dark .surface-glass {
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset;
 }
 @utility surface-glass-accent {
   @apply rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card/40 to-card/20;
 }
+@utility label-section {
+  @apply text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70;
+}
+@utility label-section-strong {
+  @apply text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/80;
+}
 @utility surface-dashed {
-  @apply rounded-2xl border border-dashed border-border/60 bg-card/30;
+  @apply rounded-2xl border border-dashed border-border/60 bg-border/40 dark:bg-card/30;
 }
 
 /* 文字渐变 */
 @utility text-gradient-brand {
-  background: linear-gradient(135deg, oklch(0.85 0.13 220), oklch(0.78 0.16 295));
+  background: linear-gradient(135deg, oklch(0.5 0.16 220), oklch(0.48 0.22 295));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+.dark .text-gradient-brand {
+  background: linear-gradient(135deg, oklch(0.85 0.13 220), oklch(0.78 0.16 295));
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 /* 焦点环 · 输入框统一 */
@@ -262,10 +306,19 @@
 @utility animate-skeleton {
   background: linear-gradient(
     90deg,
+    oklch(0 0 0 / 0.06) 0%,
+    oklch(0 0 0 / 0.12) 50%,
+    oklch(0 0 0 / 0.06) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+.dark .animate-skeleton {
+  background: linear-gradient(
+    90deg,
     oklch(1 0 0 / 0.04) 0%,
     oklch(1 0 0 / 0.1) 50%,
     oklch(1 0 0 / 0.04) 100%
   );
   background-size: 200% 100%;
-  animation: skeleton-shimmer 1.4s ease-in-out infinite;
 }

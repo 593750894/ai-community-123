@@ -2,10 +2,10 @@ import Link from "next/link";
 import { Hash, PenLine, Lightbulb, Wrench, HelpCircle, Rocket } from "lucide-react";
 
 const QUICK_TOPICS = [
-  { label: "发起工作流讨论", icon: Lightbulb, color: "text-amber-400" },
-  { label: "发布工具体验", icon: Wrench, color: "text-cyan-400" },
-  { label: "提问求助", icon: HelpCircle, color: "text-blue-400" },
-  { label: "分享项目进展", icon: Rocket, color: "text-emerald-400" },
+  { label: "发起工作流讨论", icon: Lightbulb, color: "text-amber-600 dark:text-amber-400" },
+  { label: "发布工具体验", icon: Wrench, color: "text-cyan-700 dark:text-cyan-400" },
+  { label: "提问求助", icon: HelpCircle, color: "text-blue-600 dark:text-blue-400" },
+  { label: "分享项目进展", icon: Rocket, color: "text-emerald-700 dark:text-emerald-400" },
 ] as const;
 
 function publishHref(signedIn: boolean) {

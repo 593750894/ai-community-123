@@ -38,7 +38,7 @@ export function RightPanel({
   signedIn: boolean;
 }) {
   return (
-    <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-80 shrink-0 overflow-y-auto border-l border-border/60 bg-background/40 px-4 py-5 xl:block">
+    <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-80 shrink-0 overflow-y-auto border-l border-border/60 bg-muted/40 dark:bg-background/40 px-4 py-5 xl:block">
       <Section icon={Flame} title="热门话题">
         {popularTags.length === 0 ? (
           <EmptyHint>暂无热门话题</EmptyHint>
@@ -99,7 +99,7 @@ export function RightPanel({
                         </span>
                       )}
                       {idx === 0 && (
-                        <Trophy className="absolute -right-1 -top-1 size-3.5 text-amber-400" />
+                        <Trophy className="absolute -right-1 -top-1 size-3.5 text-amber-600 dark:text-amber-400" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">

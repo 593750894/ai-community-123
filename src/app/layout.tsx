@@ -5,6 +5,10 @@ import { Navbar } from "@/components/layout/navbar";
 import { RightPanel } from "@/components/layout/right-panel";
 import { Sidebar } from "@/components/layout/sidebar";
 import { RealtimeProvider } from "@/components/providers/realtime-provider";
+import {
+  ThemeProvider,
+  themeInitScript,
+} from "@/components/providers/theme-provider";
 import { getCurrentUser } from "@/lib/auth/session";
 import {
   getActiveCreators,
@@ -68,26 +72,43 @@ export default async function RootLayout({
   return (
     <html
       lang="zh-CN"
-      className="dark h-full antialiased"
+      className="h-full antialiased"
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="flex min-h-full flex-col">
-        <RealtimeProvider enabled={!!user}>
-          <Navbar user={navbarUser} />
-          <div className="mx-auto flex w-full max-w-[1600px] flex-1">
-            <Sidebar hotChannels={sidebarChannels} popularTags={popularTags} />
-            <main className="flex min-w-0 flex-1 flex-col pb-16 lg:pb-0">
-              {children}
-            </main>
-            <RightPanel
-              popularTags={popularTags}
-              activeCreators={rightPanelCreators}
-              viewerId={user?.id ?? null}
-              signedIn={!!user}
-            />
-          </div>
-          <MobileBottomNav />
-        </RealtimeProvider>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground focus:shadow-lg"
+        >
+          跳到主要内容
+        </a>
+        <ThemeProvider defaultTheme="dark">
+          <RealtimeProvider enabled={!!user}>
+            <Navbar user={navbarUser} />
+            <div className="mx-auto flex w-full max-w-[1600px] flex-1">
+              <Sidebar
+                hotChannels={sidebarChannels}
+                popularTags={popularTags}
+              />
+              <main
+                id="main-content"
+                className="flex min-w-0 flex-1 flex-col pb-16 lg:pb-0"
+              >
+                {children}
+              </main>
+              <RightPanel
+                popularTags={popularTags}
+                activeCreators={rightPanelCreators}
+                viewerId={user?.id ?? null}
+                signedIn={!!user}
+              />
+            </div>
+            <MobileBottomNav />
+          </RealtimeProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

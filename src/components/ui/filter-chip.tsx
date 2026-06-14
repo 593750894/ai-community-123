@@ -37,7 +37,7 @@ export function FilterChip({
         <span
           className={cn(
             "rounded-full px-1.5 text-[10px] tabular-nums",
-            active ? "bg-white/10" : "bg-muted/60",
+            active ? "bg-foreground/15" : "bg-muted/60",
           )}
         >
           {count}

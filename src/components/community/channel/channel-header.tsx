@@ -186,7 +186,7 @@ export function ChannelHeader({
         {/* Stats bar */}
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-border/30 bg-card/30 px-4 py-2.5 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
-            <MessageSquare className="size-3.5 text-cyan-400" />
+            <MessageSquare className="size-3.5 text-cyan-700 dark:text-cyan-400" />
             <span className="tabular-nums font-semibold text-foreground/90">
               {stats.postCount}
             </span>
@@ -194,7 +194,7 @@ export function ChannelHeader({
           </div>
           <div className="h-3 w-px bg-border/60" />
           <div className="flex items-center gap-1.5">
-            <Users className="size-3.5 text-emerald-400" />
+            <Users className="size-3.5 text-emerald-700 dark:text-emerald-400" />
             <span className="tabular-nums font-semibold text-foreground/90">
               {stats.creatorCount}
             </span>
@@ -202,7 +202,7 @@ export function ChannelHeader({
           </div>
           <div className="h-3 w-px bg-border/60" />
           <div className="flex items-center gap-1.5">
-            <UsersRound className="size-3.5 text-sky-400" />
+            <UsersRound className="size-3.5 text-sky-700 dark:text-sky-400" />
             <span className="tabular-nums font-semibold text-foreground/90">
               {channel.memberCount}
             </span>
@@ -212,8 +212,8 @@ export function ChannelHeader({
             <>
               <div className="h-3 w-px bg-border/60" />
               <div className="flex items-center gap-1.5">
-                <CalendarPlus className="size-3.5 text-amber-400" />
-                <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
+                <CalendarPlus className="size-3.5 text-amber-600 dark:text-amber-400" />
+                <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
                   今日 +{stats.todayPostCount}
                 </span>
               </div>

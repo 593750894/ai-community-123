@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { NavbarSearch } from "@/components/layout/navbar-search";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { logoutAction } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
@@ -105,6 +106,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
             <MessageSquare className="size-4" />
           </Button>
           <NotificationBell isLoggedIn={!!user} />
+          <ThemeToggle />
           <Button
             variant="outline"
             size="sm"
@@ -202,19 +204,22 @@ function UserMenu({ user }: { user: NavbarUser }) {
       {open && (
         <div
           role="menu"
+          aria-orientation="vertical"
           className="absolute right-0 top-9 z-50 min-w-[180px] overflow-hidden rounded-lg border border-border/60 bg-popover shadow-lg"
         >
           <Link
             href={`/profile/${user.id}`}
+            role="menuitem"
             className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted"
             onClick={() => setOpen(false)}
           >
             <UserIcon className="size-3.5" />
             我的主页
           </Link>
-          <form action={logoutAction}>
+          <form action={logoutAction} role="none">
             <button
               type="submit"
+              role="menuitem"
               className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
             >
               <LogOut className="size-3.5" />

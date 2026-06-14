@@ -10,7 +10,7 @@ const VARIANT_CLASS: Record<CardVariant, string> = {
     "surface-glass transition-all hover:-translate-y-0.5 hover:border-primary/50",
   accent: "surface-glass-accent",
   dashed: "surface-dashed",
-  plain: "rounded-xl bg-card/30",
+  plain: "rounded-xl bg-muted/50 dark:bg-card/30",
 };
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {

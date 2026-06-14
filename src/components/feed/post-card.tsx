@@ -15,8 +15,8 @@ import {
 } from "@/components/publish/org-attribution-badge";
 
 const ROLE_META: Record<string, { label: string; icon: typeof Shield; className: string } | undefined> = {
-  MOD: { label: "版主", icon: Shield, className: "text-blue-400" },
-  ADMIN: { label: "管理员", icon: ShieldCheck, className: "text-amber-400" },
+  MOD: { label: "版主", icon: Shield, className: "text-blue-600 dark:text-blue-400" },
+  ADMIN: { label: "管理员", icon: ShieldCheck, className: "text-amber-600 dark:text-amber-400" },
 };
 
 export type PostCardData = {

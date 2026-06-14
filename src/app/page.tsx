@@ -93,28 +93,28 @@ const QUICK_ENTRIES = [
     icon: Wand2,
     title: "发布我的新作品",
     desc: "上传成片 + 简介 + 使用工具",
-    tone: "from-cyan-500/20 to-blue-500/10 border-cyan-500/30",
+    tone: "from-cyan-500/30 to-blue-500/15 border-cyan-500/50 dark:from-cyan-500/20 dark:to-blue-500/10 dark:border-cyan-500/30",
   },
   {
     href: "/community",
     icon: Compass,
     title: "进入社区",
     desc: "教程 / 工作流 / 行业讨论",
-    tone: "from-fuchsia-500/20 to-purple-500/10 border-fuchsia-500/30",
+    tone: "from-fuchsia-500/30 to-purple-500/15 border-fuchsia-500/50 dark:from-fuchsia-500/20 dark:to-purple-500/10 dark:border-fuchsia-500/30",
   },
   {
     href: "/collaboration",
     icon: Handshake,
     title: "找伙伴 / 接项目",
     desc: "导演、编剧、合成师、配音正在招募",
-    tone: "from-amber-500/20 to-rose-500/10 border-amber-500/30",
+    tone: "from-amber-500/30 to-rose-500/15 border-amber-500/50 dark:from-amber-500/20 dark:to-rose-500/10 dark:border-amber-500/30",
   },
   {
     href: "/tools",
     icon: Wrench,
     title: "工具库导航",
     desc: "Seedance · Kling · ComfyUI · Suno",
-    tone: "from-emerald-500/20 to-teal-500/10 border-emerald-500/30",
+    tone: "from-emerald-500/30 to-teal-500/15 border-emerald-500/50 dark:from-emerald-500/20 dark:to-teal-500/10 dark:border-emerald-500/30",
   },
 ];
 

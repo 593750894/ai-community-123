@@ -265,7 +265,7 @@ function RatingSummaryCard({
     <div className="surface-card p-4">
       <div className="flex items-center gap-4">
         <div className="flex flex-col items-center justify-center">
-          <div className="text-3xl font-semibold tabular-nums text-amber-300">
+          <div className="text-3xl font-semibold tabular-nums text-amber-600 dark:text-amber-300">
             {summary.avgRating != null ? summary.avgRating.toFixed(1) : "—"}
           </div>
           <StarRow
@@ -287,7 +287,7 @@ function RatingSummaryCard({
                 </span>
                 <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
                   <div
-                    className="absolute inset-y-0 left-0 bg-amber-300/80"
+                    className="absolute inset-y-0 left-0 bg-amber-500/80 dark:bg-amber-300/80"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -319,7 +319,7 @@ function StarRow({
           className={cn(
             px,
             n <= stars
-              ? "fill-amber-300 text-amber-300"
+              ? "fill-amber-500 text-amber-500 dark:fill-amber-300 dark:text-amber-300"
               : "text-muted-foreground/30",
           )}
         />

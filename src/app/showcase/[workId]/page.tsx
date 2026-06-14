@@ -208,7 +208,7 @@ export default async function WorkDetailPage({
               {/* 简介 */}
               {work.description && (
                 <div className="space-y-1.5">
-                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
+                  <div className="label-section-strong">
                     简介
                   </div>
                   <p className="whitespace-pre-wrap text-sm leading-7 text-foreground/95">
@@ -220,7 +220,7 @@ export default async function WorkDetailPage({
               {/* 使用工具 */}
               {work.tools.length > 0 && (
                 <div className="space-y-1.5">
-                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
+                  <div className="label-section-strong">
                     使用工具
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -240,10 +240,10 @@ export default async function WorkDetailPage({
               {/* prompt（可选） */}
               {work.prompt && (
                 <div className="space-y-1.5">
-                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
+                  <div className="label-section-strong">
                     Prompt
                   </div>
-                  <div className="rounded-lg border border-border/60 bg-background/40 px-3 py-2 font-mono text-[11px] leading-relaxed text-foreground/85">
+                  <div className="rounded-lg border border-border/60 bg-muted/60 dark:bg-background/40 px-3 py-2 font-mono text-[11px] leading-relaxed text-foreground/85">
                     {work.prompt}
                   </div>
                 </div>
@@ -309,7 +309,7 @@ export default async function WorkDetailPage({
         <aside className="space-y-4">
           {/* 作品分类卡 */}
           <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
-            <div className="mb-2 text-[11px] uppercase tracking-wide text-muted-foreground/80">
+            <div className="label-section-strong mb-2">
               作品类型
             </div>
             <div
@@ -334,7 +334,7 @@ export default async function WorkDetailPage({
 
           {/* 作者卡 */}
           <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
-            <div className="mb-3 text-[11px] uppercase tracking-wide text-muted-foreground/80">
+            <div className="label-section-strong mb-3">
               作者
             </div>
             <div className="flex items-center gap-3">
@@ -385,7 +385,7 @@ export default async function WorkDetailPage({
             </Link>
             {work.organization && (
               <div className="mt-3 border-t border-border/40 pt-3">
-                <p className="mb-1.5 text-[11px] uppercase tracking-wide text-muted-foreground/80">
+                <p className="label-section-strong mb-1.5">
                   企业发布
                 </p>
                 <OrgAttributionBadge org={work.organization} size="sm" />
@@ -395,7 +395,7 @@ export default async function WorkDetailPage({
 
           {/* 互动数据 */}
           <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
-            <div className="mb-2 text-[11px] uppercase tracking-wide text-muted-foreground/80">
+            <div className="label-section-strong mb-2">
               数据
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">

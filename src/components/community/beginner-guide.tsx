@@ -19,25 +19,25 @@ const GUIDES: Guide[] = [
     icon: BookOpen,
     label: "社区公约",
     href: "/community/rules",
-    color: "text-cyan-400",
+    color: "text-cyan-700 dark:text-cyan-400",
   },
   {
     icon: Compass,
     label: "频道导航",
     href: "/community",
-    color: "text-violet-400",
+    color: "text-violet-600 dark:text-violet-400",
   },
   {
     icon: MessageCircle,
     label: "发帖指南",
     href: "/create-post",
-    color: "text-emerald-400",
+    color: "text-emerald-700 dark:text-emerald-400",
   },
   {
     icon: Sparkles,
     label: "创作者计划",
     href: "/community/creator-program",
-    color: "text-amber-400",
+    color: "text-amber-600 dark:text-amber-400",
   },
 ];
 

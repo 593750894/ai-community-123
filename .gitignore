@@ -41,6 +41,10 @@ screenshot-*.png
 # Claude Code runtime locks
 /.claude/
 
+# taste-skill (npx skills add) — per-developer tooling, not source
+/.agents/
+/skills-lock.json
+
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example

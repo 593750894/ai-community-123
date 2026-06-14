@@ -39,7 +39,7 @@ export function HotChannelList({
     <section className="surface-card p-4">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/90">
-          <Flame className="size-3.5 text-orange-400" />
+          <Flame className="size-3.5 text-orange-600 dark:text-orange-400" />
           热门频道
         </div>
         <Link

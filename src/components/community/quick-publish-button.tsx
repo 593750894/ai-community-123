@@ -7,9 +7,9 @@ import { Plus, X, Sparkles, FileVideo, Handshake } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ACTIONS = [
-  { href: "/create-post", icon: Sparkles, label: "发帖", color: "text-blue-400" },
-  { href: "/showcase/upload", icon: FileVideo, label: "发作品", color: "text-cyan-400" },
-  { href: "/collaboration/new", icon: Handshake, label: "发合作", color: "text-emerald-400" },
+  { href: "/create-post", icon: Sparkles, label: "发帖", color: "text-blue-600 dark:text-blue-400" },
+  { href: "/showcase/upload", icon: FileVideo, label: "发作品", color: "text-cyan-700 dark:text-cyan-400" },
+  { href: "/collaboration/new", icon: Handshake, label: "发合作", color: "text-emerald-700 dark:text-emerald-400" },
 ] as const;
 
 export function QuickPublishButton() {
