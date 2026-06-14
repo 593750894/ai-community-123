@@ -323,7 +323,7 @@ export function DialogContent({
       aria-describedby={ariaDescribedBy}
       tabIndex={-1}
       className={cn(
-        "relative flex w-full flex-col rounded-xl border border-border bg-card text-card-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] outline-none",
+        "relative flex w-full flex-col rounded-xl border border-border bg-card text-card-foreground shadow-paper-modal outline-none",
         "max-h-[90dvh] overflow-hidden",
         DIALOG_SIZES[size],
         className,
