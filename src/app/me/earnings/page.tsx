@@ -5,6 +5,11 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { MoneyText } from "@/components/ui/money-text";
+import {
+  PillTag,
+  pillTagTintClass,
+  type PillTagTint,
+} from "@/components/ui/pill-tag";
 import { PayoutAccountForm } from "@/components/me/payout-account-form";
 import { RequestPayoutButton } from "@/components/me/request-payout-button";
 import { requireUser } from "@/lib/auth/guard";
@@ -25,11 +30,12 @@ export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 20;
 
-const STATUS_TONE: Record<PayoutStatusValue, string> = {
-  PENDING: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-  AVAILABLE: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-  PAID: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
-  CANCELED: "border-border bg-muted/30 text-muted-foreground",
+// PayoutStatus → PillTag tint (V2 7-tint vocabulary).
+const STATUS_TINT: Record<PayoutStatusValue, PillTagTint> = {
+  PENDING: "amber",
+  AVAILABLE: "emerald",
+  PAID: "cyan",
+  CANCELED: "slate",
 };
 
 function parseStatus(raw?: string): PayoutStatusValue | undefined {
@@ -60,33 +66,39 @@ export default async function MyEarningsPage({
     summary.platformFeeBps % 100 === 0 ? 0 : 1,
   );
 
-  const stats = [
+  const stats: Array<{
+    label: string;
+    valueCents: number;
+    icon: typeof Coins;
+    tint: PillTagTint;
+    hint: string;
+  }> = [
     {
       label: "累计净收益",
       valueCents: summary.totalNetCents,
       icon: Coins,
-      tone: "text-emerald-300",
+      tint: "emerald",
       hint: `不含已退款 / 取消订单 · 平台抽成 ${feeDisplay}%`,
     },
     {
       label: "冷藏中",
       valueCents: summary.byStatus.PENDING.netCents,
       icon: Hourglass,
-      tone: "text-amber-300",
+      tint: "amber",
       hint: `${summary.byStatus.PENDING.count} 笔 · 付款后 ${summary.payoutHoldDays} 天可申请`,
     },
     {
       label: "可申请提现",
       valueCents: summary.byStatus.AVAILABLE.netCents,
       icon: Banknote,
-      tone: "text-cyan-300",
+      tint: "cyan",
       hint: `${summary.byStatus.AVAILABLE.count} 笔 · 含已申请 ${formatPrice(summary.pendingRequestNetCents, currency)}`,
     },
     {
       label: "已结算",
       valueCents: summary.byStatus.PAID.netCents,
       icon: ShieldCheck,
-      tone: "text-sky-300",
+      tint: "blue",
       hint: `${summary.byStatus.PAID.count} 笔 · admin 已完成线下打款`,
     },
   ];
@@ -119,7 +131,7 @@ export default async function MyEarningsPage({
                 </div>
               </div>
               <span
-                className={`flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 ${s.tone}`}
+                className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${pillTagTintClass(s.tint)}`}
               >
                 <s.icon className="size-4" />
               </span>
@@ -258,16 +270,11 @@ export default async function MyEarningsPage({
                         />
                       </td>
                       <td className="px-4 py-3 text-xs">
-                        <span
-                          className={cn(
-                            "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                            STATUS_TONE[p.status],
-                          )}
-                        >
+                        <PillTag tint={STATUS_TINT[p.status]} icon={null} size="sm">
                           {PAYOUT_STATUS_LABEL[p.status]}
-                        </span>
+                        </PillTag>
                         {p.status === "AVAILABLE" && p.requestedAt && (
-                          <div className="mt-1 text-[10px] text-amber-300">
+                          <div className="mt-1 text-[10px] text-accent-amber">
                             已申请 {formatRelativeTime(p.requestedAt)}
                           </div>
                         )}

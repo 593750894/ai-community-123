@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { PillTag, type PillTagTint } from "@/components/ui/pill-tag";
 import { listReports } from "@/lib/reports/queries";
 import {
   REPORT_REASON_LABEL,
@@ -22,11 +23,11 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const STATUS_TONE: Record<ReportStatusValue, string> = {
-  PENDING: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-  REVIEWING: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
-  RESOLVED: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-  DISMISSED: "border-border bg-muted/30 text-muted-foreground",
+const STATUS_TINT: Record<ReportStatusValue, PillTagTint> = {
+  PENDING: "amber",
+  REVIEWING: "cyan",
+  RESOLVED: "emerald",
+  DISMISSED: "slate",
 };
 
 const PAGE_SIZE = 20;
@@ -208,14 +209,9 @@ export default async function AdminReportsPage({
                       )}
                     </td>
                     <td className="px-4 py-3 text-xs">
-                      <span
-                        className={cn(
-                          "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                          STATUS_TONE[r.status],
-                        )}
-                      >
+                      <PillTag tint={STATUS_TINT[r.status]} icon={null} size="sm">
                         {REPORT_STATUS_LABEL[r.status]}
-                      </span>
+                      </PillTag>
                       {r.resolvedBy && (
                         <div className="mt-1 text-[10px] text-muted-foreground">
                           处理：{r.resolvedBy.name}

@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { MoneyText } from "@/components/ui/money-text";
+import { PillTag, type PillTagTint } from "@/components/ui/pill-tag";
 import { requireUser } from "@/lib/auth/guard";
 import { listMyOrders } from "@/lib/commerce/order-queries";
 import {
@@ -29,12 +30,12 @@ function parseStatus(raw?: string): OrderStatusValue | undefined {
     : undefined;
 }
 
-const STATUS_TONE: Record<OrderStatusValue, string> = {
-  PENDING: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-  PAID: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-  REFUNDED: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
-  CANCELED: "border-border bg-muted/30 text-muted-foreground",
-  FAILED: "border-rose-500/40 bg-rose-500/10 text-rose-300",
+const STATUS_TINT: Record<OrderStatusValue, PillTagTint> = {
+  PENDING: "amber",
+  PAID: "emerald",
+  REFUNDED: "cyan",
+  CANCELED: "slate",
+  FAILED: "rose",
 };
 
 const PAGE_SIZE = 20;
@@ -167,16 +168,11 @@ export default async function MyOrdersPage({ searchParams }: PageProps) {
                           : "—"}
                       </td>
                       <td className="px-4 py-3 text-xs">
-                        <span
-                          className={cn(
-                            "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                            STATUS_TONE[o.status as OrderStatusValue],
-                          )}
-                        >
+                        <PillTag tint={STATUS_TINT[o.status as OrderStatusValue]} icon={null} size="sm">
                           {ORDER_STATUS_LABEL[o.status as OrderStatusValue]}
-                        </span>
+                        </PillTag>
                         {hasPartialRefund && (
-                          <div className="mt-1 text-[10px] text-cyan-300">
+                          <div className="mt-1 text-[10px] text-tag-cyan-fg">
                             部分退款
                           </div>
                         )}

@@ -4,6 +4,11 @@ import { Banknote, Coins, Hourglass, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { MoneyText } from "@/components/ui/money-text";
+import {
+  PillTag,
+  pillTagTintClass,
+  type PillTagTint,
+} from "@/components/ui/pill-tag";
 import { MarkPayoutPaidDialog } from "@/components/admin/mark-payout-paid-dialog";
 import {
   getAdminPayoutOverview,
@@ -22,11 +27,13 @@ export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 25;
 
-const STATUS_TONE: Record<PayoutStatusValue, string> = {
-  PENDING: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-  AVAILABLE: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-  PAID: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
-  CANCELED: "border-border bg-muted/30 text-muted-foreground",
+// PayoutStatus → PillTag tint (V2 7-tint vocabulary). Pair with
+// pillTagTintClass() when the surface needs the tinted bg/fg classes.
+const STATUS_TINT: Record<PayoutStatusValue, PillTagTint> = {
+  PENDING: "amber",
+  AVAILABLE: "emerald",
+  PAID: "cyan",
+  CANCELED: "slate",
 };
 
 function parseStatus(raw?: string): PayoutStatusValue | undefined {
@@ -67,7 +74,13 @@ export default async function AdminPayoutsPage({
   const currency = items[0]?.currency ?? "CNY";
 
   const currencyPrefix = currency === "CNY" ? "¥" : `${currency} `;
-  const stats = [
+  const stats: Array<{
+    label: string;
+    value: React.ReactNode;
+    icon: typeof Hourglass;
+    tint: PillTagTint;
+    href: string;
+  }> = [
     {
       label: "待申请提现（等冷藏期结束）",
       value: (
@@ -77,7 +90,7 @@ export default async function AdminPayoutsPage({
         />
       ),
       icon: Hourglass,
-      tone: "text-amber-300",
+      tint: "amber",
       href: "/admin/payouts?status=PENDING",
     },
     {
@@ -89,7 +102,7 @@ export default async function AdminPayoutsPage({
         />
       ),
       icon: Banknote,
-      tone: "text-emerald-300",
+      tint: "emerald",
       href: "/admin/payouts?status=AVAILABLE",
     },
     {
@@ -101,7 +114,7 @@ export default async function AdminPayoutsPage({
         />
       ),
       icon: Coins,
-      tone: "text-rose-300",
+      tint: "rose",
       href: "/admin/payouts?pendingRequest=1",
     },
     {
@@ -113,7 +126,7 @@ export default async function AdminPayoutsPage({
         />
       ),
       icon: ShieldCheck,
-      tone: "text-cyan-300",
+      tint: "cyan",
       href: "/admin/payouts?status=PAID",
     },
   ];
@@ -143,7 +156,7 @@ export default async function AdminPayoutsPage({
                 </div>
               </div>
               <span
-                className={`flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 ${s.tone}`}
+                className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${pillTagTintClass(s.tint)}`}
               >
                 <s.icon className="size-4" />
               </span>
@@ -290,22 +303,17 @@ export default async function AdminPayoutsPage({
                         </div>
                       </div>
                     ) : (
-                      <span className="text-[10px] text-amber-300">
+                      <span className="text-[10px] text-accent-amber">
                         未绑定
                       </span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-xs">
-                    <span
-                      className={cn(
-                        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                        STATUS_TONE[p.status],
-                      )}
-                    >
+                    <PillTag tint={STATUS_TINT[p.status]} icon={null} size="sm">
                       {PAYOUT_STATUS_LABEL[p.status]}
-                    </span>
+                    </PillTag>
                     {p.status === "AVAILABLE" && p.requestedAt && (
-                      <div className="mt-1 text-[10px] text-amber-300">
+                      <div className="mt-1 text-[10px] text-accent-amber">
                         卖家已申请
                       </div>
                     )}

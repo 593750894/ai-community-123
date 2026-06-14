@@ -1,4 +1,3 @@
-import { CATEGORY_TONE } from "@/lib/category-tones";
 import type { PillTagTint } from "@/components/ui/pill-tag";
 
 // 与 Prisma `CollaborationCategory` / `CollaborationWorkMode` / `CollaborationLocation` /
@@ -25,8 +24,6 @@ export type CollabCategoryMeta = {
   value: CollabCategoryValue;
   label: string;
   desc: string;
-  /** @deprecated V1 tailwind classes — use `tint` with `<PillTag>` instead. */
-  tone: string;
   emoji: string;
   /** V2 PillTag tint (DESIGN.md §7 7-tint vocabulary). */
   tint: PillTagTint;
@@ -37,7 +34,6 @@ export const COLLAB_CATEGORY_META: Record<CollabCategoryValue, CollabCategoryMet
     value: "AI_VIDEO_TEAM",
     label: "AI 视频制作团队",
     desc: "完整成片团队：编剧 / 视觉 / 后期",
-    tone: CATEGORY_TONE.indigo,
     emoji: "🎬",
     tint: "blue",
   },
@@ -45,7 +41,6 @@ export const COLLAB_CATEGORY_META: Record<CollabCategoryValue, CollabCategoryMet
     value: "AI_COMIC_CREATOR",
     label: "AI 漫剧创作者",
     desc: "竖屏漫剧 · 分镜叙事节奏",
-    tone: CATEGORY_TONE.fuchsia,
     emoji: "📖",
     tint: "violet",
   },
@@ -53,7 +48,6 @@ export const COLLAB_CATEGORY_META: Record<CollabCategoryValue, CollabCategoryMet
     value: "AI_DRAMA_TEAM",
     label: "AI 短剧团队",
     desc: "竖屏微短剧 · 1-3 分钟一集",
-    tone: CATEGORY_TONE.rose,
     emoji: "🎭",
     tint: "rose",
   },
@@ -61,7 +55,6 @@ export const COLLAB_CATEGORY_META: Record<CollabCategoryValue, CollabCategoryMet
     value: "DIGITAL_HUMAN",
     label: "数字人制作",
     desc: "数字人形象 + 口播 + 复用模板",
-    tone: CATEGORY_TONE.emerald,
     emoji: "🧑‍💼",
     tint: "emerald",
   },
@@ -69,7 +62,6 @@ export const COLLAB_CATEGORY_META: Record<CollabCategoryValue, CollabCategoryMet
     value: "PROMPT_ENGINEER",
     label: "提示词工程师",
     desc: "Prompt 设计 / 调试 / 工作流",
-    tone: CATEGORY_TONE.sky,
     emoji: "✨",
     tint: "cyan",
   },
@@ -77,7 +69,6 @@ export const COLLAB_CATEGORY_META: Record<CollabCategoryValue, CollabCategoryMet
     value: "COMFYUI_WORKFLOW",
     label: "ComfyUI 工作流搭建",
     desc: "节点图开发 · 节点封装 · 量产",
-    tone: CATEGORY_TONE.cyan,
     emoji: "🧪",
     tint: "cyan",
   },
@@ -85,7 +76,6 @@ export const COLLAB_CATEGORY_META: Record<CollabCategoryValue, CollabCategoryMet
     value: "EDITOR",
     label: "剪辑师",
     desc: "剪辑 · 调色 · 转场 · 字幕",
-    tone: CATEGORY_TONE.amber,
     emoji: "🎞️",
     tint: "amber",
   },
@@ -93,7 +83,6 @@ export const COLLAB_CATEGORY_META: Record<CollabCategoryValue, CollabCategoryMet
     value: "COFOUNDER",
     label: "联合创始人",
     desc: "长期搭子 / 股权合伙",
-    tone: CATEGORY_TONE.violet,
     emoji: "🤝",
     tint: "violet",
   },
@@ -101,7 +90,6 @@ export const COLLAB_CATEGORY_META: Record<CollabCategoryValue, CollabCategoryMet
     value: "INVEST_BIZ",
     label: "投资 / 商务合作",
     desc: "融资 · 渠道 · 品牌共创",
-    tone: CATEGORY_TONE.yellowDeep,
     emoji: "💼",
     tint: "amber",
   },
@@ -109,7 +97,6 @@ export const COLLAB_CATEGORY_META: Record<CollabCategoryValue, CollabCategoryMet
     value: "OTHER",
     label: "其他合作",
     desc: "未归类的项目合作",
-    tone: CATEGORY_TONE.slate,
     emoji: "📌",
     tint: "slate",
   },
@@ -168,13 +155,6 @@ export const COLLAB_STATUS_LABEL: Record<CollabStatusValue, string> = {
   OPEN: "开放中",
   IN_PROGRESS: "已对接",
   CLOSED: "已关闭",
-};
-
-/** @deprecated V1 tailwind classes — use `COLLAB_STATUS_TINT` with `<PillTag>`. */
-export const COLLAB_STATUS_TONE: Record<CollabStatusValue, string> = {
-  OPEN: CATEGORY_TONE.emerald,
-  IN_PROGRESS: CATEGORY_TONE.amber,
-  CLOSED: CATEGORY_TONE.zinc,
 };
 
 export const COLLAB_STATUS_TINT: Record<CollabStatusValue, PillTagTint> = {

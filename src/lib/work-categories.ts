@@ -1,4 +1,3 @@
-import { CATEGORY_TONE } from "@/lib/category-tones";
 import type { PillTagTint } from "@/components/ui/pill-tag";
 
 // 与 Prisma `WorkCategory` enum 一一对应。
@@ -22,8 +21,6 @@ export type WorkCategoryMeta = {
   value: WorkCategoryValue;
   label: string;
   desc: string;
-  /** @deprecated V1 tailwind classes — use `tint` with `<PillTag>` instead. */
-  tone: string;
   /** V2 PillTag tint (DESIGN.md §7 7-tint vocabulary). */
   tint: PillTagTint;
 };
@@ -33,63 +30,54 @@ export const WORK_CATEGORY_META: Record<WorkCategoryValue, WorkCategoryMeta> = {
     value: "AI_COMIC",
     label: "AI 漫剧",
     desc: "漫画分镜叙事，节奏明快",
-    tone: CATEGORY_TONE.fuchsia,
     tint: "violet",
   },
   AI_DRAMA: {
     value: "AI_DRAMA",
     label: "AI 短剧",
     desc: "竖屏微短剧，1-3 分钟一集",
-    tone: CATEGORY_TONE.rose,
     tint: "rose",
   },
   AI_ANIMATION: {
     value: "AI_ANIMATION",
     label: "AI 动画",
     desc: "二次元 / 三维动画风格",
-    tone: CATEGORY_TONE.sky,
     tint: "blue",
   },
   DIGITAL_HUMAN: {
     value: "DIGITAL_HUMAN",
     label: "数字人视频",
     desc: "数字人口播 / 角色扮演",
-    tone: CATEGORY_TONE.emerald,
     tint: "emerald",
   },
   ECOMMERCE_AD: {
     value: "ECOMMERCE_AD",
     label: "电商广告视频",
     desc: "5-15 秒商品种草短视频",
-    tone: CATEGORY_TONE.amber,
     tint: "amber",
   },
   PRODUCT_SHOW: {
     value: "PRODUCT_SHOW",
     label: "产品展示视频",
     desc: "产品 360° / 功能演示",
-    tone: CATEGORY_TONE.stoneSoft,
     tint: "slate",
   },
   KNOWLEDGE: {
     value: "KNOWLEDGE",
     label: "知识讲解视频",
     desc: "科普 / 教程 / 知识可视化",
-    tone: CATEGORY_TONE.blue,
     tint: "blue",
   },
   STORY: {
     value: "STORY",
     label: "故事类视频",
     desc: "叙事短片，剧情驱动",
-    tone: CATEGORY_TONE.indigo,
     tint: "violet",
   },
   EXPERIMENT: {
     value: "EXPERIMENT",
     label: "实验短片",
     desc: "风格 / 工作流 / VFX 实验",
-    tone: CATEGORY_TONE.yellowDeep,
     tint: "amber",
   },
 };

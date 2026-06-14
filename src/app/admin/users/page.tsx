@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { PillTag, type PillTagTint } from "@/components/ui/pill-tag";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
 import {
@@ -21,17 +22,17 @@ export const dynamic = "force-dynamic";
 // Stage 9：用户管理。每行可改角色、改状态、强制下线。
 // 操作自己被服务端阻断（adminSet* 会校验 userId !== admin.id）。
 
-const ROLE_TONE: Record<string, string> = {
-  USER: "bg-muted/60 text-muted-foreground",
-  MOD: "bg-sky-500/15 text-sky-300",
-  ADMIN: "bg-amber-500/15 text-amber-300",
+const ROLE_TINT: Record<string, PillTagTint> = {
+  USER: "slate",
+  MOD: "cyan",
+  ADMIN: "amber",
 };
 
-const STATUS_TONE: Record<string, string> = {
-  ACTIVE: "bg-emerald-500/15 text-emerald-300",
-  SUSPENDED: "bg-amber-500/15 text-amber-300",
-  BANNED: "bg-rose-500/15 text-rose-300",
-  DELETED: "bg-muted/60 text-muted-foreground",
+const STATUS_TINT: Record<string, PillTagTint> = {
+  ACTIVE: "emerald",
+  SUSPENDED: "amber",
+  BANNED: "rose",
+  DELETED: "slate",
 };
 
 export default async function AdminUsersPage() {
@@ -107,18 +108,14 @@ export default async function AdminUsersPage() {
                       {u.email}
                     </td>
                     <td className="px-4 py-2.5">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] ${ROLE_TONE[u.role] ?? "bg-muted/60"}`}
-                      >
+                      <PillTag tint={ROLE_TINT[u.role] ?? "slate"} icon={null} size="sm">
                         {ROLE_LABEL[u.role] ?? u.role}
-                      </span>
+                      </PillTag>
                     </td>
                     <td className="px-4 py-2.5">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] ${STATUS_TONE[u.status] ?? "bg-muted/60"}`}
-                      >
+                      <PillTag tint={STATUS_TINT[u.status] ?? "slate"} icon={null} size="sm">
                         {STATUS_LABEL[u.status] ?? u.status}
-                      </span>
+                      </PillTag>
                     </td>
                     <td className="px-4 py-2.5 text-right tabular-nums">
                       {u._count.posts}
