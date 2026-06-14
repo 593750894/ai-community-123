@@ -128,7 +128,7 @@ export function RightPanel({
       <Link
         href="/community/creator-program"
         aria-label="加入创作者计划"
-        className="mt-6 block surface-glass-accent p-4 transition-colors hover:bg-primary/[0.09]"
+        className="mt-6 block card-service-featured p-4 transition-colors hover:bg-primary/[0.09]"
       >
         <div className="mb-2 flex items-center gap-2 text-xs text-primary/80">
           <Sparkles className="size-3.5" />

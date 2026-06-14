@@ -187,7 +187,7 @@ export default async function CollaborationDetailPage({
             </div>
             {collab.contact ? (
               isLoggedIn ? (
-                <div className="surface-glass-accent rounded-lg p-3">
+                <div className="card-service-featured rounded-lg p-3">
                   <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
                     发布者预留的联系方式
                   </div>

@@ -383,8 +383,18 @@
   border-radius: var(--radius);
   box-shadow: var(--elevation-paper-2);
 }
-/* surface-glass-accent → V2 card-service-featured shim: subtle primary tint
- * fill, primary-soft hairline ring. No more inset bezel highlight. */
+/* card-service-featured → emphasized/featured card surface (DESIGN.md §7).
+ * Subtle primary tint fill, primary-soft hairline ring, paper-2 elevation.
+ * Use for promoted/highlighted items that need to stand out from card-default
+ * without resorting to colored ribbons or shouty backgrounds. */
+@utility card-service-featured {
+  background-color: var(--primary-bg-subdued);
+  border: 1px solid var(--primary-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--elevation-paper-2);
+}
+/* @deprecated surface-glass-accent — V1 name retained for one release cycle
+ * (stage 13.7). Slated for deletion in step 7. */
 @utility surface-glass-accent {
   background-color: var(--primary-bg-subdued);
   border: 1px solid var(--primary-soft);

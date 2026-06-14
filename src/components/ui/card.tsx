@@ -6,7 +6,7 @@ type CardVariant = "default" | "accent" | "dashed" | "plain";
 
 const VARIANT_CLASS: Record<CardVariant, string> = {
   default: "surface-card surface-card-hover",
-  accent: "surface-glass-accent",
+  accent: "card-service-featured",
   dashed: "surface-dashed",
   plain: "rounded-xl bg-muted/50 dark:bg-card/30",
 };
