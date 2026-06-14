@@ -23,7 +23,7 @@ import {
   OrgAttributionBadge,
   type OrgAttribution,
 } from "@/components/publish/org-attribution-badge";
-import { PillTag } from "@/components/ui/pill-tag";
+import { PillTag, pillTagTintClass } from "@/components/ui/pill-tag";
 
 export type CollabCardItem = {
   id: string;
@@ -87,8 +87,8 @@ export function CollaborationCard({
         {/* 分类色块 */}
         <span
           className={cn(
-            "flex size-11 shrink-0 items-center justify-center rounded-lg border text-base",
-            meta.tone,
+            "flex size-11 shrink-0 items-center justify-center rounded-lg border border-transparent text-base",
+            pillTagTintClass(meta.tint),
           )}
           aria-hidden
         >

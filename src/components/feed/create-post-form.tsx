@@ -10,6 +10,7 @@ import {
   PublishAsSelector,
   type PublishOrgOption,
 } from "@/components/publish/publish-as-selector";
+import { pillTagTintClass } from "@/components/ui/pill-tag";
 import { cn } from "@/lib/utils";
 import {
   POST_TYPE_META,
@@ -99,10 +100,10 @@ export function CreatePostForm({
                 type="button"
                 onClick={() => setSelectedType(t)}
                 className={cn(
-                  "rounded-lg border px-3 py-2 text-left text-xs transition-all",
+                  "rounded-lg border border-transparent px-3 py-2 text-left text-xs transition-all",
                   active
-                    ? `${meta.tone} ring-2 ring-primary/40`
-                    : "border-border bg-card/40 text-muted-foreground hover:border-border hover:bg-muted/40",
+                    ? `${pillTagTintClass(meta.tint)} ring-2 ring-primary/40`
+                    : "border-border bg-card text-muted-foreground hover:bg-muted",
                 )}
               >
                 <div className="text-sm font-medium text-foreground/95">

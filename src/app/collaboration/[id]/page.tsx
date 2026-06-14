@@ -286,7 +286,7 @@ export default async function CollaborationDetailPage({
             <div className="mb-2 text-[11px] uppercase tracking-wide text-muted-foreground/80">
               合作类型
             </div>
-            <div className={cn("rounded-lg border p-3", meta.tone)}>
+            <div className={cn("rounded-lg border border-transparent p-3", pillTagTintClass(meta.tint))}>
               <div className="text-sm font-semibold">
                 <span className="mr-1.5" aria-hidden>{meta.emoji}</span>
                 {meta.label}

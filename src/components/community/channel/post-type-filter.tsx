@@ -5,6 +5,7 @@ import { useCallback } from "react";
 
 import { cn } from "@/lib/utils";
 import { POST_TYPE_VALUES, POST_TYPE_META, type PostTypeValue } from "@/lib/post-types";
+import { pillTagTintClass } from "@/components/ui/pill-tag";
 
 const ALL_LABEL = "全部";
 
@@ -48,10 +49,10 @@ export function PostTypeFilter({ current }: { current?: string }) {
             key={type}
             onClick={() => setType(type)}
             className={cn(
-              "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all",
+              "shrink-0 rounded-full border border-transparent px-3.5 py-1.5 text-xs font-medium transition-all",
               active
-                ? meta.tone + " border-current/30 shadow-sm"
-                : "border-border bg-card/30 text-muted-foreground hover:border-primary/30 hover:bg-card/50 hover:text-foreground",
+                ? pillTagTintClass(meta.tint)
+                : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground",
             )}
           >
             {meta.label}
