@@ -15,7 +15,7 @@ import {
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { PillTag } from "@/components/ui/pill-tag";
+import { PillTag, pillTagTintClass } from "@/components/ui/pill-tag";
 import { prisma } from "@/lib/db";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -23,7 +23,6 @@ import {
   COLLAB_LOCATION_LABEL,
   COLLAB_STATUS_LABEL,
   COLLAB_STATUS_TINT,
-  COLLAB_STATUS_TONE,
   COLLAB_STATUS_VALUES,
   COLLAB_TYPE_LABEL,
   COLLAB_WORK_MODE_LABEL,
@@ -239,10 +238,10 @@ export default async function CollaborationDetailPage({
                       type="submit"
                       disabled={collab.status === s}
                       className={cn(
-                        "inline-flex h-7 items-center rounded-md border px-2.5 text-xs transition-colors",
+                        "inline-flex h-7 items-center rounded-md border border-transparent px-2.5 text-xs transition-colors",
                         collab.status === s
-                          ? `${COLLAB_STATUS_TONE[s as CollabStatusValue]} cursor-default`
-                          : "border-border bg-background hover:border-primary/40 hover:text-foreground",
+                          ? `${pillTagTintClass(COLLAB_STATUS_TINT[s as CollabStatusValue])} cursor-default`
+                          : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground",
                       )}
                     >
                       标记为 {COLLAB_STATUS_LABEL[s as CollabStatusValue]}

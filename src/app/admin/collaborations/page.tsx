@@ -8,13 +8,14 @@ import {
 } from "@/lib/admin/actions";
 import {
   COLLAB_STATUS_LABEL,
-  COLLAB_STATUS_TONE,
+  COLLAB_STATUS_TINT,
   COLLAB_STATUS_VALUES,
   collabCategoryMeta,
   COLLAB_TYPE_LABEL,
   type CollabStatusValue,
   type CollabTypeValue,
 } from "@/lib/collaborations/categories";
+import { pillTagTintClass } from "@/components/ui/pill-tag";
 
 export const dynamic = "force-dynamic";
 
@@ -103,7 +104,7 @@ export default async function AdminCollaborationsPage() {
                         <select
                           name="status"
                           defaultValue={c.status}
-                          className={`rounded-md border bg-card/40 px-1.5 py-0.5 text-[11px] outline-none focus:border-primary/50 ${COLLAB_STATUS_TONE[c.status as CollabStatusValue] ?? ""}`}
+                          className={`rounded-md border border-border px-1.5 py-0.5 text-[11px] outline-none focus:border-primary/50 ${pillTagTintClass(COLLAB_STATUS_TINT[c.status as CollabStatusValue])}`}
                         >
                           {COLLAB_STATUS_VALUES.map((s) => (
                             <option key={s} value={s}>

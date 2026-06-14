@@ -86,3 +86,10 @@ export function PillTag({
 }
 
 export const PILL_TAG_TINTS = Object.keys(TINT_CLASS) as readonly PillTagTint[];
+
+/** Returns the V2 bg+text utility classes for a tint, for non-pill consumers
+ *  (e.g. status-toggle buttons, select elements) that need the same
+ *  taxonomy color vocabulary without the pill shape. */
+export function pillTagTintClass(tint: PillTagTint): string {
+  return TINT_CLASS[tint];
+}
