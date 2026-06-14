@@ -140,7 +140,7 @@ export default async function ConversationDetailPage({
       <div className="flex min-h-0 flex-1 flex-col px-6 pb-4 sm:px-8">
         <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border bg-card/20">
           {isMuted && (
-            <div className="flex items-center gap-2 border-b border-border bg-amber-500/5 px-5 py-2 text-xs text-amber-300">
+            <div className="flex items-center gap-2 border-b border-border bg-tag-amber-bg/5 px-5 py-2 text-xs text-tag-amber-fg">
               <BellOff className="size-3.5" />
               <span>
                 免打扰开启中 · 此会话不会推送通知，红点也不计入未读
@@ -149,7 +149,7 @@ export default async function ConversationDetailPage({
           )}
           {isGroup && (
             <div className="flex items-center gap-2 border-b border-border px-5 py-2.5 text-xs text-muted-foreground">
-              <Users className="size-3.5 text-emerald-300" />
+              <Users className="size-3.5 text-tag-emerald-fg" />
               <span>
                 群聊 · 群主 / 管理员 可以管理成员；点右上「群聊设置」修改信息或退群。可在消息内 @用户名 提醒对方。
               </span>

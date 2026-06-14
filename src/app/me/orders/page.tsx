@@ -153,7 +153,7 @@ export default async function MyOrdersPage({ searchParams }: PageProps) {
                           />
                         </div>
                         {o.refundCents > 0 && (
-                          <div className="mt-0.5 text-[10px] text-cyan-300">
+                          <div className="mt-0.5 text-[10px] text-tag-cyan-fg">
                             退款{" "}
                             <MoneyText
                               value={o.refundCents}

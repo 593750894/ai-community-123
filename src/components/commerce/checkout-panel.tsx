@@ -269,7 +269,7 @@ export function CheckoutPanel({ order: initial, provider, mockEnabled }: Props) 
               )}
 
               {errorMsg && (
-                <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-300">
+                <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
                   {errorMsg}
                 </div>
               )}
@@ -278,7 +278,7 @@ export function CheckoutPanel({ order: initial, provider, mockEnabled }: Props) 
 
           {order.status === "PAID" && (
             <div className="space-y-3">
-              <div className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300">
+              <div className="flex items-center gap-2 rounded-md border border-tag-emerald-fg/30 bg-tag-emerald-bg/10 px-3 py-2 text-xs text-tag-emerald-fg">
                 <Check className="size-3.5" />
                 支付成功，谢谢支持！
               </div>
@@ -317,7 +317,7 @@ export function CheckoutPanel({ order: initial, provider, mockEnabled }: Props) 
 
           {order.status === "CANCELED" && (
             <div className="space-y-3">
-              <div className="flex items-center gap-2 rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-300">
+              <div className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
                 <AlertTriangle className="size-3.5" />
                 订单已超时取消
               </div>
@@ -343,14 +343,14 @@ export function CheckoutPanel({ order: initial, provider, mockEnabled }: Props) 
           )}
 
           {order.status === "FAILED" && (
-            <div className="flex items-center gap-2 rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-300">
+            <div className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
               <AlertTriangle className="size-3.5" />
               支付失败，请重新下单
             </div>
           )}
 
           {order.status === "REFUNDED" && (
-            <div className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+            <div className="flex items-center gap-2 rounded-md border border-tag-amber-fg/30 bg-tag-amber-bg/10 px-3 py-2 text-xs text-tag-amber-fg">
               <AlertTriangle className="size-3.5" />
               订单已退款
             </div>
@@ -384,8 +384,8 @@ function WechatScanPanel({ codeUrl }: { codeUrl: string }) {
     }
   }
   return (
-    <div className="space-y-3 rounded-md border border-emerald-500/30 bg-emerald-500/5 p-4">
-      <div className="flex items-center gap-2 text-sm font-semibold text-emerald-300">
+    <div className="space-y-3 rounded-md border border-tag-emerald-fg/30 bg-tag-emerald-bg/5 p-4">
+      <div className="flex items-center gap-2 text-sm font-semibold text-tag-emerald-fg">
         <ExternalLink className="size-4" />
         请使用微信扫一扫支付
       </div>
@@ -458,7 +458,7 @@ function Countdown({ deadline }: { deadline: string }) {
   const sec = Math.floor((remain % 60000) / 1000);
   if (remain <= 0) {
     return (
-      <span className="text-rose-300">
+      <span className="text-destructive">
         <Clock className="mr-1 inline-block size-3" />
         已超时
       </span>

@@ -40,8 +40,8 @@ export function OrganizationSettingsForm({ defaults }: { defaults: Defaults }) {
         <div
           className={
             state.ok
-              ? "rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300"
-              : "rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-300"
+              ? "rounded-md border border-tag-emerald-fg/30 bg-tag-emerald-bg/10 px-3 py-2 text-xs text-tag-emerald-fg"
+              : "rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"
           }
         >
           {state.message}

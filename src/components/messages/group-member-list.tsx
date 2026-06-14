@@ -34,8 +34,8 @@ const ROLE_PRIORITY: Record<ConversationRole, number> = {
 };
 
 function RoleIcon({ role }: { role: ConversationRole }) {
-  if (role === "OWNER") return <Crown className="size-3 text-amber-300" />;
-  if (role === "ADMIN") return <Shield className="size-3 text-sky-300" />;
+  if (role === "OWNER") return <Crown className="size-3 text-tag-amber-fg" />;
+  if (role === "ADMIN") return <Shield className="size-3 text-tag-blue-fg" />;
   return <UserIcon className="size-3 text-muted-foreground" />;
 }
 
@@ -130,7 +130,7 @@ export function GroupMemberList({
                     <input type="hidden" name="role" value="ADMIN" />
                     <button
                       type="submit"
-                      className="rounded-full border border-sky-500/40 px-2.5 py-1 text-[11px] text-sky-300 transition-colors hover:bg-sky-500/10"
+                      className="rounded-full border border-tag-blue-fg/40 px-2.5 py-1 text-[11px] text-tag-blue-fg transition-colors hover:bg-tag-blue-bg/10"
                     >
                       提为管理员
                     </button>
@@ -166,7 +166,7 @@ export function GroupMemberList({
                     <input type="hidden" name="userId" value={m.user.id} />
                     <button
                       type="submit"
-                      className="rounded-full border border-rose-500/40 px-2.5 py-1 text-[11px] text-rose-300 transition-colors hover:bg-rose-500/10"
+                      className="rounded-full border border-destructive/40 px-2.5 py-1 text-[11px] text-destructive transition-colors hover:bg-destructive/10"
                     >
                       移除
                     </button>

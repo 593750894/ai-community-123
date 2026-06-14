@@ -56,7 +56,7 @@ export function MarkPayoutPaidDialog(props: MarkPayoutPaidDialogProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-300 hover:bg-emerald-500/20"
+        className="rounded-full border border-tag-emerald-fg/30 bg-tag-emerald-bg/10 px-2 py-1 text-[11px] text-tag-emerald-fg hover:bg-tag-emerald-bg/20"
       >
         标记已打款
       </button>
@@ -168,12 +168,12 @@ function MarkForm({
             />
           </label>
 
-          <p className="text-[11px] text-amber-300">
+          <p className="text-[11px] text-tag-amber-fg">
             请先在第三方渠道完成实际转账，再在此点击确认；标记后无法撤销。
           </p>
 
           {errMsg && (
-            <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1.5 text-[11px] text-rose-300">
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 px-2 py-1.5 text-[11px] text-destructive">
               {errMsg}
             </div>
           )}
@@ -193,7 +193,7 @@ function MarkForm({
           type="button"
           onClick={submit}
           disabled={submitting}
-          className="rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full border border-tag-emerald-fg/40 bg-tag-emerald-bg/15 px-3 py-1.5 text-xs font-medium text-tag-emerald-fg hover:bg-tag-emerald-bg/25 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? "处理中…" : "确认已打款"}
         </button>

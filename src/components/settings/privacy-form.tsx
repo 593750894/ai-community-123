@@ -61,7 +61,7 @@ export function PrivacyForm({
         <div
           className={
             message.tone === "ok"
-              ? "text-[11px] text-emerald-300"
+              ? "text-[11px] text-tag-emerald-fg"
               : "text-[11px] text-rose-400"
           }
         >

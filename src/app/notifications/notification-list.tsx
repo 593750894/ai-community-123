@@ -17,6 +17,7 @@ import {
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
+import { pillTagTintClass, type PillTagTint } from "@/components/ui/pill-tag";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import type { NotificationItem } from "@/lib/notifications/queries";
 
@@ -34,18 +35,19 @@ const TYPE_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
   SYSTEM: Sparkles,
 };
 
-const TYPE_ACCENT: Record<string, string> = {
-  POST_LIKE: "text-rose-300 bg-rose-500/10 border-rose-500/30",
-  WORK_LIKE: "text-rose-300 bg-rose-500/10 border-rose-500/30",
-  COMMENT_LIKE: "text-rose-300 bg-rose-500/10 border-rose-500/30",
-  POST_REPLY: "text-cyan-300 bg-cyan-500/10 border-cyan-500/30",
-  COMMENT_REPLY: "text-cyan-300 bg-cyan-500/10 border-cyan-500/30",
-  BOOKMARK: "text-amber-300 bg-amber-500/10 border-amber-500/30",
-  MENTION: "text-violet-300 bg-violet-500/10 border-violet-500/30",
-  COLLAB_REPLY: "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
-  MESSAGE: "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
-  FOLLOW: "text-sky-300 bg-sky-500/10 border-sky-500/30",
-  SYSTEM: "text-muted-foreground bg-muted/30 border-border",
+const TYPE_TINT: Record<string, PillTagTint | null> = {
+  POST_LIKE: "rose",
+  WORK_LIKE: "rose",
+  COMMENT_LIKE: "rose",
+  POST_REPLY: "cyan",
+  COMMENT_REPLY: "cyan",
+  BOOKMARK: "amber",
+  MENTION: "violet",
+  COLLAB_REPLY: "emerald",
+  MESSAGE: "emerald",
+  FOLLOW: "blue",
+  // SYSTEM uses muted token, not the taxonomy tint vocabulary.
+  SYSTEM: null,
 };
 
 type Bucket = "today" | "thisWeek" | "older";
@@ -226,7 +228,10 @@ function NotificationRow({
   onClick: () => void;
 }) {
   const Icon = TYPE_ICON[item.type] ?? Bell;
-  const accent = TYPE_ACCENT[item.type] ?? TYPE_ACCENT.SYSTEM;
+  const tint = TYPE_TINT[item.type];
+  const accent = tint
+    ? pillTagTintClass(tint)
+    : "text-muted-foreground bg-muted";
   const unread = !item.readAt;
   const href = item.link || "#";
 
@@ -239,7 +244,7 @@ function NotificationRow({
     >
       <span
         className={cn(
-          "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full border",
+          "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full border border-transparent",
           accent,
         )}
       >

@@ -17,13 +17,13 @@ export function ChannelBeginnerGuide({ channelId }: { channelId: string }) {
       icon: BookOpen,
       label: "社区公约",
       href: "/community/rules",
-      color: "text-cyan-700 dark:text-cyan-400",
+      color: "text-tag-cyan-fg dark:text-cyan-400",
     },
     {
       icon: MessageCircle,
       label: "发帖指南",
       href: `/create-post?channelId=${channelId}`,
-      color: "text-emerald-700 dark:text-emerald-400",
+      color: "text-tag-emerald-fg dark:text-emerald-400",
     },
     {
       icon: Compass,

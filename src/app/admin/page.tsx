@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { pillTagTintClass, type PillTagTint } from "@/components/ui/pill-tag";
 import { prisma } from "@/lib/db";
 import { getAdminPayoutOverview } from "@/lib/commerce/payouts";
 import { countOpenReports } from "@/lib/reports/queries";
@@ -60,62 +61,68 @@ async function getOverview() {
 export default async function AdminPage() {
   const overview = await getOverview();
 
-  const cards = [
+  const cards: Array<{
+    label: string;
+    value: number;
+    href: string;
+    icon: typeof Users;
+    tint: PillTagTint;
+  }> = [
     {
       label: "用户",
       value: overview.users,
       href: "/admin/users",
       icon: Users,
-      tone: "text-cyan-300",
+      tint: "cyan",
     },
     {
       label: "帖子",
       value: overview.posts,
       href: "/admin/posts",
       icon: MessageSquare,
-      tone: "text-sky-300",
+      tint: "blue",
     },
     {
       label: "作品",
       value: overview.works,
       href: "/admin/works",
       icon: Film,
-      tone: "text-emerald-300",
+      tint: "emerald",
     },
     {
       label: "合作需求",
       value: overview.collabs,
       href: "/admin/collaborations",
       icon: Banknote,
-      tone: "text-amber-300",
+      tint: "amber",
     },
     {
       label: "工具",
       value: overview.tools,
       href: "/admin/tools",
       icon: Wrench,
-      tone: "text-violet-300",
+      tint: "violet",
     },
     {
       label: "待处理举报",
       value: overview.openReports,
       href: "/admin/reports?status=PENDING",
       icon: Flag,
-      tone: "text-rose-300",
+      tint: "rose",
     },
     {
       label: "已付款订单",
       value: overview.paidOrders,
       href: "/admin/orders?status=PAID",
       icon: Receipt,
-      tone: "text-emerald-300",
+      tint: "emerald",
     },
     {
       label: "待处理提现",
       value: overview.payouts.pendingRequestCount,
       href: "/admin/payouts?pendingRequest=1",
       icon: Coins,
-      tone: "text-rose-300",
+      tint: "rose",
     },
   ];
 
@@ -129,11 +136,11 @@ export default async function AdminPage() {
 
       <div className="space-y-6 px-6 py-6 sm:px-8">
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {cards.map(({ label, value, href, icon: Icon, tone }) => (
+          {cards.map(({ label, value, href, icon: Icon, tint }) => (
             <Link
               key={href}
               href={href}
-              className="group flex items-start justify-between gap-3 rounded-xl border border-border bg-card/40 p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card/70"
+              className="group flex items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40"
             >
               <div>
                 <div className="text-xs text-muted-foreground">{label}</div>
@@ -142,7 +149,7 @@ export default async function AdminPage() {
                 </div>
               </div>
               <span
-                className={`flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 ${tone}`}
+                className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${pillTagTintClass(tint)}`}
               >
                 <Icon className="size-4" />
               </span>

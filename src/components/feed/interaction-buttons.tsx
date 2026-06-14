@@ -112,10 +112,10 @@ export function LikeButton({
         "inline-flex items-center gap-1.5 rounded-full border transition-colors tabular-nums disabled:opacity-70",
         sizeCls,
         isActive
-          ? "border-rose-500/40 bg-rose-500/15 text-rose-300"
+          ? "border-destructive/40 bg-destructive/15 text-destructive"
           : variant === "solid"
-            ? "border-border bg-card/70 text-foreground/85 hover:border-rose-500/40 hover:text-rose-300"
-            : "border-border bg-transparent text-muted-foreground hover:border-rose-500/40 hover:text-rose-300",
+            ? "border-border bg-card/70 text-foreground/85 hover:border-destructive/40 hover:text-destructive"
+            : "border-border bg-transparent text-muted-foreground hover:border-destructive/40 hover:text-destructive",
       )}
       title={error ?? (isActive ? "取消点赞" : "点赞")}
     >
@@ -207,10 +207,10 @@ export function BookmarkButton({
         "inline-flex items-center gap-1.5 rounded-full border transition-colors tabular-nums disabled:opacity-70",
         sizeCls,
         isActive
-          ? "border-amber-500/40 bg-amber-500/15 text-amber-300"
+          ? "border-tag-amber-fg/40 bg-tag-amber-bg/15 text-tag-amber-fg"
           : variant === "solid"
-            ? "border-border bg-card/70 text-foreground/85 hover:border-amber-500/40 hover:text-amber-300"
-            : "border-border bg-transparent text-muted-foreground hover:border-amber-500/40 hover:text-amber-300",
+            ? "border-border bg-card/70 text-foreground/85 hover:border-tag-amber-fg/40 hover:text-tag-amber-fg"
+            : "border-border bg-transparent text-muted-foreground hover:border-tag-amber-fg/40 hover:text-tag-amber-fg",
       )}
       title={error ?? (isActive ? "取消收藏" : "收藏")}
     >

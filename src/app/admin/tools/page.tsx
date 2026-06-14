@@ -106,7 +106,7 @@ export default async function AdminToolsPage() {
                     </td>
                     <td className="px-4 py-2.5 text-xs">
                       {t.isOfficial ? (
-                        <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] text-amber-300">
+                        <span className="rounded-full bg-tag-amber-bg/15 px-1.5 py-0.5 text-[10px] text-tag-amber-fg">
                           官方
                         </span>
                       ) : (
@@ -139,7 +139,7 @@ export default async function AdminToolsPage() {
                           <input type="hidden" name="id" value={t.id} />
                           <button
                             type="submit"
-                            className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-xs text-rose-300 transition-colors hover:bg-rose-500/20"
+                            className="rounded-full border border-destructive/30 bg-destructive/10 px-2 py-1 text-xs text-destructive transition-colors hover:bg-destructive/20"
                           >
                             删除
                           </button>

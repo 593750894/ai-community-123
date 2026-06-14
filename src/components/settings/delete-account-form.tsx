@@ -68,7 +68,7 @@ export function DeleteAccountForm() {
           <span
             className={
               message.tone === "ok"
-                ? "text-xs text-emerald-300"
+                ? "text-xs text-tag-emerald-fg"
                 : "text-xs text-rose-400"
             }
           >
@@ -78,7 +78,7 @@ export function DeleteAccountForm() {
         <button
           type="submit"
           disabled={pending || phrase !== CONFIRM_PHRASE}
-          className="rounded-full border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-medium text-rose-200 hover:bg-rose-500/20 disabled:opacity-50"
+          className="rounded-full border border-destructive/40 bg-destructive/10 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/20 disabled:opacity-50"
         >
           {pending ? "处理中…" : "注销账户"}
         </button>
@@ -99,7 +99,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-rose-200/80">{label}</label>
+      <label className="mb-1 block text-xs text-destructive/80">{label}</label>
       {children}
     </div>
   );

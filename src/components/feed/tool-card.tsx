@@ -152,8 +152,8 @@ function ToolRatingPill({
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-amber-300">
-      <Star className="size-3 fill-amber-300 text-amber-300" />
+    <span className="inline-flex items-center gap-1 text-tag-amber-fg">
+      <Star className="size-3 fill-amber-300 text-tag-amber-fg" />
       <span className="font-semibold">{avg.toFixed(1)}</span>
       <span className="text-muted-foreground/70">· {count} 条</span>
     </span>

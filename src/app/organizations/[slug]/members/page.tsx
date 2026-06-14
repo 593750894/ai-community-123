@@ -188,7 +188,7 @@ export default async function OrganizationMembersPage({ params }: PageProps) {
                                     value={m.user.id}
                                   />
                                   <button
-                                    className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[11px] text-rose-300 hover:bg-rose-500/20"
+                                    className="rounded-full border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[11px] text-destructive hover:bg-destructive/20"
                                     type="submit"
                                   >
                                     移除

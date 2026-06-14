@@ -65,7 +65,7 @@ export default async function EditWorkflowItemPage({
       />
 
       {created === "1" && (
-        <div className="mx-4 mt-4 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300 sm:mx-8">
+        <div className="mx-4 mt-4 rounded-md border border-tag-emerald-fg/30 bg-tag-emerald-bg/10 px-3 py-2 text-xs text-tag-emerald-fg sm:mx-8">
           已创建为草稿；补齐下载链接 + 价格后即可上架。
         </div>
       )}
@@ -150,7 +150,7 @@ export default async function EditWorkflowItemPage({
               {!hasSales && (
                 <form action={deleteWorkflowItemAction}>
                   <input type="hidden" name="id" value={item.id} />
-                  <button className="w-full rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-300 hover:bg-rose-500/20">
+                  <button className="w-full rounded-full border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive hover:bg-destructive/20">
                     删除商品
                   </button>
                 </form>

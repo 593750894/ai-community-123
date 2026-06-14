@@ -135,7 +135,7 @@ export default async function MessagesPage() {
                         </span>
                       )}
                       {isGroup && (
-                        <span className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border border-border bg-card text-[10px] text-emerald-300">
+                        <span className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border border-border bg-card text-[10px] text-tag-emerald-fg">
                           <Users className="size-2.5" />
                         </span>
                       )}

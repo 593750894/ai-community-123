@@ -153,7 +153,7 @@ export function ToolRatingForm({
                 className={cn(
                   "size-6 transition-colors",
                   active
-                    ? "fill-amber-300 text-amber-300"
+                    ? "fill-amber-300 text-tag-amber-fg"
                     : "text-muted-foreground/40",
                 )}
               />
@@ -181,7 +181,7 @@ export function ToolRatingForm({
               type="button"
               onClick={remove}
               disabled={pending}
-              className="inline-flex items-center gap-1 rounded-full border border-rose-500/40 px-2.5 py-1 text-xs text-rose-300 transition-colors hover:bg-rose-500/15 disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-full border border-destructive/40 px-2.5 py-1 text-xs text-destructive transition-colors hover:bg-destructive/15 disabled:opacity-50"
             >
               <Trash2 className="size-3" />
               撤回
@@ -203,8 +203,8 @@ export function ToolRatingForm({
           className={cn(
             "rounded-md border px-3 py-2 text-xs",
             msg.kind === "ok"
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-              : "border-rose-500/30 bg-rose-500/10 text-rose-300",
+              ? "border-tag-emerald-fg/30 bg-tag-emerald-bg/10 text-tag-emerald-fg"
+              : "border-destructive/30 bg-destructive/10 text-destructive",
           )}
         >
           {msg.text}

@@ -249,7 +249,7 @@ export default async function AdminReportsPage({
                             </label>
                             <button
                               type="submit"
-                              className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-300 hover:bg-emerald-500/20"
+                              className="rounded-full border border-tag-emerald-fg/30 bg-tag-emerald-bg/10 px-2.5 py-1 text-[11px] text-tag-emerald-fg hover:bg-tag-emerald-bg/20"
                             >
                               处理
                             </button>

@@ -71,7 +71,7 @@ export function PostCard({
     <article
       className={cn(
         "group surface-card overflow-hidden p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 sm:p-5",
-        post.pinned && "border-amber-500/40 bg-amber-500/5 hover:border-amber-500/60",
+        post.pinned && "border-tag-amber-fg/40 bg-tag-amber-bg/5 hover:border-tag-amber-fg/60",
       )}
     >
       {/* Top row: type badge + meta */}

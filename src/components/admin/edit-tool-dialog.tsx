@@ -180,7 +180,7 @@ export function EditToolDialog({ tool }: { tool: ToolInitial }) {
                 </span>
               )}
               {state.ok && (
-                <span className="mr-auto text-xs text-emerald-300">
+                <span className="mr-auto text-xs text-tag-emerald-fg">
                   {state.message ?? "已保存"}
                 </span>
               )}

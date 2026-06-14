@@ -82,7 +82,7 @@ export default async function AdminLayout({
                 <Icon className="size-3.5" />
                 {label}
                 {showBadge && (
-                  <span className="ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500/90 px-1 text-[10px] font-semibold text-white tabular-nums">
+                  <span className="ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive/90 px-1 text-[10px] font-semibold text-white tabular-nums">
                     {badgeCount > 99 ? "99+" : badgeCount}
                   </span>
                 )}

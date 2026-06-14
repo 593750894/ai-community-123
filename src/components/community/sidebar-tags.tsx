@@ -5,12 +5,12 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { InlineError } from "@/components/ui/error-state";
 
 const TAG_COLORS = [
-  "hover:border-violet-500/50 hover:bg-violet-500/10 hover:text-violet-700 dark:hover:border-violet-400/40 dark:hover:text-violet-400",
-  "hover:border-cyan-500/50 hover:bg-cyan-500/10 hover:text-cyan-700 dark:hover:border-cyan-400/40 dark:hover:text-cyan-400",
-  "hover:border-amber-500/50 hover:bg-amber-500/10 hover:text-amber-700 dark:hover:border-amber-400/40 dark:hover:text-amber-400",
-  "hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:border-emerald-400/40 dark:hover:text-emerald-400",
-  "hover:border-rose-500/50 hover:bg-rose-500/10 hover:text-rose-700 dark:hover:border-rose-400/40 dark:hover:text-rose-400",
-  "hover:border-blue-500/50 hover:bg-blue-500/10 hover:text-blue-700 dark:hover:border-blue-400/40 dark:hover:text-blue-400",
+  "hover:border-tag-violet-fg/50 hover:bg-tag-violet-bg/10 hover:text-tag-violet-fg dark:hover:border-violet-400/40 dark:hover:text-violet-400",
+  "hover:border-tag-cyan-fg/50 hover:bg-tag-cyan-bg/10 hover:text-tag-cyan-fg dark:hover:border-cyan-400/40 dark:hover:text-cyan-400",
+  "hover:border-tag-amber-fg/50 hover:bg-tag-amber-bg/10 hover:text-tag-amber-fg dark:hover:border-amber-400/40 dark:hover:text-amber-400",
+  "hover:border-tag-emerald-fg/50 hover:bg-tag-emerald-bg/10 hover:text-tag-emerald-fg dark:hover:border-emerald-400/40 dark:hover:text-emerald-400",
+  "hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive dark:hover:border-rose-400/40 dark:hover:text-rose-400",
+  "hover:border-tag-blue-fg/50 hover:bg-tag-blue-bg/10 hover:text-tag-blue-fg dark:hover:border-blue-400/40 dark:hover:text-blue-400",
 ];
 
 export function SidebarTags({

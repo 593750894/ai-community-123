@@ -191,7 +191,7 @@ export default async function AdminUsersPage() {
                               <input type="hidden" name="userId" value={u.id} />
                               <button
                                 type="submit"
-                                className="rounded border border-rose-500/30 bg-rose-500/10 px-1.5 py-0.5 text-[11px] text-rose-300 hover:bg-rose-500/20"
+                                className="rounded border border-destructive/30 bg-destructive/10 px-1.5 py-0.5 text-[11px] text-destructive hover:bg-destructive/20"
                               >
                                 强制下线
                               </button>

@@ -150,7 +150,7 @@ export function AccountForm({ initial }: { initial: Initial }) {
           <span
             className={
               message.tone === "ok"
-                ? "text-xs text-emerald-300"
+                ? "text-xs text-tag-emerald-fg"
                 : "text-xs text-rose-400"
             }
           >

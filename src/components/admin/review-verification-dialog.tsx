@@ -46,14 +46,14 @@ export function ReviewVerificationDialog({
       <button
         type="button"
         onClick={() => setDecision("APPROVE")}
-        className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-300 hover:bg-emerald-500/20"
+        className="rounded-full border border-tag-emerald-fg/30 bg-tag-emerald-bg/10 px-2 py-0.5 text-[11px] text-tag-emerald-fg hover:bg-tag-emerald-bg/20"
       >
         通过
       </button>
       <button
         type="button"
         onClick={() => setDecision("REJECT")}
-        className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[11px] text-rose-300 hover:bg-rose-500/20"
+        className="rounded-full border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[11px] text-destructive hover:bg-destructive/20"
       >
         驳回
       </button>
@@ -189,7 +189,7 @@ function ReviewForm({
             </label>
 
             {errMsg && (
-              <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1.5 text-[11px] text-rose-300">
+              <div className="rounded-md border border-destructive/30 bg-destructive/10 px-2 py-1.5 text-[11px] text-destructive">
                 {errMsg}
               </div>
             )}
@@ -211,8 +211,8 @@ function ReviewForm({
             disabled={submitting}
             className={
               approve
-                ? "rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/25 disabled:opacity-50"
-                : "rounded-full border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs font-medium text-rose-300 hover:bg-rose-500/25 disabled:opacity-50"
+                ? "rounded-full border border-tag-emerald-fg/40 bg-tag-emerald-bg/15 px-3 py-1.5 text-xs font-medium text-tag-emerald-fg hover:bg-tag-emerald-bg/25 disabled:opacity-50"
+                : "rounded-full border border-destructive/40 bg-destructive/15 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/25 disabled:opacity-50"
             }
           >
             {submitting ? "处理中…" : approve ? "确认通过" : "确认驳回"}

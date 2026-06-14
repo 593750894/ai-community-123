@@ -64,7 +64,7 @@ export function RequestPayoutButton({
       <div className="flex flex-wrap items-center gap-2">
         {hasPendingRequest ? (
           <>
-            <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-300">
+            <span className="inline-flex items-center gap-1 rounded-md border border-tag-amber-fg/30 bg-tag-amber-bg/10 px-2.5 py-1 text-[11px] text-tag-amber-fg">
               已申请 <MoneyText value={pendingRequestNetCents} currency={currency} /> · 等待打款
             </span>
             <button
@@ -91,7 +91,7 @@ export function RequestPayoutButton({
       </div>
 
       {!hasAccount && (
-        <p className="text-[11px] text-amber-300">
+        <p className="text-[11px] text-tag-amber-fg">
           请先在下方完善收款账号信息后再申请提现。
         </p>
       )}
@@ -102,7 +102,7 @@ export function RequestPayoutButton({
       )}
 
       {errMsg && (
-        <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1.5 text-[11px] text-rose-300">
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-2 py-1.5 text-[11px] text-destructive">
           {errMsg}
         </div>
       )}

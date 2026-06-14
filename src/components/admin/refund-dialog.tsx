@@ -48,7 +48,7 @@ export function RefundDialog(props: RefundDialogProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-[11px] text-rose-300 hover:bg-rose-500/20"
+        className="rounded-full border border-destructive/30 bg-destructive/10 px-2 py-1 text-[11px] text-destructive hover:bg-destructive/20"
       >
         退款
       </button>
@@ -149,7 +149,7 @@ function RefundForm({
             <MoneyText
               value={remaining}
               currency={currency}
-              className="font-semibold text-cyan-300"
+              className="font-semibold text-tag-cyan-fg"
             />
           </div>
         </div>
@@ -185,7 +185,7 @@ function RefundForm({
         </label>
 
         {errMsg && (
-          <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1.5 text-[11px] text-rose-300">
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-2 py-1.5 text-[11px] text-destructive">
             {errMsg}
           </div>
         )}
@@ -204,7 +204,7 @@ function RefundForm({
           type="button"
           onClick={submit}
           disabled={submitting}
-          className="rounded-full border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs font-medium text-rose-300 hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full border border-destructive/40 bg-destructive/15 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/25 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? "处理中…" : "确认退款"}
         </button>

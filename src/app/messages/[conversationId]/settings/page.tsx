@@ -115,8 +115,8 @@ export default async function GroupSettingsPage({
           />
         </section>
 
-        <section className="space-y-3 rounded-2xl border border-rose-500/30 bg-rose-500/5 p-5">
-          <h2 className="text-sm font-semibold text-rose-300">危险操作</h2>
+        <section className="space-y-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-5">
+          <h2 className="text-sm font-semibold text-destructive">危险操作</h2>
           {isOwner ? (
             <>
               <p className="text-xs text-muted-foreground">
@@ -133,7 +133,7 @@ export default async function GroupSettingsPage({
                 />
                 <button
                   type="submit"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-rose-500/40 bg-rose-500/10 px-3 text-sm font-medium text-rose-300 transition-colors hover:bg-rose-500/20"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/10 px-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/20"
                 >
                   <Trash2 className="size-4" />
                   解散群聊
@@ -156,7 +156,7 @@ export default async function GroupSettingsPage({
                 />
                 <button
                   type="submit"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-rose-500/40 bg-rose-500/10 px-3 text-sm font-medium text-rose-300 transition-colors hover:bg-rose-500/20"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/10 px-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/20"
                 >
                   <LogOut className="size-4" />
                   退出群聊

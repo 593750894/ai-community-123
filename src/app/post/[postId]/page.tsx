@@ -107,9 +107,9 @@ export default async function PostDetailPage({
           {viewerIsAdmin && (
             <section
               aria-label="管理员操作"
-              className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4"
+              className="rounded-2xl border border-tag-amber-fg/30 bg-tag-amber-bg/5 p-4"
             >
-              <div className="mb-2 text-[11px] uppercase tracking-wide text-amber-300/80">
+              <div className="mb-2 text-[11px] uppercase tracking-wide text-tag-amber-fg/80">
                 管理员操作
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -122,7 +122,7 @@ export default async function PostDetailPage({
                   />
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-200 hover:bg-amber-500/20"
+                    className="inline-flex items-center gap-1 rounded-full border border-tag-amber-fg/40 bg-tag-amber-bg/10 px-2.5 py-1 text-xs text-tag-amber-fg hover:bg-tag-amber-bg/20"
                   >
                     <Pin className="size-3.5" />
                     {post.pinned ? "取消置顶" : "置顶"}
@@ -268,7 +268,7 @@ export default async function PostDetailPage({
                 )}
                 {post.imageUrl && (
                   <div className="rounded-xl border border-border bg-background/40 p-3">
-                    <div className="mb-2 inline-flex items-center gap-1 rounded-md bg-cyan-500/10 px-2 py-0.5 text-[11px] text-cyan-300">
+                    <div className="mb-2 inline-flex items-center gap-1 rounded-md bg-tag-cyan-bg/10 px-2 py-0.5 text-[11px] text-tag-cyan-fg">
                       <ImageIcon className="size-3" />
                       图片
                     </div>

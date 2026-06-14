@@ -34,7 +34,7 @@ export function CreateToolForm() {
           </p>
         </div>
         {state.ok && (
-          <span className="rounded-md bg-emerald-500/15 px-2 py-0.5 text-[11px] text-emerald-300">
+          <span className="rounded-md bg-tag-emerald-bg/15 px-2 py-0.5 text-[11px] text-tag-emerald-fg">
             {state.message ?? "已添加"}
           </span>
         )}

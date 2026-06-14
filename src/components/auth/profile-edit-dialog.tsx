@@ -149,7 +149,7 @@ function ProfileEditForm({
           <p
             className={
               state.ok
-                ? "rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-500"
+                ? "rounded-md border border-tag-emerald-fg/40 bg-tag-emerald-bg/10 px-3 py-2 text-xs text-emerald-500"
                 : "rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive"
             }
           >

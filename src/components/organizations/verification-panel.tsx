@@ -48,11 +48,11 @@ export function VerificationPanel({ defaults }: { defaults: Defaults }) {
           <span
             className={
               defaults.status === "APPROVED"
-                ? "rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-emerald-300"
+                ? "rounded-full border border-tag-emerald-fg/40 bg-tag-emerald-bg/10 px-2 py-0.5 text-tag-emerald-fg"
                 : defaults.status === "PENDING"
-                  ? "rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-amber-300"
+                  ? "rounded-full border border-tag-amber-fg/40 bg-tag-amber-bg/10 px-2 py-0.5 text-tag-amber-fg"
                   : defaults.status === "REJECTED"
-                    ? "rounded-full border border-rose-500/40 bg-rose-500/10 px-2 py-0.5 text-rose-300"
+                    ? "rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-destructive"
                     : "rounded-full border border-border bg-muted/40 px-2 py-0.5 text-muted-foreground"
             }
           >
@@ -79,17 +79,17 @@ export function VerificationPanel({ defaults }: { defaults: Defaults }) {
       </div>
 
       {defaults.status === "REJECTED" && defaults.reviewNote && (
-        <div className="rounded-md border border-rose-500/30 bg-rose-500/5 px-3 py-2 text-xs text-rose-200">
+        <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
           <p className="font-medium">驳回原因</p>
-          <p className="mt-1 text-rose-200/90">{defaults.reviewNote}</p>
+          <p className="mt-1 text-destructive/90">{defaults.reviewNote}</p>
         </div>
       )}
 
       {defaults.status === "PENDING" && (
-        <div className="rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-200">
+        <div className="rounded-md border border-tag-amber-fg/30 bg-tag-amber-bg/5 px-3 py-2 text-xs text-tag-amber-fg">
           申请已提交，请耐心等待管理员审核。
           {defaults.submittedAt && (
-            <span className="ml-1 text-amber-200/70">
+            <span className="ml-1 text-tag-amber-fg/70">
               提交于 {new Date(defaults.submittedAt).toISOString().slice(0, 10)}
             </span>
           )}
@@ -97,7 +97,7 @@ export function VerificationPanel({ defaults }: { defaults: Defaults }) {
       )}
 
       {defaults.status === "APPROVED" && (
-        <div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-200">
+        <div className="rounded-md border border-tag-emerald-fg/30 bg-tag-emerald-bg/5 px-3 py-2 text-xs text-tag-emerald-fg">
           认证已通过。如企业资料发生变更，可重新提交资料触发再次审核。
         </div>
       )}
@@ -110,8 +110,8 @@ export function VerificationPanel({ defaults }: { defaults: Defaults }) {
           <div
             className={
               state.ok
-                ? "rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300"
-                : "rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-300"
+                ? "rounded-md border border-tag-emerald-fg/30 bg-tag-emerald-bg/10 px-3 py-2 text-xs text-tag-emerald-fg"
+                : "rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"
             }
           >
             {state.message}

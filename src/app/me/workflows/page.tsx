@@ -246,7 +246,7 @@ function RowActions({
       {!hasSales && (
         <form action={deleteWorkflowItemAction}>
           <input type="hidden" name="id" value={id} />
-          <button className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-[11px] text-rose-300 hover:bg-rose-500/20">
+          <button className="rounded-full border border-destructive/30 bg-destructive/10 px-2 py-1 text-[11px] text-destructive hover:bg-destructive/20">
             删除
           </button>
         </form>

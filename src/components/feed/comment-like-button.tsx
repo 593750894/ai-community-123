@@ -89,8 +89,8 @@ export function CommentLikeButton({
       className={cn(
         "inline-flex h-6 items-center gap-1 rounded-full border px-2 text-[11px] tabular-nums transition-colors disabled:opacity-70",
         isActive
-          ? "border-rose-500/40 bg-rose-500/15 text-rose-300"
-          : "border-border bg-transparent text-muted-foreground hover:border-rose-500/40 hover:text-rose-300",
+          ? "border-destructive/40 bg-destructive/15 text-destructive"
+          : "border-border bg-transparent text-muted-foreground hover:border-destructive/40 hover:text-destructive",
       )}
       title={error ?? (isActive ? "取消点赞" : "点赞")}
     >

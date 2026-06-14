@@ -91,7 +91,7 @@ function ChangePasswordForm() {
           <span
             className={
               message.tone === "ok"
-                ? "text-xs text-emerald-300"
+                ? "text-xs text-tag-emerald-fg"
                 : "text-xs text-rose-400"
             }
           >
@@ -170,7 +170,7 @@ function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
           <span
             className={
               message.tone === "ok"
-                ? "text-xs text-emerald-300"
+                ? "text-xs text-tag-emerald-fg"
                 : "text-xs text-rose-400"
             }
           >

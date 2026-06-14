@@ -53,7 +53,7 @@ export function DeleteCommentButton({
       onClick={onClick}
       disabled={pending}
       title={error ?? "删除"}
-      className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:bg-rose-500/10 hover:text-rose-300 disabled:opacity-50"
+      className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
     >
       <Trash2 className="size-3" />
       删除

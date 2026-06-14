@@ -36,9 +36,9 @@ export default async function SettingsAccountPage() {
         <PasswordEmailForm currentEmail={user.email} />
       </section>
 
-      <section className="rounded-2xl border border-rose-500/30 bg-rose-500/5 p-5">
-        <h2 className="mb-1 text-sm font-medium text-rose-200">注销账户</h2>
-        <ul className="mb-4 list-disc space-y-1 pl-4 text-xs text-rose-200/80">
+      <section className="rounded-2xl border border-destructive/30 bg-destructive/5 p-5">
+        <h2 className="mb-1 text-sm font-medium text-destructive">注销账户</h2>
+        <ul className="mb-4 list-disc space-y-1 pl-4 text-xs text-destructive/80">
           <li>注销后该账号无法再登录，其他设备的登录态立即失效。</li>
           <li>
             个人资料（昵称 / 头像 / 简介 / 联系方式 / 作品链接）会被清空，

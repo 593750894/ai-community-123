@@ -61,7 +61,7 @@ export default async function OrganizationSettingsPage({
 
       <div className="space-y-6 px-4 py-5 sm:px-8 sm:py-6">
         {sp.created === "1" && (
-          <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300">
+          <div className="rounded-md border border-tag-emerald-fg/30 bg-tag-emerald-bg/10 px-3 py-2 text-xs text-tag-emerald-fg">
             企业已创建。可继续完善信息或前往成员页邀请伙伴。
           </div>
         )}
@@ -109,8 +109,8 @@ export default async function OrganizationSettingsPage({
           )}
         </section>
 
-        <section className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4">
-          <h2 className="mb-2 text-sm font-medium text-rose-300">高级操作</h2>
+        <section className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+          <h2 className="mb-2 text-sm font-medium text-destructive">高级操作</h2>
           {isOwner ? (
             <form
               action={deleteOrganizationAction}
@@ -118,12 +118,12 @@ export default async function OrganizationSettingsPage({
             >
               <input type="hidden" name="id" value={org.id} />
               <div>
-                <p className="text-xs text-rose-300">解散企业</p>
-                <p className="text-[11px] text-rose-200/80">
+                <p className="text-xs text-destructive">解散企业</p>
+                <p className="text-[11px] text-destructive/80">
                   解散后所有成员资格、邀请记录均会被移除，操作不可恢复。
                 </p>
               </div>
-              <button className="rounded-full border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs text-rose-200 hover:bg-rose-500/25">
+              <button className="rounded-full border border-destructive/40 bg-destructive/15 px-3 py-1.5 text-xs text-destructive hover:bg-destructive/25">
                 解散企业
               </button>
             </form>
@@ -134,12 +134,12 @@ export default async function OrganizationSettingsPage({
             >
               <input type="hidden" name="id" value={org.id} />
               <div>
-                <p className="text-xs text-rose-300">退出企业</p>
-                <p className="text-[11px] text-rose-200/80">
+                <p className="text-xs text-destructive">退出企业</p>
+                <p className="text-[11px] text-destructive/80">
                   退出后将失去管理员权限。重新加入需所有者再次邀请。
                 </p>
               </div>
-              <button className="rounded-full border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs text-rose-200 hover:bg-rose-500/25">
+              <button className="rounded-full border border-destructive/40 bg-destructive/15 px-3 py-1.5 text-xs text-destructive hover:bg-destructive/25">
                 退出企业
               </button>
             </form>

@@ -221,8 +221,8 @@ export default async function CollaborationDetailPage({
 
           {/* 发布者操作（仅发布者可见） */}
           {isOwner && (
-            <section className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5">
-              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-amber-200">
+            <section className="rounded-2xl border border-tag-amber-fg/30 bg-tag-amber-bg/5 p-5">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-tag-amber-fg">
                 <ShieldCheck className="size-4" />
                 发布者操作
               </div>

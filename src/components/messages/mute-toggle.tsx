@@ -68,7 +68,7 @@ export function MuteToggle({
           {pending ? (
             <Loader2 className="size-3.5 animate-spin" />
           ) : (
-            <BellOff className="size-3.5 text-amber-300" />
+            <BellOff className="size-3.5 text-tag-amber-fg" />
           )}
           免打扰 {mutedHours > 0 ? `(${mutedHours}h)` : ""}
         </Button>

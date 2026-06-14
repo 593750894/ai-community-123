@@ -186,13 +186,13 @@ export default async function CollaborationPage({
             label="开放中需求"
             value={stats.openCount}
             icon={Briefcase}
-            tone="text-emerald-300"
+            tone="text-tag-emerald-fg"
           />
           <StatCard
             label="本周新发布"
             value={stats.weekCount}
             icon={Clock}
-            tone="text-cyan-300"
+            tone="text-tag-cyan-fg"
           />
           <StatCard
             label="累计合作"
@@ -204,7 +204,7 @@ export default async function CollaborationPage({
             label="平台创作者"
             value={stats.creatorCount}
             icon={UserPlus}
-            tone="text-amber-300"
+            tone="text-tag-amber-fg"
           />
         </section>
 

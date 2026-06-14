@@ -239,7 +239,7 @@ export function MessageBubble({
                 }}
               />
               {errorMsg && (
-                <div className="text-[11px] text-rose-300">{errorMsg}</div>
+                <div className="text-[11px] text-destructive">{errorMsg}</div>
               )}
               <div className="flex items-center justify-end gap-1.5 text-[11px]">
                 <button
@@ -307,7 +307,7 @@ export function MessageBubble({
                     type="button"
                     onClick={() => void submitDelete()}
                     disabled={pending}
-                    className="inline-flex items-center gap-0.5 rounded px-1 py-0.5 hover:bg-rose-500/20"
+                    className="inline-flex items-center gap-0.5 rounded px-1 py-0.5 hover:bg-destructive/20"
                     title={canRecallSelf ? "撤回（仅 2 分钟内）" : "删除该消息"}
                   >
                     <Trash2 className="size-3" />
@@ -319,7 +319,7 @@ export function MessageBubble({
           </div>
         </div>
         {errorMsg && !isEditing && (
-          <div className="mt-1 text-[10px] text-rose-300">{errorMsg}</div>
+          <div className="mt-1 text-[10px] text-destructive">{errorMsg}</div>
         )}
       </div>
     </div>
@@ -343,7 +343,7 @@ function MessageContent({ text }: { text: string }) {
       <a
         key={`m-${key++}`}
         href={`/u/${username}`}
-        className="font-medium text-sky-300 hover:underline"
+        className="font-medium text-tag-blue-fg hover:underline"
       >
         @{username}
       </a>,

@@ -95,7 +95,7 @@ export function ReportDialog({
             id="report-dialog-title"
             className="flex items-center gap-2 tracking-tight"
           >
-            <Flag className="size-4 text-rose-300" />
+            <Flag className="size-4 text-destructive" />
             举报{REPORT_TARGET_LABEL[targetType] ?? "内容"}
           </DialogTitle>
           <p className="text-xs text-muted-foreground">
@@ -105,7 +105,7 @@ export function ReportDialog({
 
         {done ? (
           <DialogBody>
-            <div className="rounded-md border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+            <div className="rounded-md border border-tag-emerald-fg/40 bg-tag-emerald-bg/10 px-4 py-3 text-sm text-tag-emerald-fg">
               已收到你的举报，管理员会尽快处理。
             </div>
           </DialogBody>
@@ -173,7 +173,7 @@ export function ReportDialog({
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex h-9 items-center justify-center rounded-full bg-rose-500/90 px-4 text-sm font-medium text-white transition-colors hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-9 items-center justify-center rounded-full bg-destructive/90 px-4 text-sm font-medium text-white transition-colors hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submitting ? "提交中…" : "提交举报"}
               </button>

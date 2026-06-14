@@ -60,7 +60,7 @@ export function ReportButton({
         type="button"
         onClick={onClick}
         className={cn(
-          "inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-rose-500/40 hover:text-rose-300",
+          "inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive",
           className,
         )}
       >
@@ -76,7 +76,7 @@ export function ReportButton({
         aria-label="举报"
         title="举报"
         className={cn(
-          "absolute right-2 top-2 z-10 inline-flex size-7 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:border-rose-500/40 hover:text-rose-300",
+          "absolute right-2 top-2 z-10 inline-flex size-7 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive",
           className,
         )}
       >
@@ -91,7 +91,7 @@ export function ReportButton({
         aria-label="举报"
         title="举报"
         className={cn(
-          "inline-flex h-7 items-center justify-center rounded-full border border-border bg-transparent px-2 text-[11px] text-muted-foreground transition-colors hover:border-rose-500/40 hover:text-rose-300",
+          "inline-flex h-7 items-center justify-center rounded-full border border-border bg-transparent px-2 text-[11px] text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive",
           className,
         )}
       >

@@ -46,7 +46,7 @@ export function GroupAddMembersForm({
       {state.message && state.ok && (
         <p
           role="status"
-          className="rounded-md border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300"
+          className="rounded-md border border-emerald-400/30 bg-tag-emerald-bg/10 px-3 py-2 text-xs text-tag-emerald-fg"
         >
           {state.message}
         </p>

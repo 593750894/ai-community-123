@@ -170,7 +170,7 @@ export function JoinChannelButton({
 
   const styleCls = isMember
     ? showLeave
-      ? "border-rose-500/50 bg-rose-500/15 text-rose-300"
+      ? "border-destructive/50 bg-destructive/15 text-destructive"
       : "border-border bg-card/70 text-foreground/85"
     : "border-transparent bg-primary text-primary-foreground hover:bg-primary/90";
 

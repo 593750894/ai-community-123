@@ -32,8 +32,8 @@ export function CommunityStatsCard({
 }) {
   const stats: StatItem[] = [
     { icon: Hash, label: "频道", value: channelCount, color: "text-violet-600 dark:text-violet-400" },
-    { icon: MessageSquare, label: "帖子", value: postCount, color: "text-cyan-700 dark:text-cyan-400" },
-    { icon: Users, label: "创作者", value: creatorCount, color: "text-emerald-700 dark:text-emerald-400" },
+    { icon: MessageSquare, label: "帖子", value: postCount, color: "text-tag-cyan-fg dark:text-cyan-400" },
+    { icon: Users, label: "创作者", value: creatorCount, color: "text-tag-emerald-fg dark:text-emerald-400" },
     { icon: CalendarPlus, label: "今日新帖", value: todayPostCount, color: "text-amber-600 dark:text-amber-400" },
   ];
 

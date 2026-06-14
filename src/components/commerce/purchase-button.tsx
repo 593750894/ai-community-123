@@ -156,7 +156,7 @@ export function PurchaseButton({
       </Button>
 
       {errorMsg && (
-        <p className="mt-2 text-[11px] text-rose-300">{errorMsg}</p>
+        <p className="mt-2 text-[11px] text-destructive">{errorMsg}</p>
       )}
       {disabled && disabledReason && (
         <p className="mt-2 text-[11px] text-muted-foreground">
