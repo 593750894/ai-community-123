@@ -187,17 +187,30 @@ export type OrderPaymentMethodValue = (typeof ORDER_PAYMENT_METHODS)[number];
  * 创建订单的入参。
  * Stage 10.2 仅支持 MEMBERSHIP（按 planSlug）+ WORKFLOW_PURCHASE（按 workflowItemId）。
  * COLLABORATION_DEPOSIT / CUSTOM 留待后续。
+ *
+ * Stage 16.2 加 clientNonce：可选，但客户端 SHOULD 提供。
+ * - 命名空间：per-user，所以前缀不需要包含 userId。
+ * - 字符集：URL-safe (alnum + - _)，长度 8-64。
+ * - 同 (userId, clientNonce) 复合唯一；命中既有 PENDING 单 → 返回原单。
  */
+const CLIENT_NONCE_FIELD = z
+  .string()
+  .trim()
+  .regex(/^[A-Za-z0-9_-]{8,64}$/, "clientNonce 格式非法")
+  .optional();
+
 export const CreateOrderSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("MEMBERSHIP"),
     planSlug: z.string().trim().min(1, "缺少计划标识").max(64),
     paymentMethod: z.enum(ORDER_PAYMENT_METHODS),
+    clientNonce: CLIENT_NONCE_FIELD,
   }),
   z.object({
     type: z.literal("WORKFLOW_PURCHASE"),
     workflowItemId: z.string().trim().min(1, "缺少商品 ID").max(64),
     paymentMethod: z.enum(ORDER_PAYMENT_METHODS),
+    clientNonce: CLIENT_NONCE_FIELD,
   }),
 ]);
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;

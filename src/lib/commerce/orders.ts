@@ -41,6 +41,51 @@ function stripTrailingSlash(s: string): string {
 }
 
 /**
+ * Stage 16.2：复用既有 clientNonce 订单。仅当 PENDING + 有 paymentUrl 时视为可复用，
+ * 否则视为同一 nonce 之前的某次创建已被取消 / 失败 / 不完整 → 让客户端拿新 intent 再下单。
+ */
+async function findOrderByNonce(
+  buyerId: string,
+  clientNonce: string,
+): Promise<CreateOrderResult | null> {
+  const existing = await prisma.order.findUnique({
+    where: {
+      userId_clientNonce: { userId: buyerId, clientNonce },
+    },
+    select: {
+      orderNo: true,
+      status: true,
+      amountCents: true,
+      currency: true,
+      expiresAt: true,
+      paymentMethod: true,
+      metadata: true,
+    },
+  });
+  if (!existing) return null;
+  if (existing.status !== "PENDING") {
+    throw new ConflictError("该请求已被处理，请刷新页面后重试");
+  }
+  const meta =
+    existing.metadata && typeof existing.metadata === "object" && !Array.isArray(existing.metadata)
+      ? (existing.metadata as Record<string, unknown>)
+      : {};
+  const paymentUrl =
+    typeof meta.paymentUrl === "string" ? meta.paymentUrl : null;
+  if (!paymentUrl || !existing.paymentMethod || !existing.expiresAt) {
+    throw new ConflictError("该请求已被处理，但订单数据缺失，请刷新页面后重试");
+  }
+  return {
+    orderNo: existing.orderNo,
+    paymentUrl,
+    amountCents: existing.amountCents,
+    currency: existing.currency,
+    expiresAt: existing.expiresAt,
+    paymentMethod: existing.paymentMethod,
+  };
+}
+
+/**
  * 订单号：YYYYMMDDHHMMSS（UTC）+ 8 位随机 hex；总长度 22。
  * 与 cuid 长度区间不重叠，方便正则区分。
  */
@@ -73,6 +118,14 @@ export async function createOrder(
   input: CreateOrderInput,
   baseUrl: string,
 ): Promise<CreateOrderResult> {
+  // ── 0. Stage 16.2：clientNonce 命中既有 PENDING 单 → 直接返回 ─────
+  // 同 (userId, clientNonce) 复合唯一，所以同一用户重发请求会落到这里。
+  // 命中非 PENDING（已 CANCELED / FAILED）则视为已被处理，让客户端刷新页面拿新 intent。
+  if (input.clientNonce) {
+    const replay = await findOrderByNonce(buyerId, input.clientNonce);
+    if (replay) return replay;
+  }
+
   // ── 1. 快照价格 / 校验业务规则 ─────────────────────────────
   let amountCents: number;
   let currency: string;
@@ -134,9 +187,13 @@ export async function createOrder(
   const now = new Date();
   const expiresAt = new Date(now.getTime() + ORDER_TTL_MS);
 
-  // ── 2. 落 PENDING 单（极小概率 orderNo 撞车，retry 一次） ───────
+  // ── 2. 落 PENDING 单 ─────────────────────────────────────────────
+  // 两类 P2002：
+  //   - target 含 client_nonce：并发请求抢先建了；重读返回胜出方（不算错）。
+  //   - target 含 order_no：极小概率 orderNo 撞车，换一个重试。
   let orderNo = generateOrderNo(now);
   let orderId: string | null = null;
+  let raceWinner: CreateOrderResult | null = null;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const created = await prisma.order.create({
@@ -151,6 +208,7 @@ export async function createOrder(
           workflowItemId,
           paymentMethod: input.paymentMethod,
           expiresAt,
+          clientNonce: input.clientNonce ?? null,
           metadata: sellerIdForMetadata
             ? ({ sellerId: sellerIdForMetadata } as Prisma.InputJsonValue)
             : Prisma.JsonNull,
@@ -165,12 +223,34 @@ export async function createOrder(
         err instanceof Prisma.PrismaClientKnownRequestError &&
         err.code === "P2002"
       ) {
+        const target = err.meta?.target;
+        const targetCols = Array.isArray(target)
+          ? (target as string[])
+          : typeof target === "string"
+            ? [target]
+            : [];
+        if (
+          input.clientNonce &&
+          targetCols.some((c) => c.includes("client_nonce"))
+        ) {
+          // 并发请求胜出；重读返回它（含 paymentUrl）。
+          const winner = await findOrderByNonce(buyerId, input.clientNonce);
+          if (winner) {
+            raceWinner = winner;
+            break;
+          }
+          // 极端情况下 P2002 后再 findFirst 又拿不到（事务隔离 / 视图不一致），
+          // 直接抛 Conflict 让客户端重试。
+          throw new ConflictError("订单创建竞态失败，请重试");
+        }
+        // orderNo 撞车（极少）：换一个重试
         orderNo = generateOrderNo();
         continue;
       }
       throw err;
     }
   }
+  if (raceWinner) return raceWinner;
   if (!orderId) throw new ConflictError("生成订单失败，请重试");
 
   // ── 3. 调 provider 拿付款链接 ───────────────────────────────

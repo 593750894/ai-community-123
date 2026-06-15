@@ -874,6 +874,10 @@ model Order {
   refundReason    String?        @map("refund_reason")
   refundedAt      DateTime?      @map("refunded_at")
   refundedById    String?        @map("refunded_by_id") // 操作退款的 admin id
+  // 阶段 16.2：客户端幂等键，防止双击 / 网络重试创建重复订单。
+  // 同 (userId, clientNonce) 复合唯一；NULL 不参与约束（PG NULL ≠ NULL 语义），
+  // 旧路径不传 nonce 时降级为非幂等的允许行为。
+  clientNonce     String?        @map("client_nonce")
   metadata        Json?
   createdAt       DateTime       @default(now()) @map("created_at")
   updatedAt       DateTime       @updatedAt @map("updated_at")
@@ -884,6 +888,7 @@ model Order {
   payout       Payout?
   refunds      Refund[]
 
+  @@unique([userId, clientNonce])
   @@index([userId, status])
   @@index([status, createdAt])
   @@index([type])

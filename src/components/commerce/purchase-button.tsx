@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { Coins, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,22 @@ import {
   SELECTABLE_PAYMENT_METHODS,
   type SelectablePaymentMethod,
 } from "@/lib/payments/registry";
+
+/**
+ * Stage 16.2：生成一次性幂等键。useMemo 锁定到购买意图维度——
+ * 同一组件实例 + 同一商品 = 同一 nonce（双击 / 网络重试 → 同一订单）；
+ * 路由跳转 / 不同商品 / 卸载重挂 = 新 nonce（新购买意图）。
+ *
+ * 字符集 alnum + `-`，长度 22-24，符合 server schema /^[A-Za-z0-9_-]{8,64}$/。
+ * 用 crypto.randomUUID 拼时间戳确保即使同毫秒多个实例也不重。
+ */
+function generateNonce(): string {
+  const rnd =
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID().replace(/-/g, "").slice(0, 16)
+      : Math.random().toString(36).slice(2, 18).padEnd(16, "0");
+  return `n${Date.now().toString(36)}${rnd}`.slice(0, 32);
+}
 
 type Payload =
   | { type: "MEMBERSHIP"; planSlug: string }
@@ -54,6 +70,18 @@ export function PurchaseButton({
   );
   const [pending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  // 锁定到 (type, id)：商品 / 计划变了 → 新 intent → 新 nonce；
+  // 同一 intent 重渲染 / 切支付方式 / 失败重试 → 同一 nonce → server 复用同一订单。
+  const intentKey =
+    payload.type === "MEMBERSHIP"
+      ? `m:${payload.planSlug}`
+      : `w:${payload.workflowItemId}`;
+  const clientNonce = useMemo(
+    () => generateNonce(),
+    // intentKey 是有意作 cache key 的 dep，body 不需要读它。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [intentKey],
+  );
 
   function onSubmit() {
     if (disabled) return;
@@ -71,7 +99,11 @@ export function PurchaseButton({
         const resp = await fetch("/api/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...payload, paymentMethod: method }),
+          body: JSON.stringify({
+            ...payload,
+            paymentMethod: method,
+            clientNonce,
+          }),
         });
         if (resp.status === 401) {
           const next =
