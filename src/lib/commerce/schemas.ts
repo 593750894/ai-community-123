@@ -56,11 +56,26 @@ export const CreateWorkflowItemSchema = z.object({
     .trim()
     .min(10, "描述至少 10 个字")
     .max(2000, "描述最多 2000 个字"),
-  coverUrl: z.string().url("封面必须是合法 URL").max(500).optional().nullable(),
+  coverUrl: z
+    .string()
+    .url("封面必须是合法 URL")
+    .max(500)
+    .refine(
+      (v) => v.startsWith("http://") || v.startsWith("https://"),
+      "封面链接必须以 http(s):// 开头",
+    )
+    .optional()
+    .nullable(),
+  // Stage 16.5：下载链接仅允许 http(s)，禁止 javascript: / data: / file: 等可在 302 Location 触发 XSS 的协议。
+  // 这里是 belt-and-suspenders 的「上传时拒绝」一侧；redeem 时还会再校验一次以兜底历史数据。
   downloadUrl: z
     .string()
     .url("下载链接必须是合法 URL")
     .max(500)
+    .refine(
+      (v) => v.startsWith("http://") || v.startsWith("https://"),
+      "下载链接必须以 http(s):// 开头",
+    )
     .optional()
     .nullable(),
   priceCents: z

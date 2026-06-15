@@ -290,6 +290,17 @@ export default async function AdminOrdersPage({
                         >
                           查看 →
                         </Link>
+                        {/* Stage 16.5：付费工作流 PAID 单显示下载兑换审计入口。
+                            REFUNDED 单也展示，便于事后排查「退款前下了几次」。 */}
+                        {o.type === "WORKFLOW_PURCHASE" &&
+                          (o.status === "PAID" || o.status === "REFUNDED") && (
+                            <Link
+                              href={`/admin/orders/${o.orderNo}/downloads`}
+                              className="text-[11px] text-muted-foreground hover:text-foreground hover:underline"
+                            >
+                              下载记录 →
+                            </Link>
+                          )}
                         {refundable && (
                           <RefundDialog
                             orderNo={o.orderNo}

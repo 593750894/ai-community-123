@@ -76,11 +76,10 @@ export default async function CheckoutPage({
           id: order.workflowItem.id,
           title: order.workflowItem.title,
           coverUrl: order.workflowItem.coverUrl,
-          // 仅 PAID 状态下暴露下载链接
-          downloadUrl:
-            order.status === "PAID"
-              ? order.workflowItem.downloadUrl
-              : null,
+          // Stage 16.5：不再把裸 URL 透传到 HTML。客户端拿到 downloadAvailable=true 后，
+          // 通过 POST /api/orders/{orderNo}/download-url 拿短期签名 URL 再跳转。
+          downloadAvailable:
+            order.status === "PAID" && order.workflowItem.downloadAvailable,
           seller: order.workflowItem.seller,
         }
       : null,

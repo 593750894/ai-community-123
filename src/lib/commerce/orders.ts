@@ -542,7 +542,12 @@ export interface OrderForViewer {
     id: string;
     title: string;
     coverUrl: string | null;
-    downloadUrl: string | null;
+    /**
+     * Stage 16.5：不再向调用方暴露原始 download_url。
+     * 仅返回「卖家是否已配置文件」的布尔，buyer UI 根据它决定是否渲染下载按钮；
+     * 实际 URL 通过 `POST /api/orders/{orderNo}/download-url` 签发短期 token 拿到。
+     */
+    downloadAvailable: boolean;
     seller: { id: string; username: string; name: string };
   } | null;
 }
@@ -576,6 +581,8 @@ export async function getOrderByNo(
           id: true,
           title: true,
           coverUrl: true,
+          // 仍然 SELECT 该字段以判定卖家是否上传了文件，但**不会**透传给调用方。
+          // 调用方只拿到 downloadAvailable: boolean — 真实 URL 仅通过签名 token 兑换。
           downloadUrl: true,
           seller: { select: { id: true, username: true, name: true } },
         },
@@ -586,7 +593,7 @@ export async function getOrderByNo(
   if (order.userId !== viewerId) {
     throw new ForbiddenError("订单仅本人可见");
   }
-  const { metadata, ...rest } = order;
+  const { metadata, workflowItem, ...rest } = order;
   const paymentUrl =
     metadata &&
     typeof metadata === "object" &&
@@ -594,7 +601,19 @@ export async function getOrderByNo(
     typeof (metadata as Record<string, unknown>).paymentUrl === "string"
       ? ((metadata as Record<string, unknown>).paymentUrl as string)
       : null;
-  return { ...rest, paymentUrl } as OrderForViewer;
+  return {
+    ...rest,
+    paymentUrl,
+    workflowItem: workflowItem
+      ? {
+          id: workflowItem.id,
+          title: workflowItem.title,
+          coverUrl: workflowItem.coverUrl,
+          downloadAvailable: Boolean(workflowItem.downloadUrl),
+          seller: workflowItem.seller,
+        }
+      : null,
+  } as OrderForViewer;
 }
 
 function orderTypeBranch(

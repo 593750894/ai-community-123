@@ -329,6 +329,9 @@ model User {
   // Stage 11.2：企业认证审核
   organizationsReviewed Organization[] @relation("OrgVerificationReviewer")
 
+  // Stage 16.5：付费下载 redeem 审计
+  downloadGrants        DownloadGrant[] @relation("DownloadGrantUser")
+
   @@index([status])
   @@index([role])
   @@map("users")
@@ -898,6 +901,7 @@ model Order {
   payout       Payout?
   refunds      Refund[]
   clawbacks    ClawbackRequest[]
+  downloadGrants DownloadGrant[]
 
   @@unique([userId, clientNonce])
   @@index([userId, status])
@@ -1030,6 +1034,32 @@ model WebhookEvent {
   @@index([orderNo])
   @@index([receivedAt])
   @@map("webhook_events")
+}
+
+/// Stage 16.5：付费下载 redeem 审计日志。
+///
+/// 不参与签名验证本身（HMAC 完全无状态），只记录每次成功 GET 兑换：方便事后排查滥用
+/// （"同一 IP 1 小时拉了 100 次"、"refund 后还在尝试"等）+ 给运营提供量化指标。
+///
+/// 关键不变量：本表只在 redeem 成功后写一行；token 验签失败 / 订单已 refund / 文件未配置
+/// 都不会留下 grant 记录（错误已通过 401/403/404 暴露给客户端）。
+model DownloadGrant {
+  id            String   @id @default(cuid())
+  orderId       String   @map("order_id")
+  userId        String   @map("user_id")
+  tokenNonce    String   @map("token_nonce")
+  issuedAt      DateTime @map("issued_at")
+  expiresAt     DateTime @map("expires_at")
+  redeemedAt    DateTime @default(now()) @map("redeemed_at")
+  ip            String?
+  userAgentHash String?  @map("user_agent_hash")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User  @relation("DownloadGrantUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, redeemedAt(sort: Desc)])
+  @@index([userId, redeemedAt(sort: Desc)])
+  @@map("download_grants")
 }
 
 // ═════════════════════════════════════════════════════════════════

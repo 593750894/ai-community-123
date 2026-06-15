@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Receipt } from "lucide-react";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { SignedDownloadLink } from "@/components/commerce/signed-download-link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { MoneyText } from "@/components/ui/money-text";
@@ -184,21 +185,30 @@ export default async function MyOrdersPage({ searchParams }: PageProps) {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right text-xs">
-                        {o.status === "PENDING" ? (
-                          <Link
-                            href={`/checkout/${o.orderNo}`}
-                            className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] text-primary hover:bg-primary/20"
-                          >
-                            去支付
-                          </Link>
-                        ) : (
-                          <Link
-                            href={`/checkout/${o.orderNo}`}
-                            className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                          >
-                            详情
-                          </Link>
-                        )}
+                        <div className="flex flex-col items-end gap-1">
+                          {o.status === "PENDING" ? (
+                            <Link
+                              href={`/checkout/${o.orderNo}`}
+                              className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] text-primary hover:bg-primary/20"
+                            >
+                              去支付
+                            </Link>
+                          ) : (
+                            <Link
+                              href={`/checkout/${o.orderNo}`}
+                              className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                            >
+                              详情
+                            </Link>
+                          )}
+                          {/* Stage 16.5：仅 PAID + 未退款 + 卖家已上传文件，显示下载入口；
+                              真实 URL 通过签名 token 兑换，不在 HTML 中。 */}
+                          {o.status === "PAID" &&
+                            o.refundCents === 0 &&
+                            o.workflowItem?.downloadAvailable && (
+                              <SignedDownloadLink orderNo={o.orderNo} />
+                            )}
+                        </div>
                       </td>
                     </tr>
                   );

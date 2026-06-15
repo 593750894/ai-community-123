@@ -40,6 +40,11 @@ export interface OrderListRow {
   workflowItem: {
     id: string;
     title: string;
+    /**
+     * Stage 16.5：卖家是否已上传文件（即 download_url 非空）。
+     * 实际 URL 不在这里下发；前端通过 POST /api/orders/{orderNo}/download-url 取短期签名 URL。
+     */
+    downloadAvailable: boolean;
     seller: { id: string; name: string; username: string };
   } | null;
 }
@@ -55,6 +60,8 @@ const LIST_INCLUDE = {
     select: {
       id: true,
       title: true,
+      // 仅用于派生 downloadAvailable; URL 本身不会进入返回 payload。
+      downloadUrl: true,
       seller: { select: { id: true, name: true, username: true } },
     },
   },
@@ -78,7 +85,14 @@ function shapeRow(o: OrderRow): OrderListRow {
     createdAt: o.createdAt,
     buyer: o.user,
     plan: o.plan,
-    workflowItem: o.workflowItem,
+    workflowItem: o.workflowItem
+      ? {
+          id: o.workflowItem.id,
+          title: o.workflowItem.title,
+          downloadAvailable: Boolean(o.workflowItem.downloadUrl),
+          seller: o.workflowItem.seller,
+        }
+      : null,
   };
 }
 

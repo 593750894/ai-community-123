@@ -50,7 +50,11 @@ export interface CheckoutOrderView {
     id: string;
     title: string;
     coverUrl: string | null;
-    downloadUrl: string | null;
+    /**
+     * Stage 16.5：是否可以触发下载（卖家已上传文件 + 订单 PAID）。
+     * 真实 URL 不再透传到客户端 — 点击下载按钮时 POST /api/orders/.../download-url 拿短期签名 URL。
+     */
+    downloadAvailable: boolean;
     seller: { id: string; username: string; name: string };
   } | null;
 }
@@ -291,23 +295,10 @@ export function CheckoutPanel({ order: initial, provider, mockEnabled }: Props) 
                   前往个人中心
                 </Button>
               )}
-              {order.workflowItem?.downloadUrl && (
-                <Button
-                  className="w-full"
-                  nativeButton={false}
-                  render={
-                    <a
-                      href={order.workflowItem.downloadUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    />
-                  }
-                >
-                  <ExternalLink className="size-3.5" />
-                  下载工作流
-                </Button>
+              {order.workflowItem?.downloadAvailable && (
+                <SignedDownloadButton orderNo={order.orderNo} />
               )}
-              {order.workflowItem && !order.workflowItem.downloadUrl && (
+              {order.workflowItem && !order.workflowItem.downloadAvailable && (
                 <p className="text-[11px] text-muted-foreground">
                   卖家尚未提供下载链接，请稍后再来查看。
                 </p>
@@ -507,4 +498,62 @@ function labelForCycle(c: string): string {
     default:
       return c;
   }
+}
+
+/**
+ * Stage 16.5：付费下载按钮。点击 → POST /api/orders/{orderNo}/download-url 拿短期签名 URL → 当前窗口跳转。
+ *
+ * 不在挂载时预签发：避免页面打开就在审计 / 限流上「白白消耗」一次 mint。
+ * 出错时把错误信息以小字呈现，不打断 UI。
+ */
+function SignedDownloadButton({ orderNo }: { orderNo: string }) {
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <div className="space-y-1.5">
+      <Button
+        type="button"
+        className="w-full"
+        disabled={pending}
+        onClick={async () => {
+          setPending(true);
+          setError(null);
+          try {
+            const resp = await fetch(`/api/orders/${orderNo}/download-url`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+            });
+            const body = (await resp.json()) as
+              | { success: true; data: { url: string; expiresAt: string } }
+              | { success: false; error: { code: string; message: string } };
+            if (!resp.ok || body.success !== true) {
+              const msg =
+                (body as { error?: { message?: string } }).error?.message ??
+                "签发下载链接失败，请稍后再试";
+              setError(msg);
+              return;
+            }
+            // 跳转到签名 URL，浏览器自动跟随服务端 302 到卖家裸 URL。
+            window.location.href = body.data.url;
+          } catch (err) {
+            setError(
+              err instanceof Error ? err.message : "网络异常，请稍后再试",
+            );
+          } finally {
+            setPending(false);
+          }
+        }}
+      >
+        {pending ? (
+          <Loader2 className="size-3.5 animate-spin" />
+        ) : (
+          <ExternalLink className="size-3.5" />
+        )}
+        下载工作流
+      </Button>
+      {error && (
+        <p className="text-[11px] text-destructive">{error}</p>
+      )}
+    </div>
+  );
 }
