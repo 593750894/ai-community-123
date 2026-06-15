@@ -97,6 +97,14 @@ export interface WebhookEvent {
   amountCents: number;
   paidAt: Date;
   raw: unknown;
+  /**
+   * 阶段 16.1：provider 提供的 webhook 唯一 ID，用于 webhook_events 表去重。
+   * - MOCK: `${orderNo}|${transactionId}|${paidAt.toISOString()}`
+   * - WECHAT_PAY: v3 通知 body.id（每次重发同一事件保持不变）
+   * - ALIPAY: 异步通知 params.notify_id
+   * 缺失（极少数 UNKNOWN 事件类型）时回退用 rawBodyHash 兜底，但应尽量在 provider 内提供。
+   */
+  providerEventId: string;
 }
 
 export interface PaymentProvider {

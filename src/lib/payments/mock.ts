@@ -117,6 +117,10 @@ export const mockProvider: PaymentProvider = {
         amountCents: body.amountCents,
         paidAt: paidAtDate,
         raw: body,
+        // 阶段 16.1：同一笔 mock 回调（相同签名 canonical）的 providerEventId 完全确定。
+        // 攻击者要构造新 eventId 必须改 orderNo / transactionId / paidAt 任一字段，
+        // 但任一改动都会让签名失败，所以 dedup 表足够阻止 mock 重放。
+        providerEventId: `${body.orderNo}|${body.transactionId}|${paidAtDate.toISOString()}`,
       };
     } catch {
       return null;

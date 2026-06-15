@@ -445,6 +445,7 @@ export const wechatProvider: PaymentProvider = {
       return null;
     }
     let body: {
+      id?: string;
       event_type?: string;
       resource?: {
         ciphertext?: string;
@@ -458,6 +459,9 @@ export const wechatProvider: PaymentProvider = {
       return null;
     }
     if (!body.resource?.ciphertext || !body.resource.nonce) return null;
+    // 阶段 16.1：top-level body.id 是 v3 通知的全局唯一 ID；重发同一事件保持不变。
+    // 缺失则视为非法通知（生产环境微信必然返回，缺失通常意味着伪造）。
+    if (!body.id) return null;
     let plain: string;
     try {
       plain = decryptWechatResource({
@@ -504,6 +508,7 @@ export const wechatProvider: PaymentProvider = {
       amountCents: resource.amount.total,
       paidAt,
       raw: resource,
+      providerEventId: body.id,
     };
   },
 };

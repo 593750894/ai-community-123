@@ -947,6 +947,36 @@ model Payout {
   @@map("payouts")
 }
 
+/// 阶段 16.1：支付回调幂等表。每个第三方网关投递的 webhook 在被处理前先 upsert 此表，
+/// 复合唯一 (provider, providerEventId) 保证重复投递只命中一次 markOrderPaid。
+///
+/// providerEventId 来源：
+///   - MOCK：`${orderNo}|${transactionId}|${paidAt.toISOString()}`（mockProvider 的 signed canonical 决定确定性）
+///   - WECHAT_PAY：top-level body.id（v3 通知的 unique ID）
+///   - ALIPAY：params.notify_id（异步通知的 unique ID）
+///
+/// 为什么用单独的表而不是 Order 字段：
+///   1. 同一订单可能收到 ORDER_PAID + 后续 REFUNDED 多类事件，不能用 orderNo 单字段去重。
+///   2. webhook 早于业务表 markOrderPaid，dedup 必须在 PSP 验签后、业务处理前完成。
+///   3. 表作为 ops 审计源（"我们到底收到过这条 webhook 吗？"），独立于 Order 生命周期。
+///
+/// rawBodyHash 用于事后取证（与 PSP 重发对账时确认 body 字节级一致），不参与去重。
+model WebhookEvent {
+  id              String   @id @default(cuid())
+  provider        String // MOCK / WECHAT_PAY / ALIPAY
+  providerEventId String   @map("provider_event_id")
+  orderNo         String?  @map("order_no")
+  eventType       String   @map("event_type") // ORDER_PAID / ORDER_REFUNDED / UNKNOWN
+  rawBodyHash     String   @map("raw_body_hash") // sha256(raw) hex
+  receivedAt      DateTime @default(now()) @map("received_at")
+  processedAt     DateTime? @map("processed_at") // markOrderPaid 完成时间；null = 验签通过但业务处理失败 / 跳过
+
+  @@unique([provider, providerEventId])
+  @@index([orderNo])
+  @@index([receivedAt])
+  @@map("webhook_events")
+}
+
 // ═════════════════════════════════════════════════════════════════
 //                  Organization (企业账号) stub
 // ═════════════════════════════════════════════════════════════════

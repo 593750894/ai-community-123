@@ -313,6 +313,25 @@ export const alipayProvider: PaymentProvider = {
     const cfg = loadConfig();
     if (!cfg) return null;
     if (params.app_id !== cfg.appId) return null;
+
+    // 阶段 16.1：notify_id 是支付宝异步通知的全局唯一 ID，同一事件重发保持不变。
+    // 缺失视为非法通知（生产支付宝必然返回）。providerEventId 也用它，与 webhook_events 去重表挂钩。
+    const notifyId = params.notify_id;
+    if (!notifyId) return null;
+
+    // 阶段 16.1：notify_time staleness defense-in-depth。webhook_events 去重表是主要防线，
+    // 但 dedup 表清理后被远期 replay 仍可绕过——5min 窗口拒收明显过期的捕获回调。
+    // 支付宝商户时区默认 +08:00；notify_time 格式 "YYYY-MM-DD HH:mm:ss"。
+    if (params.notify_time) {
+      const notifyTs = new Date(params.notify_time.replace(" ", "T") + "+08:00");
+      if (
+        !Number.isNaN(notifyTs.getTime()) &&
+        Math.abs(Date.now() - notifyTs.getTime()) > 5 * 60 * 1000
+      ) {
+        return null;
+      }
+    }
+
     const tradeStatus = params.trade_status;
     const orderNo = params.out_trade_no;
     const tradeNo = params.trade_no;
@@ -336,6 +355,7 @@ export const alipayProvider: PaymentProvider = {
       amountCents,
       paidAt,
       raw: params,
+      providerEventId: notifyId,
     };
   },
 };
