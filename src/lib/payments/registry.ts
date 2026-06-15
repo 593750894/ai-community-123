@@ -17,7 +17,11 @@ import type { PaymentProvider, ProviderId } from "./types";
  */
 
 const WEBHOOK_REGISTRY = new Map<string, PaymentProvider>();
-if (IS_MOCK_ENABLED) WEBHOOK_REGISTRY.set("MOCK", mockProvider);
+if (IS_MOCK_ENABLED) {
+  WEBHOOK_REGISTRY.set("MOCK", mockProvider);
+  // 启动日志便于运维核对：mock 在 prod 启用是高风险配置，应在 boot log 中显眼。
+  console.warn("[payments] mock provider registered (PAYMENT_MOCK_ENABLED=true)");
+}
 if (IS_WECHAT_ENABLED) WEBHOOK_REGISTRY.set("WECHAT_PAY", wechatProvider);
 if (IS_ALIPAY_ENABLED) WEBHOOK_REGISTRY.set("ALIPAY", alipayProvider);
 

@@ -1,5 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+import { env } from "@/lib/env";
+
 import type {
   CreateChargeInput,
   CreateChargeResult,
@@ -15,29 +17,19 @@ import type {
  * Stage 10.3 上线真实微信 / 支付宝后，mock 仍可用于 e2e 测试（需显式开启）。
  *
  * Gate（关键安全约束）：
- * - 默认仅在 NODE_ENV !== "production" 启用。
- * - 生产环境必须显式设置 PAYMENT_MOCK_ENABLED=true 才会启用，并且必须设置
- *   PAYMENT_MOCK_SECRET（否则启动期抛错）。
- * - 启动期校验在模块加载时执行；若违反约束直接抛错让进程拒绝起。
+ * - 必须显式 PAYMENT_MOCK_ENABLED=true 才启用，**无论 NODE_ENV**。
+ *   旧实现的「非 production 自动启用」在 staging / preview 部署会被滥用：
+ *   攻击者构造 HMAC 即可把任意 orderNo 置为 PAID。
+ * - 启用时必须配 PAYMENT_MOCK_SECRET（env.ts 已 fail-fast 校验 ≥16 字符）；
+ *   不再有 `seedland-dev-mock-secret` 回退。
+ * - 关闭时（默认）mockProvider 仍被 export，但 registry 不注册，所有 webhook 验签直接 fail。
  *
  * Webhook 签名：HMAC-SHA256(secret, "orderNo=...&amountCents=...&transactionId=...&paidAt=...")
  * paidAt 必填且参与签名 → 同一订单的回调不可被改写时间戳重放。
  */
 
-const IS_PRODUCTION = process.env.NODE_ENV === "production";
-const MOCK_SECRET_RAW = process.env.PAYMENT_MOCK_SECRET ?? "";
-export const IS_MOCK_ENABLED =
-  process.env.PAYMENT_MOCK_ENABLED === "true" || !IS_PRODUCTION;
-
-if (IS_PRODUCTION && IS_MOCK_ENABLED && !MOCK_SECRET_RAW) {
-  // 拒绝启动：避免回退到 dev 默认 secret 被攻击者用于伪造任何订单的 PAID 回调。
-  throw new Error(
-    "PAYMENT_MOCK_ENABLED=true requires PAYMENT_MOCK_SECRET to be set in production.",
-  );
-}
-
-const MOCK_SECRET =
-  MOCK_SECRET_RAW || (IS_PRODUCTION ? "" : "seedland-dev-mock-secret");
+export const IS_MOCK_ENABLED = env.PAYMENT_MOCK_ENABLED;
+const MOCK_SECRET = env.PAYMENT_MOCK_SECRET ?? "";
 
 export interface MockSignablePayload {
   orderNo: string;

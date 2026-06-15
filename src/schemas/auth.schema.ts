@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// 不接受 role 字段：注册一律落 DB 默认值 USER；提权由 /admin/users PATCH 走 requireAdmin。
 export const RegisterApiSchema = z.object({
   email: z.email("请输入有效邮箱"),
   password: z
@@ -12,7 +13,6 @@ export const RegisterApiSchema = z.object({
     .string()
     .min(1, "请输入昵称")
     .max(40, "昵称最多 40 个字符"),
-  role: z.enum(["USER", "MOD", "ADMIN"]).optional(),
   bio: z.string().max(280, "简介最多 280 个字符").optional(),
 });
 

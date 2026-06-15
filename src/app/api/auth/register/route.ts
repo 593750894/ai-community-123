@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       throw new ValidationError("参数校验失败", parsed.error.flatten().fieldErrors);
     }
 
-    const { email, password, name, role, bio } = parsed.data;
+    const { email, password, name, bio } = parsed.data;
     const passwordHash = await hashPassword(password);
     const username = generateUsername(email);
 
@@ -30,7 +30,6 @@ export async function POST(request: Request) {
         name,
         passwordHash,
         avatar: `https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(username)}`,
-        ...(role && { role }),
         ...(bio && { bio }),
       },
       select: {
@@ -53,7 +52,9 @@ export async function POST(request: Request) {
       err instanceof Prisma.PrismaClientKnownRequestError &&
       err.code === "P2002"
     ) {
-      return error(new ConflictError("该邮箱已被注册"));
+      // 不区分 email / username，避免账号枚举（用户名随机生成，碰撞极少；
+      // 真实业务上 P2002 几乎总是 email 冲突，但 API 不主动确认这一点）。
+      return error(new ConflictError("该邮箱或用户名已被使用"));
     }
     return error(err);
   }

@@ -3,6 +3,7 @@ import { SignJWT, jwtVerify } from "jose";
 
 import { prisma } from "@/lib/db";
 import type { User } from "@/lib/db";
+import { env } from "@/lib/env";
 
 export const SESSION_COOKIE = "seedland_session";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -15,14 +16,11 @@ export interface SessionPayload {
   // exp 由 jose 自动写入
 }
 
+// env.AUTH_SECRET_KEY 是已 base64 解码的 32 字节 Buffer（Uint8Array 兼容）。
+// 旧实现 `new TextEncoder().encode(raw)` 把 base64 字符串当 UTF-8 字节，
+// 有效熵被压缩；jose 仍接受但密钥强度低于 .env.example 声称的 32B。
 function getSecretKey(): Uint8Array {
-  const raw = process.env.AUTH_SECRET;
-  if (!raw) {
-    throw new Error(
-      "AUTH_SECRET is not set. Add it to web/.env (base64-encoded 32 bytes).",
-    );
-  }
-  return new TextEncoder().encode(raw);
+  return env.AUTH_SECRET_KEY;
 }
 
 /**

@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 
 import { expireStalePendingOrders } from "@/lib/commerce/orders";
+import { env } from "@/lib/env";
 import { error, success } from "@/lib/response";
 import { ForbiddenError } from "@/lib/errors";
 
@@ -18,7 +19,7 @@ import { ForbiddenError } from "@/lib/errors";
  *  - 外部 cron / 手动：`curl -X POST -H "Authorization: Bearer $CRON_SECRET" .../api/cron/expire-orders`
  */
 async function handle(request: Request): Promise<Response> {
-  const secret = process.env.CRON_SECRET;
+  const secret = env.CRON_SECRET;
   if (!secret) throw new ForbiddenError("cron 未启用");
   const auth = request.headers.get("authorization") ?? "";
   const provided = auth.startsWith("Bearer ") ? auth.slice(7) : "";

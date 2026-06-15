@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 
 import { finalizePendingPayouts } from "@/lib/commerce/payouts";
+import { env } from "@/lib/env";
 import { ForbiddenError } from "@/lib/errors";
 import { error, success } from "@/lib/response";
 
@@ -13,7 +14,7 @@ import { error, success } from "@/lib/response";
  * 建议调度间隔：每 5-10 分钟。冷藏期为 7 天，对短时间 jitter 不敏感。
  */
 async function handle(request: Request): Promise<Response> {
-  const secret = process.env.CRON_SECRET;
+  const secret = env.CRON_SECRET;
   if (!secret) throw new ForbiddenError("cron 未启用");
   const auth = request.headers.get("authorization") ?? "";
   const provided = auth.startsWith("Bearer ") ? auth.slice(7) : "";

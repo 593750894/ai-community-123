@@ -78,16 +78,8 @@ export async function registerAction(
       err instanceof Prisma.PrismaClientKnownRequestError &&
       err.code === "P2002"
     ) {
-      const target = (err.meta?.target as string[] | undefined) ?? [];
-      const field = target.includes("email") ? "email" : "username";
-      return {
-        ok: false,
-        fieldErrors: {
-          [field]: [
-            field === "email" ? "该邮箱已被注册" : "该用户名已被占用",
-          ],
-        },
-      };
+      // 不暴露具体冲突字段，避免账号枚举（攻击者可借此探测目标邮箱 / 用户名是否注册）。
+      return { ok: false, message: "该邮箱或用户名已被使用" };
     }
     return { ok: false, message: "注册失败，请稍后重试" };
   }
