@@ -200,6 +200,14 @@ enum RefundStatus {
   FAILED // PSP 拒绝
 }
 
+/// 阶段 16.4：Payout 已 PAID 后买家退款产生的应收（卖家欠平台）。
+enum ClawbackStatus {
+  PENDING // 等待 ops 处理
+  DEDUCTED // 已从卖家未来某笔 payout 净额扣除
+  MANUAL // 线下追回 / 协商（不走自动扣除）
+  WAIVED // 平台决定吃下不追讨
+}
+
 enum PaymentMethod {
   WECHAT_PAY
   ALIPAY
@@ -309,6 +317,8 @@ model User {
   workflowItemsAsSeller   WorkflowItem[]       @relation("WorkflowItemSeller")
   payoutsAsSeller         Payout[]             @relation("PayoutSeller")
   refundsInitiated        Refund[]             @relation("RefundCreator")
+  clawbacksAsSeller       ClawbackRequest[]    @relation("ClawbackSeller")
+  clawbacksResolved       ClawbackRequest[]    @relation("ClawbackResolver")
   organizationMemberships OrganizationMember[]
 
   // Stage 11.1：企业 / Organization
@@ -882,11 +892,12 @@ model Order {
   createdAt       DateTime       @default(now()) @map("created_at")
   updatedAt       DateTime       @updatedAt @map("updated_at")
 
-  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan         MembershipPlan? @relation(fields: [planId], references: [id])
-  workflowItem WorkflowItem?   @relation(fields: [workflowItemId], references: [id])
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan         MembershipPlan?   @relation(fields: [planId], references: [id])
+  workflowItem WorkflowItem?     @relation(fields: [workflowItemId], references: [id])
   payout       Payout?
   refunds      Refund[]
+  clawbacks    ClawbackRequest[]
 
   @@unique([userId, clientNonce])
   @@index([userId, status])
@@ -910,12 +921,50 @@ model Refund {
   createdAt        DateTime     @default(now()) @map("created_at")
   finishedAt       DateTime?    @map("finished_at")
 
-  order     Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  createdBy User  @relation("RefundCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  order     Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdBy User              @relation("RefundCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  clawback  ClawbackRequest?
 
   @@index([orderId, createdAt])
   @@index([status, createdAt])
   @@map("refunds")
+}
+
+/// 阶段 16.4：已分润后退款的应收。
+/// 触发条件：refundOrder SUCCESS 时，关联 Payout 已是 PAID → 卖家已实际收到这笔钱，
+/// 但买家要回去了 → 平台垫资。建一行 PENDING ClawbackRequest 让 ops 追讨 / 扣减下次结算。
+///
+/// 设计选择：本表只「记录欠款」，不强制自动扣减。
+/// - 自动从下次 payout.netCents 扣是更激进的设计，但有合理性边界（同一卖家可能开了多个店、
+///   平台政策也可能允许部分豁免），MVP 让 ops 手动决策，记录在本表 status + note 留痕。
+/// - 卖家从未来某笔 payout 抵扣 → admin 在 /admin/clawbacks 标记 DEDUCTED + note 写抵扣的 payout id。
+///
+/// 严格地 refundId @unique：一次 Refund SUCCESS 至多产生一条 Clawback 行。
+/// payoutId 不唯一：同一 Payout 可能对应多次部分退款（虽然实际很罕见）。
+model ClawbackRequest {
+  id           String          @id @default(cuid())
+  refundId     String          @unique @map("refund_id")
+  payoutId     String          @map("payout_id")
+  sellerId     String          @map("seller_id")
+  orderId      String          @map("order_id")
+  orderNo      String          @map("order_no")
+  amountCents  Int             @map("amount_cents")
+  currency     String          @default("CNY")
+  status       ClawbackStatus  @default(PENDING)
+  note         String?
+  createdAt    DateTime        @default(now()) @map("created_at")
+  resolvedAt   DateTime?       @map("resolved_at")
+  resolvedById String?         @map("resolved_by_id")
+
+  refund     Refund @relation(fields: [refundId], references: [id], onDelete: Cascade)
+  payout     Payout @relation(fields: [payoutId], references: [id], onDelete: Restrict)
+  order      Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  seller     User   @relation("ClawbackSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  resolvedBy User?  @relation("ClawbackResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([sellerId, status])
+  @@index([status, createdAt])
+  @@map("clawback_requests")
 }
 
 /// 阶段 10：创作者收益结算单。每个 PAID 订单生成一条；7 日确认期后变 AVAILABLE 可结算。
@@ -943,8 +992,9 @@ model Payout {
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @updatedAt @map("updated_at")
 
-  order  Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  seller User  @relation("PayoutSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  order      Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  seller     User              @relation("PayoutSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  clawbacks  ClawbackRequest[]
 
   @@index([sellerId, status])
   @@index([status, availableAt])

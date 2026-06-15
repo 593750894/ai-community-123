@@ -223,24 +223,63 @@ export async function refundOrder(
       },
     });
 
-    if (fullyRefunded && order.type === "WORKFLOW_PURCHASE" && order.workflowItemId) {
-      const wf = await tx.workflowItem.findUnique({
-        where: { id: order.workflowItemId },
-        select: { salesCount: true },
-      });
-      if (wf && wf.salesCount > 0) {
-        await tx.workflowItem.update({
+    if (order.type === "WORKFLOW_PURCHASE" && order.workflowItemId) {
+      if (fullyRefunded) {
+        const wf = await tx.workflowItem.findUnique({
           where: { id: order.workflowItemId },
-          data: { salesCount: { decrement: 1 } },
+          select: { salesCount: true },
         });
+        if (wf && wf.salesCount > 0) {
+          await tx.workflowItem.update({
+            where: { id: order.workflowItemId },
+            data: { salesCount: { decrement: 1 } },
+          });
+        }
       }
-      await tx.payout.updateMany({
-        where: {
-          orderId: order.id,
-          status: { in: ["PENDING", "AVAILABLE"] },
-        },
-        data: { status: "CANCELED" },
+
+      // Stage 16.4：根据 Payout 状态决定怎么处理卖家侧的钱。
+      // - PENDING / AVAILABLE → 钱还在平台手里，直接 CANCELED 即可（旧逻辑）。
+      // - PAID → 钱已打给卖家，平台垫资退给买家 → 建 ClawbackRequest 让 ops 追回。
+      const payout = await tx.payout.findUnique({
+        where: { orderId: order.id },
+        select: { id: true, status: true, sellerId: true, netCents: true },
       });
+      if (payout) {
+        if (payout.status === "PENDING" || payout.status === "AVAILABLE") {
+          if (fullyRefunded) {
+            await tx.payout.update({
+              where: { id: payout.id },
+              data: { status: "CANCELED" },
+            });
+          }
+          // 部分退款 + payout 仍在冷藏 / 可用 → 暂不动 payout 金额；
+          // 等 stage 16.5 引入 payout 净额逐次抵扣的实现后再回填。
+        } else if (payout.status === "PAID") {
+          // 净额按本次退款金额 / 订单总额比例计算（保留卖家最低 1 分获得感）。
+          // 全额退款 → 全额追回净额；部分退款 → 按比例。
+          const clawAmount = Math.min(
+            payout.netCents,
+            Math.max(
+              1,
+              Math.round((payout.netCents * refundAmount) / order.amountCents),
+            ),
+          );
+          // refundId unique：同一 Refund 至多一条 Clawback；重入安全。
+          await tx.clawbackRequest.create({
+            data: {
+              refundId,
+              payoutId: payout.id,
+              sellerId: payout.sellerId,
+              orderId: order.id,
+              orderNo: order.orderNo,
+              amountCents: clawAmount,
+              currency: order.currency,
+              status: "PENDING",
+            },
+          });
+        }
+        // CANCELED Payout：旧退款已处理过 / 异常状态，跳过。
+      }
     }
   });
 

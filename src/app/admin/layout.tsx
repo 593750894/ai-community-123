@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Receipt,
+  RotateCcw,
   ScrollText,
   Users,
   Wrench,
@@ -38,6 +39,13 @@ const NAV = [
   { href: "/admin/orders", label: "订单", icon: Receipt },
   // Stage 10.5：结算管理（卖家提现 / 标记打款）。
   { href: "/admin/payouts", label: "结算", icon: Coins },
+  // Stage 16.4：分润后退款的应收追讨。
+  {
+    href: "/admin/clawbacks?status=PENDING",
+    label: "追讨",
+    icon: RotateCcw,
+    badgeKey: "clawbacks" as const,
+  },
   // Stage 11.2：企业认证审核。
   {
     href: "/admin/organizations/verifications",
@@ -53,13 +61,17 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [admin, openReports, pendingVerifications] = await Promise.all([
-    requireAdmin("/admin"),
-    countOpenReports().catch(() => 0),
-    prisma.organization
-      .count({ where: { verificationStatus: "PENDING" } })
-      .catch(() => 0),
-  ]);
+  const [admin, openReports, pendingVerifications, pendingClawbacks] =
+    await Promise.all([
+      requireAdmin("/admin"),
+      countOpenReports().catch(() => 0),
+      prisma.organization
+        .count({ where: { verificationStatus: "PENDING" } })
+        .catch(() => 0),
+      prisma.clawbackRequest
+        .count({ where: { status: "PENDING" } })
+        .catch(() => 0),
+    ]);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -71,7 +83,9 @@ export default async function AdminLayout({
                 ? openReports
                 : badgeKey === "orgVerifications"
                   ? pendingVerifications
-                  : 0;
+                  : badgeKey === "clawbacks"
+                    ? pendingClawbacks
+                    : 0;
             const showBadge = badgeCount > 0;
             return (
               <Link
