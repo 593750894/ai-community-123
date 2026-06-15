@@ -29,6 +29,23 @@ const DEDUP_TYPES: Set<NotificationType> = new Set([
  */
 const GROUP_MESSAGE_DEDUP_WINDOW_MS = 5 * 60 * 1000;
 
+/**
+ * Stage 16.3：系统消息（actorId = null）的短窗口去重。
+ * - 主 DEDUP_TYPES 走 (recipientId + actorId + type + target) 四元组，无 actorId 就 bail，
+ *   导致 ORDER_REFUNDED / PAYOUT_PAID 这类「平台自身触发」的通知漏过去重。
+ * - 这里对 (recipientId + type + target) 做短窗去重，覆盖 webhook 重发后 markOrderPaid
+ *   多次回退路径 / refund 路径并发触发等竞态。
+ * - 窗口选 5min：覆盖 PSP 常见的 0-5min 内重试，又不会卡住「同一笔订单 30 分钟后再退」
+ *   这类业务合理的二次通知。
+ */
+const SYSTEM_DEDUP_TYPES: Set<NotificationType> = new Set([
+  "ORDER_PAID",
+  "ORDER_REFUNDED",
+  "PAYOUT_PAID",
+  "WORKFLOW_SOLD",
+]);
+const SYSTEM_DEDUP_WINDOW_MS = 5 * 60 * 1000;
+
 // Stage 9：用户可在 /settings/notifications 关闭通知类型；但 SYSTEM 永远直达
 // （admin 举报通知、强制下线提示等运维通道，不能被用户关掉）。
 const NON_GATEABLE_TYPES: Set<NotificationType> = new Set(["SYSTEM"]);
@@ -56,6 +73,28 @@ export async function emitNotification(input: EmitNotificationInput) {
         where: {
           userId: recipientId,
           actorId,
+          type,
+          targetType,
+          targetId,
+          createdAt: { gte: since },
+        },
+        select: { id: true },
+      });
+      if (existing) return null;
+    }
+
+    // Stage 16.3：系统通知去重（actorId=null 才走这条；与上面互斥避免双重去重）。
+    if (
+      !actorId &&
+      SYSTEM_DEDUP_TYPES.has(type) &&
+      targetType &&
+      targetId
+    ) {
+      const since = new Date(Date.now() - SYSTEM_DEDUP_WINDOW_MS);
+      const existing = await prisma.notification.findFirst({
+        where: {
+          userId: recipientId,
+          actorId: null,
           type,
           targetType,
           targetId,
