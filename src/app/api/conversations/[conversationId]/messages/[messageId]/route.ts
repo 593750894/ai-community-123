@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
 import { EditMessageSchema } from "@/lib/messages/schemas";
@@ -15,6 +16,7 @@ export async function PATCH(
 ) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const { messageId } = await params;
     const body = await request.json().catch(() => ({}));
     const parsed = EditMessageSchema.safeParse(body);

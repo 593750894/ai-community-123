@@ -10,6 +10,7 @@ import {
   clearSessionCookie,
   getSession,
 } from "@/lib/auth/session";
+import { requireActiveUserById, SuspendedError } from "@/lib/auth/suspension";
 import {
   LoginSchema,
   RegisterSchema,
@@ -144,6 +145,12 @@ export async function updateProfileAction(
   const session = await getSession();
   if (!session) {
     return { ok: false, message: "请先登录" };
+  }
+  try {
+    await requireActiveUserById(session.userId);
+  } catch (err) {
+    if (err instanceof SuspendedError) return { ok: false, message: err.message };
+    throw err;
   }
 
   const parsed = UpdateProfileSchema.safeParse({

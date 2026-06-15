@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireUser } from "@/lib/auth/guard";
+import { requireActiveUser, SuspendedError } from "@/lib/auth/suspension";
 import { AppError } from "@/lib/errors";
 
 import {
@@ -65,6 +66,12 @@ export async function createWorkflowItemAction(
   formData: FormData,
 ): Promise<SellerActionState> {
   const user = await requireUser("/me/workflows/new");
+  try {
+    await requireActiveUser(user);
+  } catch (err) {
+    if (err instanceof SuspendedError) return { ok: false, message: err.message };
+    throw err;
+  }
   const raw = parseFormPayload(formData);
   const parsed = CreateWorkflowItemSchema.safeParse(raw);
   if (!parsed.success) {
@@ -92,6 +99,12 @@ export async function updateWorkflowItemAction(
   const id = String(formData.get("id") || "");
   if (!id) return { ok: false, message: "缺少商品 ID" };
   const user = await requireUser(`/me/workflows/${id}/edit`);
+  try {
+    await requireActiveUser(user);
+  } catch (err) {
+    if (err instanceof SuspendedError) return { ok: false, message: err.message };
+    throw err;
+  }
   const raw = parseFormPayload(formData);
   const parsed = UpdateWorkflowItemSchema.safeParse(raw);
   if (!parsed.success) {
@@ -119,6 +132,12 @@ export async function transitionWorkflowItemStatusAction(
   const status = String(formData.get("status") || "");
   if (!id) return;
   const user = await requireUser("/me/workflows");
+  try {
+    await requireActiveUser(user);
+  } catch (err) {
+    if (err instanceof SuspendedError) return;
+    throw err;
+  }
   try {
     await transitionWorkflowItemStatus(
       id,

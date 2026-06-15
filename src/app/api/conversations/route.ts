@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { ValidationError } from "@/lib/errors";
 import { success, created, error } from "@/lib/response";
 import { CreateConversationSchema } from "@/lib/messages/schemas";
@@ -62,6 +63,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const body = await request.json().catch(() => ({}));
     // 兼容旧 1v1 客户端（不带 isGroup 字段）：默认按 1v1 处理。
     const normalized =

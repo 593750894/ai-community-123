@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { ValidationError } from "@/lib/errors";
 import { createOrganization } from "@/lib/organizations/actions";
 import { listMyOrganizations } from "@/lib/organizations/queries";
@@ -27,6 +28,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     createLimiter.check(user.id);
     const body = await request.json().catch(() => ({}));
     const parsed = CreateOrganizationSchema.safeParse(body);

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireUser } from "@/lib/auth/guard";
+import { requireActiveUser, SuspendedError } from "@/lib/auth/suspension";
 import { AppError } from "@/lib/errors";
 
 import {
@@ -67,6 +68,12 @@ export async function createOrganizationAction(
   formData: FormData,
 ): Promise<OrgActionState> {
   const user = await requireUser("/me/organizations/new");
+  try {
+    await requireActiveUser(user);
+  } catch (err) {
+    if (err instanceof SuspendedError) return { ok: false, message: err.message };
+    throw err;
+  }
   const raw = parseCreatePayload(formData);
   const parsed = CreateOrganizationSchema.safeParse(raw);
   if (!parsed.success) {
@@ -96,6 +103,12 @@ export async function updateOrganizationAction(
   const slug = String(formData.get("slug") || "");
   if (!id) return { ok: false, message: "缺少企业 ID" };
   const user = await requireUser(`/organizations/${slug}/settings`);
+  try {
+    await requireActiveUser(user);
+  } catch (err) {
+    if (err instanceof SuspendedError) return { ok: false, message: err.message };
+    throw err;
+  }
   const raw = {
     name: String(formData.get("name") || "").trim(),
     description: String(formData.get("description") || "").trim() || undefined,
@@ -164,6 +177,12 @@ export async function inviteMemberAction(
   const slug = String(formData.get("slug") || "");
   if (!id) return { ok: false, message: "缺少企业 ID" };
   const user = await requireUser(`/organizations/${slug}/members`);
+  try {
+    await requireActiveUser(user);
+  } catch (err) {
+    if (err instanceof SuspendedError) return { ok: false, message: err.message };
+    throw err;
+  }
   const inviteeUsername = String(formData.get("inviteeUsername") || "").trim();
   const role = String(formData.get("role") || "MEMBER") as InviteAssignableRole;
   const message = String(formData.get("message") || "").trim() || undefined;

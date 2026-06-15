@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
+import { requireActiveUserById, SuspendedError } from "@/lib/auth/suspension";
 import {
   CreateCollaborationSchema,
   UpdateCollabStatusSchema,
@@ -44,6 +45,15 @@ export async function createCollaborationAction(
   const session = await getSession();
   if (!session) {
     return { ok: false, message: "请先登录后再发布合作需求" };
+  }
+
+  try {
+    await requireActiveUserById(session.userId);
+  } catch (err) {
+    if (err instanceof SuspendedError) {
+      return { ok: false, message: err.message };
+    }
+    throw err;
   }
 
   const parsed = CreateCollaborationSchema.safeParse({
@@ -116,6 +126,12 @@ export async function updateCollaborationStatusAction(
 ): Promise<void> {
   const session = await getSession();
   if (!session) return;
+  try {
+    await requireActiveUserById(session.userId);
+  } catch (err) {
+    if (err instanceof SuspendedError) return;
+    throw err;
+  }
 
   const parsed = UpdateCollabStatusSchema.safeParse({
     id: formData.get("id"),

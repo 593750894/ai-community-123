@@ -103,16 +103,15 @@ export async function getSession(): Promise<SessionPayload | null> {
   // 确保所有调用者（包括只取 userId 的 server action 写入路径）
   // 都看到强制下线 / 封禁 / 注销账号为「未登录」。
   // DB 错误不吞 — 让调用方决定 503/降级。
+  //
+  // Stage 17.5：SUSPENDED 改为「登录态保留 + read-only」（之前与 BANNED 同视为已登出）。
+  // 调用方需要拦截写入路径时改用 requireActiveUser(); BANNED / DELETED 仍是终态视为登出。
   const user = await prisma.user.findUnique({
     where: { id: decoded.userId },
     select: { status: true, tokensValidAfter: true },
   });
   if (!user) return null;
-  if (
-    user.status === "BANNED" ||
-    user.status === "DELETED" ||
-    user.status === "SUSPENDED"
-  ) {
+  if (user.status === "BANNED" || user.status === "DELETED") {
     return null;
   }
   if (
@@ -142,6 +141,9 @@ export type CurrentUser = Pick<
   | "contact"
   | "isProfilePublic"
   | "createdAt"
+  // Stage 17.5：SUSPENDED 用户仍可登录，UI / 写入路径靠 suspendedUntil + suspensionReason 决定行为
+  | "suspendedUntil"
+  | "suspensionReason"
 >;
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
@@ -165,6 +167,8 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
       contact: true,
       isProfilePublic: true,
       tokensValidAfter: true,
+      suspendedUntil: true,
+      suspensionReason: true,
       createdAt: true,
     },
   });
@@ -180,12 +184,8 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     return null;
   }
 
-  // 已封禁 / 已注销 / 已暂停 用户视同未登录（与 getSession 保持一致）
-  if (
-    user.status === "BANNED" ||
-    user.status === "DELETED" ||
-    user.status === "SUSPENDED"
-  ) {
+  // Stage 17.5：SUSPENDED 现在保留登录态（read-only）。BANNED / DELETED 仍视为登出。
+  if (user.status === "BANNED" || user.status === "DELETED") {
     return null;
   }
 

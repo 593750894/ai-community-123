@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
+import { requireActiveUserById, SuspendedError } from "@/lib/auth/suspension";
 import {
   SendMessageSchema,
   StartConversationSchema,
@@ -61,6 +62,14 @@ export async function startConversationAction(
     // 不允许跟自己发起私信
     redirect(`/profile/${targetUserId}`);
   }
+  try {
+    await requireActiveUserById(session.userId);
+  } catch (err) {
+    if (err instanceof SuspendedError) {
+      redirect(`/profile/${targetUserId}`);
+    }
+    throw err;
+  }
 
   const target = await prisma.user.findUnique({
     where: { id: targetUserId },
@@ -108,6 +117,14 @@ export async function sendMessageAction(
   const session = await getSession();
   if (!session) {
     return { ok: false, message: "请先登录后再发送消息" };
+  }
+  try {
+    await requireActiveUserById(session.userId);
+  } catch (err) {
+    if (err instanceof SuspendedError) {
+      return { ok: false, message: err.message };
+    }
+    throw err;
   }
 
   // 附件以 JSON 字符串形式藏在 formData.attachments；空字符串视作 []。

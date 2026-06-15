@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
 import { ToggleLikeSchema } from "@/lib/interactions/schemas";
@@ -12,6 +13,7 @@ import {
 export async function POST(request: Request) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const body = await request.json();
     const parsed = ToggleLikeSchema.safeParse(body);
     if (!parsed.success) {

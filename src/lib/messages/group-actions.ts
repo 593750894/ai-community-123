@@ -6,6 +6,7 @@ import type { ZodError } from "zod";
 
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
+import { requireActiveUserById, SuspendedError } from "@/lib/auth/suspension";
 import {
   AppError,
   ValidationError,
@@ -127,6 +128,12 @@ export async function createGroupConversationAction(
   if (!session) {
     return { ok: false, message: "请先登录后再创建群聊" };
   }
+  try {
+    await requireActiveUserById(session.userId);
+  } catch (err) {
+    if (err instanceof SuspendedError) return { ok: false, message: err.message };
+    throw err;
+  }
   const title = String(formData.get("title") ?? "");
   const avatarUrl = String(formData.get("avatarUrl") ?? "");
   const membersRaw = String(formData.get("members") ?? "");
@@ -182,6 +189,12 @@ export async function updateGroupConversationAction(
   if (!session) {
     return { ok: false, message: "请先登录" };
   }
+  try {
+    await requireActiveUserById(session.userId);
+  } catch (err) {
+    if (err instanceof SuspendedError) return { ok: false, message: err.message };
+    throw err;
+  }
   const conversationId = String(formData.get("conversationId") ?? "");
   if (!conversationId) {
     return { ok: false, message: "缺少会话 ID" };
@@ -220,6 +233,12 @@ export async function addGroupMembersAction(
   const session = await getSession();
   if (!session) {
     return { ok: false, message: "请先登录" };
+  }
+  try {
+    await requireActiveUserById(session.userId);
+  } catch (err) {
+    if (err instanceof SuspendedError) return { ok: false, message: err.message };
+    throw err;
   }
   const conversationId = String(formData.get("conversationId") ?? "");
   if (!conversationId) {

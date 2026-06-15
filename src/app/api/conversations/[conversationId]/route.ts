@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
 import { UpdateGroupConversationSchema } from "@/lib/messages/schemas";
@@ -48,6 +49,7 @@ export async function PATCH(
 ) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const { conversationId } = await params;
     const body = await request.json().catch(() => ({}));
     const parsed = UpdateGroupConversationSchema.safeParse(body);

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { NotFoundError, ForbiddenError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
 import { UpdatePostSchema } from "@/lib/posts/schemas";
@@ -34,6 +35,7 @@ export async function PATCH(
 ) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const { postId } = await params;
 
     const post = await prisma.post.findUnique({

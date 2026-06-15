@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getCurrentUser, getSession, type CurrentUser } from "@/lib/auth/session";
+import { requireActiveUser as enforceActive } from "@/lib/auth/suspension";
 import { UnauthorizedError } from "@/lib/errors";
 
 export async function requireUser(redirectTo: string): Promise<CurrentUser> {
@@ -47,4 +48,33 @@ export async function requireAuth(): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) throw new UnauthorizedError();
   return user;
+}
+
+/**
+ * Stage 17.5：要求当前会话不仅登录、且处于 ACTIVE 状态（非禁言）。
+ *
+ * 用法：所有「创建 / 编辑 / 删除 / 互动」server action + API 入口在拿到 currentUser 后调用一次。
+ * 抛 SuspendedError（403 + code=SUSPENDED + suspendedUntil + reason 细节），让上层
+ * 统一返回 JSON 错误或渲染锁定页。
+ *
+ * 已自带懒自愈：suspendedUntil 已到期但 cron 还没跑时，写入路径就地解禁后放行。
+ */
+export async function requireActiveUser(): Promise<CurrentUser> {
+  const user = await requireAuth();
+  await enforceActive(user);
+  return user;
+}
+
+/** 与 requireUser 同义但额外校验未被禁言；redirect 跳登录页。 */
+export async function requireActiveUserOrRedirect(
+  redirectTo: string,
+): Promise<CurrentUser> {
+  const user = await requireUser(redirectTo);
+  await enforceActive(user);
+  return user;
+}
+
+/** 旧调用方拿到 user 后想就地检查禁言；不抛重定向，抛 SuspendedError。 */
+export async function assertActive(user: CurrentUser): Promise<void> {
+  await enforceActive(user);
 }

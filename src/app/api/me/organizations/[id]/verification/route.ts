@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { getViewerMembership } from "@/lib/organizations/queries";
 import { SubmitVerificationSchema } from "@/lib/organizations/schemas";
@@ -43,6 +44,7 @@ export async function POST(
 ) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     submitLimiter.check(user.id);
     const { id } = await context.params;
     const body = await request.json().catch(() => ({}));

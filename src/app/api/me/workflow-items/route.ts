@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { ValidationError } from "@/lib/errors";
 import { created, error, success } from "@/lib/response";
 import { createWorkflowItem } from "@/lib/commerce/actions";
@@ -39,6 +40,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const body = await request.json().catch(() => ({}));
     const parsed = CreateWorkflowItemSchema.safeParse(body);
     if (!parsed.success) {

@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { ValidationError } from "@/lib/errors";
 import { removeMember, updateMemberRole } from "@/lib/organizations/actions";
 import {
@@ -14,6 +15,7 @@ export async function PATCH(
 ) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const { id, userId } = await context.params;
     const body = (await request.json().catch(() => ({}))) as { role?: string };
     if (!body?.role || !(INVITE_ASSIGNABLE_ROLES as readonly string[]).includes(body.role)) {

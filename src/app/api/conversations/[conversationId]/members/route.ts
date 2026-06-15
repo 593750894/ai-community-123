@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { ValidationError } from "@/lib/errors";
 import { success, created, error } from "@/lib/response";
 import { AddGroupMembersSchema } from "@/lib/messages/schemas";
@@ -27,6 +28,7 @@ export async function POST(
 ) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const { conversationId } = await params;
     const body = await request.json().catch(() => ({}));
     const parsed = AddGroupMembersSchema.safeParse(body);

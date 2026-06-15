@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { ForbiddenError, ValidationError } from "@/lib/errors";
 import { inviteMember } from "@/lib/organizations/actions";
 import {
@@ -49,6 +50,7 @@ export async function POST(
 ) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     inviteLimiter.check(user.id);
     const { id } = await context.params;
     const body = await request.json().catch(() => ({}));

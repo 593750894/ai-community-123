@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { error, success } from "@/lib/response";
 import {
@@ -36,6 +37,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
 export async function PATCH(request: Request, { params }: RouteContext) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const { id } = await params;
     const body = await request.json().catch(() => ({}));
 

@@ -269,6 +269,16 @@ model User {
   isProfilePublic  Boolean   @default(true) @map("is_profile_public")
   tokensValidAfter DateTime? @map("tokens_valid_after") // 早于此时间签发的 JWT 视为失效
 
+  // Stage 17.5：禁言原因 / 期限 / 操作 admin 快照。
+  // SUSPENDED 状态下用户仍可登录（read-only），suspendedUntil 到期由 cron 自动 ACTIVE。
+  // BANNED / DELETED 是终态，不写这几列。
+  suspensionReason  String?   @map("suspension_reason")
+  suspendedUntil    DateTime? @map("suspended_until")
+  suspendedAt       DateTime? @map("suspended_at")
+  suspendedById     String?   @map("suspended_by_id")
+  suspendedBy       User?     @relation("UserSuspender", fields: [suspendedById], references: [id], onDelete: SetNull)
+  suspensionsIssued User[]    @relation("UserSuspender")
+
   // Stage 10.5：卖家收款账号（提现绑定）。三个字段同时为空 = 未绑定。
   payoutMethod  String? @map("payout_method") // ALIPAY / WECHAT_PAY / BANK
   payoutAccount String? @map("payout_account") // 支付宝账号 / 微信号 / 银行卡号
@@ -330,10 +340,11 @@ model User {
   organizationsReviewed Organization[] @relation("OrgVerificationReviewer")
 
   // Stage 16.5：付费下载 redeem 审计
-  downloadGrants        DownloadGrant[] @relation("DownloadGrantUser")
+  downloadGrants DownloadGrant[] @relation("DownloadGrantUser")
 
   @@index([status])
   @@index([role])
+  @@index([status, suspendedUntil]) // Stage 17.5: cron 查询 SUSPENDED + 到期
   @@map("users")
 }
 
@@ -895,12 +906,12 @@ model Order {
   createdAt       DateTime       @default(now()) @map("created_at")
   updatedAt       DateTime       @updatedAt @map("updated_at")
 
-  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan         MembershipPlan?   @relation(fields: [planId], references: [id])
-  workflowItem WorkflowItem?     @relation(fields: [workflowItemId], references: [id])
-  payout       Payout?
-  refunds      Refund[]
-  clawbacks    ClawbackRequest[]
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan           MembershipPlan?   @relation(fields: [planId], references: [id])
+  workflowItem   WorkflowItem?     @relation(fields: [workflowItemId], references: [id])
+  payout         Payout?
+  refunds        Refund[]
+  clawbacks      ClawbackRequest[]
   downloadGrants DownloadGrant[]
 
   @@unique([userId, clientNonce])
@@ -925,8 +936,8 @@ model Refund {
   createdAt        DateTime     @default(now()) @map("created_at")
   finishedAt       DateTime?    @map("finished_at")
 
-  order     Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  createdBy User              @relation("RefundCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  order     Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdBy User             @relation("RefundCreator", fields: [createdById], references: [id], onDelete: Cascade)
   clawback  ClawbackRequest?
 
   @@index([orderId, createdAt])
@@ -946,19 +957,19 @@ model Refund {
 /// 严格地 refundId @unique：一次 Refund SUCCESS 至多产生一条 Clawback 行。
 /// payoutId 不唯一：同一 Payout 可能对应多次部分退款（虽然实际很罕见）。
 model ClawbackRequest {
-  id           String          @id @default(cuid())
-  refundId     String          @unique @map("refund_id")
-  payoutId     String          @map("payout_id")
-  sellerId     String          @map("seller_id")
-  orderId      String          @map("order_id")
-  orderNo      String          @map("order_no")
-  amountCents  Int             @map("amount_cents")
-  currency     String          @default("CNY")
-  status       ClawbackStatus  @default(PENDING)
+  id           String         @id @default(cuid())
+  refundId     String         @unique @map("refund_id")
+  payoutId     String         @map("payout_id")
+  sellerId     String         @map("seller_id")
+  orderId      String         @map("order_id")
+  orderNo      String         @map("order_no")
+  amountCents  Int            @map("amount_cents")
+  currency     String         @default("CNY")
+  status       ClawbackStatus @default(PENDING)
   note         String?
-  createdAt    DateTime        @default(now()) @map("created_at")
-  resolvedAt   DateTime?       @map("resolved_at")
-  resolvedById String?         @map("resolved_by_id")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  resolvedAt   DateTime?      @map("resolved_at")
+  resolvedById String?        @map("resolved_by_id")
 
   refund     Refund @relation(fields: [refundId], references: [id], onDelete: Cascade)
   payout     Payout @relation(fields: [payoutId], references: [id], onDelete: Restrict)
@@ -996,9 +1007,9 @@ model Payout {
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @updatedAt @map("updated_at")
 
-  order      Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  seller     User              @relation("PayoutSeller", fields: [sellerId], references: [id], onDelete: Cascade)
-  clawbacks  ClawbackRequest[]
+  order     Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  seller    User              @relation("PayoutSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  clawbacks ClawbackRequest[]
 
   @@index([sellerId, status])
   @@index([status, availableAt])
@@ -1021,13 +1032,13 @@ model Payout {
 ///
 /// rawBodyHash 用于事后取证（与 PSP 重发对账时确认 body 字节级一致），不参与去重。
 model WebhookEvent {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   provider        String // MOCK / WECHAT_PAY / ALIPAY
-  providerEventId String   @map("provider_event_id")
-  orderNo         String?  @map("order_no")
-  eventType       String   @map("event_type") // ORDER_PAID / ORDER_REFUNDED / UNKNOWN
-  rawBodyHash     String   @map("raw_body_hash") // sha256(raw) hex
-  receivedAt      DateTime @default(now()) @map("received_at")
+  providerEventId String    @map("provider_event_id")
+  orderNo         String?   @map("order_no")
+  eventType       String    @map("event_type") // ORDER_PAID / ORDER_REFUNDED / UNKNOWN
+  rawBodyHash     String    @map("raw_body_hash") // sha256(raw) hex
+  receivedAt      DateTime  @default(now()) @map("received_at")
   processedAt     DateTime? @map("processed_at") // markOrderPaid 完成时间；null = 验签通过但业务处理失败 / 跳过
 
   @@unique([provider, providerEventId])

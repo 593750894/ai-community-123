@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { ValidationError } from "@/lib/errors";
 import { success, created, error } from "@/lib/response";
 import { CreatePostSchema } from "@/lib/posts/schemas";
@@ -59,6 +60,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const body = await request.json();
     const parsed = CreatePostSchema.safeParse(body);
     if (!parsed.success) {

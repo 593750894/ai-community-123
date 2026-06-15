@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
 import { toggleChannelMembership } from "@/lib/community/members";
@@ -21,6 +22,7 @@ export async function POST(
 ) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const { channelId: idOrSlug } = await params;
 
     if (!ID_OR_SLUG_RE.test(idOrSlug)) {

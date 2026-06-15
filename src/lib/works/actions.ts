@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
+import { requireActiveUserById, SuspendedError } from "@/lib/auth/suspension";
 import { CreateWorkSchema } from "@/lib/works/schemas";
 import { resolveOrgAttribution } from "@/lib/organizations/content-attribution";
 import { AppError } from "@/lib/errors";
@@ -35,6 +36,15 @@ export async function createWorkAction(
   const session = await getSession();
   if (!session) {
     return { ok: false, message: "请先登录后再发布作品" };
+  }
+
+  try {
+    await requireActiveUserById(session.userId);
+  } catch (err) {
+    if (err instanceof SuspendedError) {
+      return { ok: false, message: err.message };
+    }
+    throw err;
   }
 
   const parsed = CreateWorkSchema.safeParse({

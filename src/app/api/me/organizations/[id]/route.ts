@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { ValidationError } from "@/lib/errors";
 import { deleteOrganization, updateOrganization } from "@/lib/organizations/actions";
 import { UpdateOrganizationSchema } from "@/lib/organizations/schemas";
@@ -11,6 +12,7 @@ export async function PATCH(
 ) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const { id } = await context.params;
     const body = await request.json().catch(() => ({}));
     const parsed = UpdateOrganizationSchema.safeParse(body);

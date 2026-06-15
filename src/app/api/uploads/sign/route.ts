@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { AppError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
 import { createRateLimiter } from "@/lib/rate-limit";
@@ -33,6 +34,7 @@ const Schema = z.object({
 export async function POST(request: Request) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
 
     const body = await request.json();
     const parsed = Schema.safeParse(body);

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { success, error } from "@/lib/response";
 import { ValidationError } from "@/lib/errors";
 import { UpdateProfileSchema } from "@/lib/auth/schemas";
@@ -9,6 +10,7 @@ import { UpdateProfileSchema } from "@/lib/auth/schemas";
 export async function PUT(request: Request) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const body = await request.json();
     const parsed = UpdateProfileSchema.safeParse(body);
     if (!parsed.success) {

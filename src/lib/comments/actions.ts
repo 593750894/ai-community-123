@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
+import { requireActiveUserById, SuspendedError } from "@/lib/auth/suspension";
 import { CreateCommentSchema } from "@/lib/comments/schemas";
 import { notifyPostReply } from "@/lib/notifications/emit";
 
@@ -42,6 +43,15 @@ export async function createCommentAction(
       message: "请先登录后再发表评论",
       loginNext: postId ? `/post/${postId}` : "/community",
     };
+  }
+
+  try {
+    await requireActiveUserById(session.userId);
+  } catch (err) {
+    if (err instanceof SuspendedError) {
+      return { ok: false, message: err.message };
+    }
+    throw err;
   }
 
   const rawParentId = formData.get("parentId");

@@ -4,6 +4,7 @@ import { MobileBottomNav } from "@/components/layout/mobile-nav";
 import { Navbar } from "@/components/layout/navbar";
 import { RightPanel } from "@/components/layout/right-panel";
 import { Sidebar } from "@/components/layout/sidebar";
+import { SuspensionBanner } from "@/components/layout/suspension-banner";
 import { RealtimeProvider } from "@/components/providers/realtime-provider";
 import {
   ThemeProvider,
@@ -88,6 +89,17 @@ export default async function RootLayout({
         <ThemeProvider defaultTheme="dark">
           <RealtimeProvider enabled={!!user}>
             <Navbar user={navbarUser} />
+            <SuspensionBanner
+              user={
+                user
+                  ? {
+                      status: user.status,
+                      suspendedUntil: user.suspendedUntil,
+                      suspensionReason: user.suspensionReason,
+                    }
+                  : null
+              }
+            />
             <div className="mx-auto flex w-full max-w-[1600px] flex-1">
               <Sidebar
                 hotChannels={sidebarChannels}

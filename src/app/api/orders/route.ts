@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import { ValidationError } from "@/lib/errors";
 import { created, error } from "@/lib/response";
 import { createOrder } from "@/lib/commerce/orders";
@@ -17,6 +18,7 @@ const orderLimiter = createRateLimiter({
 export async function POST(request: Request) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     orderLimiter.check(user.id);
 
     const body = await request.json().catch(() => ({}));

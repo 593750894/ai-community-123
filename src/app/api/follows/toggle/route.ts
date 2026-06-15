@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth/guard";
+import { requireActiveUser } from "@/lib/auth/suspension";
 import {
   NotFoundError,
   ValidationError,
@@ -18,6 +19,7 @@ const ToggleFollowSchema = z.object({
 export async function POST(request: Request) {
   try {
     const user = await requireAuth();
+    await requireActiveUser(user);
     const body = await request.json();
     const parsed = ToggleFollowSchema.safeParse(body);
     if (!parsed.success) {

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { Prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
+import { requireActiveUserById, SuspendedError } from "@/lib/auth/suspension";
 import {
   notifyCommentLike,
   notifyPostLike,
@@ -12,6 +13,21 @@ import {
   notifyPostBookmark,
   notifyWorkBookmark,
 } from "@/lib/notifications/emit";
+
+/** 把禁言态映射为 InteractionResult 失败结果（带原因 message）。其它错误向上抛。 */
+async function ensureActiveOrInteractionFail(
+  userId: string,
+): Promise<InteractionResult | null> {
+  try {
+    await requireActiveUserById(userId);
+    return null;
+  } catch (err) {
+    if (err instanceof SuspendedError) {
+      return { ok: false, active: false, count: 0, message: err.message };
+    }
+    throw err;
+  }
+}
 
 export type InteractionResult = {
   ok: boolean;
@@ -40,6 +56,8 @@ export async function togglePostLike(postId: string): Promise<InteractionResult>
   if (!session) return needLoginResult();
 
   const userId = session.userId;
+  const blocked = await ensureActiveOrInteractionFail(userId);
+  if (blocked) return blocked;
 
   const post = await prisma.post.findUnique({
     where: { id: postId },
@@ -113,6 +131,8 @@ export async function toggleWorkLike(workId: string): Promise<InteractionResult>
   if (!session) return needLoginResult();
 
   const userId = session.userId;
+  const blocked = await ensureActiveOrInteractionFail(userId);
+  if (blocked) return blocked;
 
   const work = await prisma.work.findUnique({
     where: { id: workId },
@@ -190,6 +210,8 @@ export async function toggleCommentLike(
   if (!session) return needLoginResult();
 
   const userId = session.userId;
+  const blocked = await ensureActiveOrInteractionFail(userId);
+  if (blocked) return blocked;
 
   const comment = await prisma.comment.findUnique({
     where: { id: commentId },
@@ -264,6 +286,8 @@ export async function togglePostBookmark(
   if (!session) return needLoginResult();
 
   const userId = session.userId;
+  const blocked = await ensureActiveOrInteractionFail(userId);
+  if (blocked) return blocked;
 
   const post = await prisma.post.findUnique({
     where: { id: postId },
@@ -313,6 +337,8 @@ export async function toggleWorkBookmark(
   if (!session) return needLoginResult();
 
   const userId = session.userId;
+  const blocked = await ensureActiveOrInteractionFail(userId);
+  if (blocked) return blocked;
 
   const work = await prisma.work.findUnique({
     where: { id: workId },
