@@ -11,8 +11,11 @@ import {
   Wrench,
 } from "lucide-react";
 
+import { redirect } from "next/navigation";
+
 import { PageHeader } from "@/components/layout/page-header";
 import { pillTagTintClass, type PillTagTint } from "@/components/ui/pill-tag";
+import { requireMod } from "@/lib/auth/guard";
 import { prisma } from "@/lib/db";
 import { getAdminPayoutOverview } from "@/lib/commerce/payouts";
 import { countOpenReports } from "@/lib/reports/queries";
@@ -59,6 +62,11 @@ async function getOverview() {
 }
 
 export default async function AdminPage() {
+  // Stage 17.1：MOD 看不到全站营收 / 用户总数等敏感聚合，直接跳转其工作面板。
+  const actor = await requireMod("/admin");
+  if (actor.role !== "ADMIN") {
+    redirect("/admin/reports?status=PENDING");
+  }
   const overview = await getOverview();
 
   const cards: Array<{

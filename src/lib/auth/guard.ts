@@ -44,6 +44,28 @@ export async function isAdmin(): Promise<boolean> {
   return user?.role === "ADMIN";
 }
 
+/**
+ * Stage 17.1：审核员守卫。允许 MOD 与 ADMIN 进入。
+ * 用于 /admin/reports 的认领 / 处理 / 驳回入口；其它 admin 区仍用 requireAdmin。
+ */
+export async function requireMod(
+  redirectTo = "/admin/reports",
+): Promise<CurrentUser> {
+  const user = await getCurrentUser();
+  if (!user) {
+    const params = new URLSearchParams({ next: redirectTo });
+    redirect(`/auth/login?${params.toString()}`);
+  }
+  if (user.role !== "ADMIN" && user.role !== "MOD") {
+    redirect("/?reason=mod-only");
+  }
+  return user;
+}
+
+export function isModOrAdmin(role: string | undefined): boolean {
+  return role === "ADMIN" || role === "MOD";
+}
+
 export async function requireAuth(): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) throw new UnauthorizedError();

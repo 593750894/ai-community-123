@@ -39,6 +39,14 @@ export type ReportListItem = {
   } | null;
   resolvedAt: Date | null;
   resolution: string | null;
+  // Stage 17.1：MOD 队列认领
+  assignedToId: string | null;
+  assignedTo: {
+    id: string;
+    name: string;
+    username: string;
+  } | null;
+  assignedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -46,6 +54,8 @@ export type ReportListItem = {
 export interface ListReportsArgs {
   status?: ReportStatusValue;
   targetType?: ReportTargetTypeValue;
+  /** Stage 17.1：仅返回该 MOD 认领的举报（"我处理的" filter）。 */
+  assignedToId?: string;
   page: number;
   pageSize: number;
 }
@@ -177,6 +187,7 @@ export async function listReports(
   const where: Prisma.ReportWhereInput = {};
   if (args.status) where.status = args.status;
   if (args.targetType) where.targetType = args.targetType;
+  if (args.assignedToId) where.assignedToId = args.assignedToId;
 
   const skip = (Math.max(1, args.page) - 1) * args.pageSize;
 
@@ -191,6 +202,7 @@ export async function listReports(
           select: { id: true, name: true, username: true, avatar: true },
         },
         resolvedBy: { select: { id: true, name: true, username: true } },
+        assignedTo: { select: { id: true, name: true, username: true } },
       },
     }),
     prisma.report.count({ where }),
@@ -224,6 +236,9 @@ export async function listReports(
       resolvedBy: r.resolvedBy,
       resolvedAt: r.resolvedAt,
       resolution: r.resolution,
+      assignedToId: r.assignedToId,
+      assignedTo: r.assignedTo,
+      assignedAt: r.assignedAt,
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
     };
@@ -242,6 +257,7 @@ export async function getReportById(
         select: { id: true, name: true, username: true, avatar: true },
       },
       resolvedBy: { select: { id: true, name: true, username: true } },
+      assignedTo: { select: { id: true, name: true, username: true } },
     },
   });
   if (!r) return null;
@@ -267,6 +283,9 @@ export async function getReportById(
     resolvedBy: r.resolvedBy,
     resolvedAt: r.resolvedAt,
     resolution: r.resolution,
+    assignedToId: r.assignedToId,
+    assignedTo: r.assignedTo,
+    assignedAt: r.assignedAt,
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
   };
@@ -275,5 +294,12 @@ export async function getReportById(
 export async function countOpenReports(): Promise<number> {
   return prisma.report.count({
     where: { status: { in: ["PENDING", "REVIEWING"] } },
+  });
+}
+
+/** Stage 17.1：当前 MOD 的活跃工作量（自己认领、未结案）。layout badge 用。 */
+export async function countMyAssignedReports(modId: string): Promise<number> {
+  return prisma.report.count({
+    where: { assignedToId: modId, status: "REVIEWING" },
   });
 }

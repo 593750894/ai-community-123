@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { requireAdmin } from "@/lib/auth/guard";
 import { prisma } from "@/lib/db";
 import { adminDeletePost } from "@/lib/admin/actions";
 
@@ -10,6 +11,7 @@ export const dynamic = "force-dynamic";
 // 改帖子内容、置顶/锁帖等编辑能力 MVP 不做。
 
 export default async function AdminPostsPage() {
+  await requireAdmin("/admin/posts");
   const posts = await prisma.post.findMany({
     orderBy: { createdAt: "desc" },
     take: 200,

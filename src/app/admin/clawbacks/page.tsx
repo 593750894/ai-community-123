@@ -10,6 +10,7 @@ import {
   type PillTagTint,
 } from "@/components/ui/pill-tag";
 import { ResolveClawbackDialog } from "@/components/admin/resolve-clawback-dialog";
+import { requireAdmin } from "@/lib/auth/guard";
 import {
   CLAWBACK_STATUSES,
   CLAWBACK_STATUS_LABEL,
@@ -43,6 +44,7 @@ export default async function AdminClawbacksPage({
 }: {
   searchParams: Promise<{ status?: string; page?: string }>;
 }) {
+  await requireAdmin("/admin/clawbacks");
   const sp = await searchParams;
   const status = parseStatus(sp.status);
   const page = Math.max(1, Number(sp.page) || 1);

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { requireAdmin } from "@/lib/auth/guard";
 import { prisma } from "@/lib/db";
 import { adminDeleteWork } from "@/lib/admin/actions";
 
@@ -9,6 +10,7 @@ export const dynamic = "force-dynamic";
 // 阶段 11：作品管理。删除后点赞 / 收藏 cascade 一起删。
 
 export default async function AdminWorksPage() {
+  await requireAdmin("/admin/works");
   const works = await prisma.work.findMany({
     orderBy: { createdAt: "desc" },
     take: 200,

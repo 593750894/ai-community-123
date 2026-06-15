@@ -19,6 +19,9 @@ export type AuditAction =
   | "DELETE_COMMENT"
   | "RESOLVE_REPORT"
   | "DISMISS_REPORT"
+  // Stage 17.1
+  | "CLAIM_REPORT"
+  | "RELEASE_REPORT"
   // Stage 9 新增
   | "CREATE_TOOL"
   | "UPDATE_TOOL"
@@ -59,6 +62,8 @@ export const AUDIT_ACTIONS = [
   "POST_UNLOCK",
   "RESOLVE_REPORT",
   "DISMISS_REPORT",
+  "CLAIM_REPORT",
+  "RELEASE_REPORT",
   "ORDER_REFUND_FULL",
   "ORDER_REFUND_PARTIAL",
   "PAYOUT_MARK_PAID",
@@ -84,6 +89,8 @@ export const AUDIT_ACTION_LABEL: Record<string, string> = {
   POST_UNLOCK: "解锁帖子",
   RESOLVE_REPORT: "处理举报",
   DISMISS_REPORT: "驳回举报",
+  CLAIM_REPORT: "认领举报",
+  RELEASE_REPORT: "释放认领",
   ORDER_REFUND_FULL: "订单全额退款",
   ORDER_REFUND_PARTIAL: "订单部分退款",
   PAYOUT_MARK_PAID: "结算单标记打款",

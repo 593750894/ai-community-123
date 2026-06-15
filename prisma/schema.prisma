@@ -312,6 +312,7 @@ model User {
   notificationsTriggered Notification[] @relation("NotificationActor")
   reportsFiled           Report[]       @relation("ReportReporter")
   reportsResolved        Report[]       @relation("ReportResolver")
+  reportsAssigned        Report[]       @relation("ReportAssignee")
   auditLogs              AuditLog[]     @relation("AuditAdmin")
 
   // 关注关系（阶段 2）
@@ -801,14 +802,20 @@ model Report {
   resolvedById String?          @map("resolved_by_id")
   resolvedAt   DateTime?        @map("resolved_at")
   resolution   String?
-  createdAt    DateTime         @default(now()) @map("created_at")
-  updatedAt    DateTime         @updatedAt @map("updated_at")
+  // Stage 17.1：MOD 队列认领。PENDING 时 assignedToId 为空；
+  // MOD/ADMIN 认领后置 REVIEWING 并写 assignedToId/assignedAt；resolve/dismiss 时清空。
+  assignedToId String?   @map("assigned_to_id")
+  assignedAt   DateTime? @map("assigned_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
   reporter   User  @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
   resolvedBy User? @relation("ReportResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+  assignedTo User? @relation("ReportAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
 
   @@index([status, createdAt])
   @@index([targetType, targetId])
+  @@index([assignedToId, status])
   @@map("reports")
 }
 

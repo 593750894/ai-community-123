@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { RefundDialog } from "@/components/admin/refund-dialog";
+import { requireAdmin } from "@/lib/auth/guard";
 import { listOrdersForAdmin } from "@/lib/commerce/order-queries";
 import {
   ORDER_STATUSES,
@@ -59,6 +60,7 @@ export default async function AdminOrdersPage({
     page?: string;
   }>;
 }) {
+  await requireAdmin("/admin/orders");
   const sp = await searchParams;
   const status = pickEnum<OrderStatusValue>(sp.status, ORDER_STATUSES);
   const type = pickEnum<OrderTypeValue>(sp.type, ORDER_TYPES);

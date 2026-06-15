@@ -6,6 +6,7 @@ import { ReviewVerificationDialog } from "@/components/admin/review-verification
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterChip } from "@/components/ui/filter-chip";
+import { requireAdmin } from "@/lib/auth/guard";
 import {
   ORG_VERIFICATION_STATUSES,
   ORG_VERIFICATION_STATUS_LABEL,
@@ -32,6 +33,7 @@ function parseStatus(raw?: string): OrgVerificationStatusValue | null | undefine
 }
 
 export default async function AdminVerificationsPage({ searchParams }: PageProps) {
+  await requireAdmin("/admin/organizations/verifications");
   const params = await searchParams;
   const statusFilter = parseStatus(params.status);
   const q = (params.q ?? "").trim() || null;

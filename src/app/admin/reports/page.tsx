@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { PillTag, type PillTagTint } from "@/components/ui/pill-tag";
+import { requireMod } from "@/lib/auth/guard";
 import { listReports } from "@/lib/reports/queries";
 import {
   REPORT_REASON_LABEL,
@@ -17,7 +18,9 @@ import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/utils";
 
 import {
+  adminClaimReportFormAction,
   adminDismissReportFormAction,
+  adminReleaseReportFormAction,
   adminResolveReportFormAction,
 } from "./actions";
 
@@ -59,31 +62,38 @@ export default async function AdminReportsPage({
   searchParams: Promise<{
     status?: string;
     targetType?: string;
+    assignedToMe?: string;
     page?: string;
   }>;
 }) {
+  const actor = await requireMod("/admin/reports");
   const sp = await searchParams;
   const status = parseStatus(sp.status);
   const targetType = parseTargetType(sp.targetType);
+  const assignedToMe = sp.assignedToMe === "1";
   const page = Math.max(1, Number(sp.page) || 1);
 
   const { items, total } = await listReports({
     status,
     targetType,
+    assignedToId: assignedToMe ? actor.id : undefined,
     page,
     pageSize: PAGE_SIZE,
   });
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const isAdminActor = actor.role === "ADMIN";
 
   return (
     <>
       <PageHeader
         eyebrow="管理后台"
-        title="举报处理"
+        title={assignedToMe ? "我处理的举报" : "举报处理"}
         description={`共 ${total} 条记录。当前筛选：${
           status ? REPORT_STATUS_LABEL[status] : "全部状态"
-        } · ${targetType ? REPORT_TARGET_LABEL[targetType] : "全部类型"}`}
+        } · ${targetType ? REPORT_TARGET_LABEL[targetType] : "全部类型"}${
+          assignedToMe ? " · 仅我认领" : ""
+        }`}
       />
 
       <div className="space-y-4 px-6 py-6 sm:px-8">
@@ -126,13 +136,23 @@ export default async function AdminReportsPage({
               ))}
             </select>
           </div>
+          <label className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <input
+              type="checkbox"
+              name="assignedToMe"
+              value="1"
+              defaultChecked={assignedToMe}
+              className="size-3.5"
+            />
+            仅看我认领的
+          </label>
           <button
             type="submit"
             className="inline-flex h-9 items-center gap-1 rounded-full bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
           >
             筛选
           </button>
-          {(status || targetType) && (
+          {(status || targetType || assignedToMe) && (
             <Link
               href="/admin/reports"
               className="inline-flex h-9 items-center gap-1 rounded-full border border-border px-3 text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
@@ -150,6 +170,7 @@ export default async function AdminReportsPage({
                 <th className="px-4 py-2.5 text-left font-medium">目标</th>
                 <th className="px-4 py-2.5 text-left font-medium">原因</th>
                 <th className="px-4 py-2.5 text-left font-medium">状态</th>
+                <th className="px-4 py-2.5 text-left font-medium">处理人</th>
                 <th className="px-4 py-2.5 text-left font-medium">时间</th>
                 <th className="px-4 py-2.5 text-right font-medium">操作</th>
               </tr>
@@ -157,6 +178,9 @@ export default async function AdminReportsPage({
             <tbody className="divide-y divide-border">
               {items.map((r) => {
                 const isOpen = r.status === "PENDING" || r.status === "REVIEWING";
+                const isMine = r.assignedToId === actor.id;
+                const canActOnReviewing =
+                  r.status === "REVIEWING" && (isMine || isAdminActor);
                 return (
                   <tr key={r.id} className="align-top hover:bg-muted/20">
                     <td className="px-4 py-3 text-xs">
@@ -228,11 +252,69 @@ export default async function AdminReportsPage({
                         </div>
                       )}
                     </td>
+                    <td className="px-4 py-3 text-xs">
+                      {r.assignedTo ? (
+                        <div>
+                          <div
+                            className={cn(
+                              "font-medium",
+                              isMine ? "text-primary" : "text-foreground/90",
+                            )}
+                          >
+                            {r.assignedTo.name}
+                            {isMine && (
+                              <span className="ml-1 text-[10px] text-primary/80">
+                                （我）
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-muted-foreground">
+                            @{r.assignedTo.username}
+                          </div>
+                          {r.assignedAt && (
+                            <div className="text-[10px] text-muted-foreground/70">
+                              认领 {formatRelativeTime(r.assignedAt)}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-[11px] text-muted-foreground/60">
+                          {r.status === "PENDING" ? "待认领" : "—"}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">
                       {formatRelativeTime(r.createdAt)}
                     </td>
                     <td className="px-4 py-3 text-right text-xs">
-                      {isOpen ? (
+                      {!isOpen ? (
+                        <span className="text-[11px] text-muted-foreground/60">
+                          已结案
+                        </span>
+                      ) : r.status === "PENDING" ? (
+                        // 待认领：仅显示「认领」+「驳回」（驳回无需先认领，避免低质举报增加 MOD 负担）
+                        <div className="flex flex-col items-end gap-1.5">
+                          <form action={adminClaimReportFormAction}>
+                            <input type="hidden" name="id" value={r.id} />
+                            <button
+                              type="submit"
+                              className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] text-primary hover:bg-primary/20"
+                            >
+                              认领
+                            </button>
+                          </form>
+                          <form action={adminDismissReportFormAction}>
+                            <input type="hidden" name="id" value={r.id} />
+                            <button
+                              type="submit"
+                              className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                            >
+                              驳回
+                            </button>
+                          </form>
+                        </div>
+                      ) : canActOnReviewing ? (
+                        // 我认领 / ADMIN：可处理 / 驳回 / 释放
                         <div className="flex flex-col items-end gap-1.5">
                           <form
                             action={adminResolveReportFormAction}
@@ -254,20 +336,35 @@ export default async function AdminReportsPage({
                               处理
                             </button>
                           </form>
-                          <form action={adminDismissReportFormAction}>
-                            <input type="hidden" name="id" value={r.id} />
-                            <button
-                              type="submit"
-                              className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                            >
-                              驳回
-                            </button>
-                          </form>
+                          <div className="flex items-center gap-1.5">
+                            <form action={adminDismissReportFormAction}>
+                              <input type="hidden" name="id" value={r.id} />
+                              <button
+                                type="submit"
+                                className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                              >
+                                驳回
+                              </button>
+                            </form>
+                            <form action={adminReleaseReportFormAction}>
+                              <input type="hidden" name="id" value={r.id} />
+                              <button
+                                type="submit"
+                                className="rounded-full border border-tag-amber-fg/30 bg-tag-amber-bg/10 px-2.5 py-1 text-[11px] text-tag-amber-fg hover:bg-tag-amber-bg/20"
+                              >
+                                释放
+                              </button>
+                            </form>
+                          </div>
                         </div>
                       ) : (
-                        <span className="text-[11px] text-muted-foreground/60">
-                          已结案
-                        </span>
+                        // 别的 MOD 认领中：不可操作，避免抢单
+                        <div className="flex flex-col items-end gap-1 text-[11px] text-muted-foreground/70">
+                          <span>处理中</span>
+                          <span className="text-[10px]">
+                            由 {r.assignedTo?.name ?? "其他审核员"} 处理
+                          </span>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -276,7 +373,7 @@ export default async function AdminReportsPage({
               {items.length === 0 && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="px-4 py-10 text-center text-sm text-muted-foreground"
                   >
                     暂无举报记录
@@ -293,6 +390,7 @@ export default async function AdminReportsPage({
             totalPages={totalPages}
             status={status}
             targetType={targetType}
+            assignedToMe={assignedToMe}
           />
         )}
       </div>
@@ -305,15 +403,18 @@ function Pagination({
   totalPages,
   status,
   targetType,
+  assignedToMe,
 }: {
   page: number;
   totalPages: number;
   status?: ReportStatusValue;
   targetType?: ReportTargetTypeValue;
+  assignedToMe?: boolean;
 }) {
   const baseParams = new URLSearchParams();
   if (status) baseParams.set("status", status);
   if (targetType) baseParams.set("targetType", targetType);
+  if (assignedToMe) baseParams.set("assignedToMe", "1");
   const buildHref = (p: number) => {
     const params = new URLSearchParams(baseParams);
     params.set("page", String(p));

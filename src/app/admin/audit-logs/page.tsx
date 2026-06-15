@@ -8,6 +8,7 @@ import {
   AUDIT_TARGET_TYPES,
 } from "@/lib/admin/audit";
 import { listAuditLogs } from "@/lib/admin/audit-queries";
+import { requireAdmin } from "@/lib/auth/guard";
 import { cn, formatRelativeTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -72,6 +73,7 @@ export default async function AdminAuditLogsPage({
     page?: string;
   }>;
 }) {
+  await requireAdmin("/admin/audit-logs");
   const sp = await searchParams;
   const actor = (sp.actor ?? "").trim() || undefined;
   const action = parseAction(sp.action);

@@ -10,6 +10,7 @@ import {
   type PillTagTint,
 } from "@/components/ui/pill-tag";
 import { MarkPayoutPaidDialog } from "@/components/admin/mark-payout-paid-dialog";
+import { requireAdmin } from "@/lib/auth/guard";
 import {
   getAdminPayoutOverview,
   listPayoutsForAdmin,
@@ -53,6 +54,7 @@ export default async function AdminPayoutsPage({
     page?: string;
   }>;
 }) {
+  await requireAdmin("/admin/payouts");
   const sp = await searchParams;
   const status = parseStatus(sp.status);
   const pendingRequest = sp.pendingRequest === "1";

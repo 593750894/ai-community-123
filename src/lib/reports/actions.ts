@@ -199,6 +199,10 @@ export async function adminResolveReport(
           resolvedById: adminId,
           resolvedAt: new Date(),
           resolution: payload.resolution ?? null,
+          // Stage 17.1：结案时清空认领信息，便于 /admin/reports 列表的「我处理的」
+          // 只统计 REVIEWING 中的活跃 case。
+          assignedToId: null,
+          assignedAt: null,
         },
       });
     },
@@ -293,3 +297,87 @@ async function deleteReportTargetInTx(
       return { deleted: false, action: null };
   }
 }
+
+/**
+ * Stage 17.1：审核员认领举报。PENDING → REVIEWING + assignedToId=modId。
+ *
+ * 并发安全：用 updateMany WHERE status=PENDING AND assignedToId IS NULL，
+ * 拿到 count=0 表示已被别的 MOD 抢先认领或已结案，外层抛 409。
+ * 同一个 mod 认领自己已认领的 case → updateMany 也会返回 0（status 已是 REVIEWING），
+ * 业务上无害（前端按钮不会再出现）。
+ */
+export async function adminClaimReport(
+  reportId: string,
+  modId: string,
+): Promise<void> {
+  const report = await prisma.report.findUnique({
+    where: { id: reportId },
+    select: { id: true, status: true, assignedToId: true },
+  });
+  if (!report) throw new NotFoundError("举报");
+  if (report.status !== "PENDING") {
+    throw new ConflictError("该举报已被认领或已结案");
+  }
+
+  const { count } = await prisma.report.updateMany({
+    where: { id: reportId, status: "PENDING", assignedToId: null },
+    data: {
+      status: "REVIEWING",
+      assignedToId: modId,
+      assignedAt: new Date(),
+    },
+  });
+  if (count === 0) throw new ConflictError("该举报已被认领或已结案");
+
+  await createAuditLog({
+    adminId: modId,
+    action: "CLAIM_REPORT",
+    targetType: "Report",
+    targetId: reportId,
+    metadata: { previousStatus: "PENDING" },
+  });
+}
+
+/**
+ * Stage 17.1：审核员释放认领。REVIEWING → PENDING + 清空 assignedToId。
+ *
+ * 仅认领者本人 / ADMIN 可释放（MOD 不能抢别人的 case）。
+ * 已结案的 case 不可释放。
+ */
+export async function adminReleaseReport(
+  reportId: string,
+  actor: { id: string; role: string },
+): Promise<void> {
+  const report = await prisma.report.findUnique({
+    where: { id: reportId },
+    select: { id: true, status: true, assignedToId: true },
+  });
+  if (!report) throw new NotFoundError("举报");
+  if (report.status !== "REVIEWING") {
+    throw new ConflictError("仅可释放审核中的举报");
+  }
+  const isOwner = report.assignedToId === actor.id;
+  const isAdminActor = actor.role === "ADMIN";
+  if (!isOwner && !isAdminActor) {
+    throw new ForbiddenError("仅认领者或 ADMIN 可释放");
+  }
+
+  const { count } = await prisma.report.updateMany({
+    where: { id: reportId, status: "REVIEWING" },
+    data: {
+      status: "PENDING",
+      assignedToId: null,
+      assignedAt: null,
+    },
+  });
+  if (count === 0) throw new ConflictError("举报状态已变更");
+
+  await createAuditLog({
+    adminId: actor.id,
+    action: "RELEASE_REPORT",
+    targetType: "Report",
+    targetId: reportId,
+    metadata: { previousAssignee: report.assignedToId },
+  });
+}
+

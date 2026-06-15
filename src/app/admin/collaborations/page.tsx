@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { requireAdmin } from "@/lib/auth/guard";
 import { prisma } from "@/lib/db";
 import {
   adminDeleteCollab,
@@ -24,6 +25,7 @@ export const dynamic = "force-dynamic";
 // 状态切换走 select.onChange → form submit（无 JS：select + 提交按钮）。
 
 export default async function AdminCollaborationsPage() {
+  await requireAdmin("/admin/collaborations");
   const collabs = await prisma.collaboration.findMany({
     orderBy: { createdAt: "desc" },
     take: 200,
@@ -79,10 +81,10 @@ export default async function AdminCollaborationsPage() {
                       {COLLAB_TYPE_LABEL[c.type as CollabTypeValue] ?? c.type}
                     </td>
                     <td className="px-4 py-2.5 text-xs">
-                      <span aria-hidden className="mr-1">
-                        {meta.emoji}
+                      <span className="inline-flex items-center gap-1">
+                        <meta.icon className="size-3.5 text-muted-foreground" aria-hidden />
+                        {meta.label}
                       </span>
-                      {meta.label}
                     </td>
                     <td className="px-4 py-2.5 text-xs">
                       <Link

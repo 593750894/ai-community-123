@@ -6,12 +6,15 @@ import { listReports } from "@/lib/reports/queries";
 import { ListReportsQuerySchema } from "@/lib/reports/schemas";
 
 /**
- * GET /api/admin/reports?status=PENDING&targetType=POST&page=1&pageSize=20
+ * GET /api/admin/reports?status=PENDING&targetType=POST&assignedToMe=1&page=1&pageSize=20
+ * Stage 17.1：MOD + ADMIN 都可调用。
  */
 export async function GET(request: Request) {
   try {
     const user = await requireAuth();
-    if (user.role !== "ADMIN") throw new ForbiddenError();
+    if (user.role !== "ADMIN" && user.role !== "MOD") {
+      throw new ForbiddenError();
+    }
     const url = new URL(request.url);
     const parsed = ListReportsQuerySchema.safeParse({
       status: url.searchParams.get("status") ?? undefined,
@@ -23,10 +26,12 @@ export async function GET(request: Request) {
         parsed.error.flatten().fieldErrors,
       );
     }
+    const assignedToMe = url.searchParams.get("assignedToMe") === "1";
     const { page, pageSize } = parsePagination(url);
     const { items, total } = await listReports({
       status: parsed.data.status,
       targetType: parsed.data.targetType,
+      assignedToId: assignedToMe ? user.id : undefined,
       page,
       pageSize,
     });

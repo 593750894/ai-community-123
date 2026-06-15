@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { CreateToolForm } from "@/components/admin/create-tool-form";
 import { EditToolDialog } from "@/components/admin/edit-tool-dialog";
+import { requireAdmin } from "@/lib/auth/guard";
 import { prisma } from "@/lib/db";
 import { adminDeleteTool } from "@/lib/admin/actions";
 import {
@@ -17,6 +18,7 @@ export const dynamic = "force-dynamic";
 // slug 不暴露编辑入口（routing key）。
 
 export default async function AdminToolsPage() {
+  await requireAdmin("/admin/tools");
   const tools = await prisma.tool.findMany({
     orderBy: [{ isOfficial: "desc" }, { createdAt: "desc" }],
     take: 300,
@@ -78,10 +80,10 @@ export default async function AdminToolsPage() {
                       </Link>
                     </td>
                     <td className="px-4 py-2.5 text-xs">
-                      <span aria-hidden className="mr-1">
-                        {meta.emoji}
+                      <span className="inline-flex items-center gap-1">
+                        <meta.icon className="size-3.5 text-muted-foreground" aria-hidden />
+                        {meta.label}
                       </span>
-                      {meta.label}
                     </td>
                     <td className="px-4 py-2.5 text-xs text-muted-foreground">
                       {TOOL_PRICING_LABEL[t.pricing as ToolPricingValue] ??
