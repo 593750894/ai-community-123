@@ -1,3 +1,17 @@
+import {
+  BookOpen,
+  Briefcase,
+  Clapperboard,
+  Drama,
+  Film,
+  FlaskConical,
+  Handshake,
+  Pin,
+  Sparkles,
+  UserSquare,
+  type LucideIcon,
+} from "lucide-react";
+
 import type { PillTagTint } from "@/components/ui/pill-tag";
 
 // 与 Prisma `CollaborationCategory` / `CollaborationWorkMode` / `CollaborationLocation` /
@@ -24,7 +38,7 @@ export type CollabCategoryMeta = {
   value: CollabCategoryValue;
   label: string;
   desc: string;
-  emoji: string;
+  icon: LucideIcon;
   /** V2 PillTag tint (DESIGN.md §7 7-tint vocabulary). */
   tint: PillTagTint;
 };
@@ -34,70 +48,70 @@ export const COLLAB_CATEGORY_META: Record<CollabCategoryValue, CollabCategoryMet
     value: "AI_VIDEO_TEAM",
     label: "AI 视频制作团队",
     desc: "完整成片团队：编剧 / 视觉 / 后期",
-    emoji: "🎬",
+    icon: Clapperboard,
     tint: "blue",
   },
   AI_COMIC_CREATOR: {
     value: "AI_COMIC_CREATOR",
     label: "AI 漫剧创作者",
     desc: "竖屏漫剧 · 分镜叙事节奏",
-    emoji: "📖",
+    icon: BookOpen,
     tint: "violet",
   },
   AI_DRAMA_TEAM: {
     value: "AI_DRAMA_TEAM",
     label: "AI 短剧团队",
     desc: "竖屏微短剧 · 1-3 分钟一集",
-    emoji: "🎭",
+    icon: Drama,
     tint: "rose",
   },
   DIGITAL_HUMAN: {
     value: "DIGITAL_HUMAN",
     label: "数字人制作",
     desc: "数字人形象 + 口播 + 复用模板",
-    emoji: "🧑‍💼",
+    icon: UserSquare,
     tint: "emerald",
   },
   PROMPT_ENGINEER: {
     value: "PROMPT_ENGINEER",
     label: "提示词工程师",
     desc: "Prompt 设计 / 调试 / 工作流",
-    emoji: "✨",
+    icon: Sparkles,
     tint: "cyan",
   },
   COMFYUI_WORKFLOW: {
     value: "COMFYUI_WORKFLOW",
     label: "ComfyUI 工作流搭建",
     desc: "节点图开发 · 节点封装 · 量产",
-    emoji: "🧪",
+    icon: FlaskConical,
     tint: "cyan",
   },
   EDITOR: {
     value: "EDITOR",
     label: "剪辑师",
     desc: "剪辑 · 调色 · 转场 · 字幕",
-    emoji: "🎞️",
+    icon: Film,
     tint: "amber",
   },
   COFOUNDER: {
     value: "COFOUNDER",
     label: "联合创始人",
     desc: "长期搭子 / 股权合伙",
-    emoji: "🤝",
+    icon: Handshake,
     tint: "violet",
   },
   INVEST_BIZ: {
     value: "INVEST_BIZ",
     label: "投资 / 商务合作",
     desc: "融资 · 渠道 · 品牌共创",
-    emoji: "💼",
+    icon: Briefcase,
     tint: "amber",
   },
   OTHER: {
     value: "OTHER",
     label: "其他合作",
     desc: "未归类的项目合作",
-    emoji: "📌",
+    icon: Pin,
     tint: "slate",
   },
 };

@@ -77,7 +77,7 @@ export function CreatePostForm({
           </option>
           {channels.map((c) => (
             <option key={c.id} value={c.id}>
-              {(c.icon ?? "#") + " " + c.name} · {c.slug}
+              {c.name} · {c.slug}
             </option>
           ))}
         </Select>

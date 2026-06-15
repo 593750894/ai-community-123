@@ -75,9 +75,7 @@ export default async function ToolDetailPage({ params }: PageProps) {
                   className="size-full object-cover"
                 />
               ) : (
-                <span className="text-2xl" aria-hidden>
-                  {meta.emoji}
-                </span>
+                <meta.icon className="size-7 text-muted-foreground" aria-hidden />
               )}
             </span>
             <div className="min-w-0 space-y-1.5">
@@ -94,9 +92,7 @@ export default async function ToolDetailPage({ params }: PageProps) {
               </div>
               <div className="flex flex-wrap items-center gap-1.5 text-xs">
                 <PillTag tint={meta.tint} icon={null}>
-                  <span aria-hidden className="mr-0.5">
-                    {meta.emoji}
-                  </span>
+                  <meta.icon className="mr-0.5 size-3" aria-hidden />
                   {meta.label}
                 </PillTag>
                 <PillTag tint={TOOL_PRICING_TINT[pricing]} icon={null}>

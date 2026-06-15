@@ -87,12 +87,12 @@ export function CollaborationCard({
         {/* 分类色块 */}
         <span
           className={cn(
-            "flex size-11 shrink-0 items-center justify-center rounded-lg border border-transparent text-base",
+            "flex size-11 shrink-0 items-center justify-center rounded-lg border border-transparent",
             pillTagTintClass(meta.tint),
           )}
           aria-hidden
         >
-          {meta.emoji}
+          <meta.icon className="size-5" />
         </span>
 
         <div className="min-w-0 flex-1">
@@ -105,7 +105,7 @@ export function CollaborationCard({
               {COLLAB_STATUS_LABEL[item.status]}
             </PillTag>
             <PillTag tint={meta.tint} icon={null}>
-              {meta.emoji ? <span aria-hidden className="mr-0.5">{meta.emoji}</span> : null}
+              <meta.icon className="mr-0.5 size-3" aria-hidden />
               {meta.label}
             </PillTag>
           </div>

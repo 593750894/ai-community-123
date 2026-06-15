@@ -4,6 +4,7 @@ import {
   Briefcase,
   Clock,
   Filter,
+  Globe,
   Handshake,
   Plus,
   ShieldCheck,
@@ -221,7 +222,7 @@ export default async function CollaborationPage({
               href={queryWithCategory(null)}
               active={!activeCategory}
               label="全部"
-              emoji="🌐"
+              icon={Globe}
               count={stats.totalCount}
             />
             {COLLAB_CATEGORY_ORDER.map((c) => {
@@ -232,7 +233,7 @@ export default async function CollaborationPage({
                   href={queryWithCategory(c)}
                   active={activeCategory === c}
                   label={meta.label}
-                  emoji={meta.emoji}
+                  icon={meta.icon}
                   count={counts[c] ?? 0}
                   tint={meta.tint}
                 />

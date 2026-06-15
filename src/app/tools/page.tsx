@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Filter, Search, Sparkles, Wrench } from "lucide-react";
+import { Filter, Globe, Search, Sparkles, Wrench } from "lucide-react";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -150,7 +150,7 @@ export default async function ToolsPage({
               href={queryWithCategory(null)}
               active={!activeCategory}
               label="全部"
-              emoji="🌐"
+              icon={Globe}
               count={total}
             />
             {TOOL_CATEGORY_ORDER.map((c) => {
@@ -161,7 +161,7 @@ export default async function ToolsPage({
                   href={queryWithCategory(c)}
                   active={activeCategory === c}
                   label={meta.label}
-                  emoji={meta.emoji}
+                  icon={meta.icon}
                   count={counts[c] ?? 0}
                   tint={meta.tint}
                 />

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight, Flame, Hash, MessageSquare, Users } from "lucide-react";
 
+import { ChannelIcon } from "@/components/community/channel-icon";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InlineError } from "@/components/ui/error-state";
 
@@ -64,13 +65,13 @@ export function PopularChannelGrid({
                 <div className="flex items-start justify-between">
                   <div className="flex min-w-0 items-center gap-2.5">
                     <span
-                      className="flex size-9 shrink-0 items-center justify-center rounded-lg text-lg"
+                      className="flex size-9 shrink-0 items-center justify-center rounded-lg"
                       style={{
                         backgroundColor: `${c.color}18`,
                         color: c.color,
                       }}
                     >
-                      {c.icon ?? "#"}
+                      <ChannelIcon name={c.icon} className="size-4" />
                     </span>
                     <div className="min-w-0">
                       <div className="truncate text-sm font-semibold leading-tight">

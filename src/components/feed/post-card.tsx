@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Eye, ImageIcon, MessageCircle, Pin, Play, Shield, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { ChannelIcon } from "@/components/community/channel-icon";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { postTypeMeta, type PostTypeValue } from "@/lib/post-types";
 import {
@@ -94,7 +95,7 @@ export function PostCard({
             href={`/community/${post.channel.id}`}
             className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            {post.channel.icon && <span>{post.channel.icon}</span>}
+            <ChannelIcon name={post.channel.icon} className="size-3" />
             <span>{post.channel.name}</span>
           </Link>
         )}

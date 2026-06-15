@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   FileText,
   Film,
-  Hash,
   Search as SearchIcon,
   User as UserIcon,
   Wrench,
@@ -10,6 +9,7 @@ import {
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
+import { ChannelIcon } from "@/components/community/channel-icon";
 import { CountText } from "@/components/ui/count-text";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
@@ -305,14 +305,14 @@ function ResultRow({ hit, q }: { hit: SearchHit; q: string }) {
           className="flex items-center gap-3 rounded-2xl border border-border bg-card/30 p-3 transition-colors hover:border-primary/40 hover:bg-card/60"
         >
           <span
-            className="flex size-10 shrink-0 items-center justify-center rounded-md border text-base"
+            className="flex size-10 shrink-0 items-center justify-center rounded-md border"
             style={{
               borderColor: `${hit.color}55`,
               backgroundColor: `${hit.color}1a`,
               color: hit.color,
             }}
           >
-            {hit.icon ?? <Hash className="size-4" />}
+            <ChannelIcon name={hit.icon} className="size-4" />
           </span>
           <div className="min-w-0 flex-1">
             <div className="text-sm font-medium">

@@ -52,9 +52,7 @@ export function ToolCard({ tool }: { tool: ToolCardItem }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={tool.logoUrl} alt={tool.name} className="size-full object-cover" />
             ) : (
-              <span className="text-base" aria-hidden>
-                {meta.emoji}
-              </span>
+              <meta.icon className="size-5 text-muted-foreground" aria-hidden />
             )}
           </span>
           <div className="min-w-0">
@@ -71,7 +69,7 @@ export function ToolCard({ tool }: { tool: ToolCardItem }) {
             </div>
             <div className="mt-0.5 flex flex-wrap items-center gap-1">
               <PillTag tint={meta.tint} size="sm" icon={null}>
-                <span aria-hidden className="mr-0.5">{meta.emoji}</span>
+                <meta.icon className="mr-0.5 size-3" aria-hidden />
                 {meta.label}
               </PillTag>
               <PillTag tint={TOOL_PRICING_TINT[tool.pricing]} size="sm" icon={null}>

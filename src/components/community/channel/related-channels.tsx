@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Hash, MessageSquare, Users } from "lucide-react";
 
+import { ChannelIcon } from "@/components/community/channel-icon";
 import type { ChannelOverview } from "@/types/community";
 
 export function RelatedChannels({
@@ -24,14 +25,14 @@ export function RelatedChannels({
               className="group flex items-start gap-2.5 rounded-2xl px-2.5 py-2.5 transition-colors hover:bg-muted/40"
             >
               <span
-                className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border text-base"
+                className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border"
                 style={{
                   backgroundColor: `${ch.color}15`,
                   borderColor: `${ch.color}25`,
                   color: ch.color,
                 }}
               >
-                {ch.icon ?? "#"}
+                <ChannelIcon name={ch.icon} className="size-4" />
               </span>
               <div className="min-w-0 flex-1">
                 <span className="truncate text-sm font-medium transition-colors group-hover:text-primary">

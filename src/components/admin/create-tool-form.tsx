@@ -67,7 +67,7 @@ export function CreateToolForm() {
           >
             {TOOL_CATEGORY_ORDER.map((c) => (
               <option key={c} value={c}>
-                {TOOL_CATEGORY_META[c].emoji} {TOOL_CATEGORY_META[c].label}
+                {TOOL_CATEGORY_META[c].label}
               </option>
             ))}
           </select>

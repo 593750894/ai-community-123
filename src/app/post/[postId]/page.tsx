@@ -12,6 +12,7 @@ import {
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
+import { ChannelIcon } from "@/components/community/channel-icon";
 import { CommentForm } from "@/components/feed/comment-form";
 import { CommentThread } from "@/components/feed/comment-thread";
 import {
@@ -86,7 +87,7 @@ export default async function PostDetailPage({
   return (
     <div className="flex flex-1 flex-col">
       <PageHeader
-        eyebrow={`${post.channel.icon ?? "#"} ${post.channel.name} · ${post.channel.slug}`}
+        eyebrow={`${post.channel.name} · ${post.channel.slug}`}
         title={post.title}
         description={`由 ${post.author.name} 于 ${formatRelativeTime(post.createdAt)}发布`}
         actions={
@@ -166,9 +167,10 @@ export default async function PostDetailPage({
                 href={`/community/${post.channel.id}`}
                 className="ml-auto inline-flex items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
-                <span style={{ color: post.channel.color }}>
-                  {post.channel.icon ?? "#"}
-                </span>
+                <ChannelIcon
+                  name={post.channel.icon}
+                  className="size-3"
+                />
                 <span>{post.channel.name}</span>
               </Link>
             </div>
@@ -339,13 +341,13 @@ export default async function PostDetailPage({
               className="flex items-center gap-2.5"
             >
               <span
-                className="flex size-9 items-center justify-center rounded-lg text-lg"
+                className="flex size-9 items-center justify-center rounded-lg"
                 style={{
                   backgroundColor: `${post.channel.color}20`,
                   color: post.channel.color,
                 }}
               >
-                {post.channel.icon ?? "#"}
+                <ChannelIcon name={post.channel.icon} className="size-4" />
               </span>
               <div>
                 <div className="text-sm font-semibold leading-tight">

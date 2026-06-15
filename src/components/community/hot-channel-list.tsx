@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Flame, Hash, MessageSquare } from "lucide-react";
 
+import { ChannelIcon } from "@/components/community/channel-icon";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InlineError } from "@/components/ui/error-state";
 
@@ -71,13 +72,13 @@ export function HotChannelList({
                   className="group flex items-start gap-2.5 rounded-full px-2 py-2 transition-colors hover:bg-muted/40"
                 >
                   <span
-                    className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg text-base"
+                    className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg"
                     style={{
                       backgroundColor: `${ch.color}20`,
                       color: ch.color,
                     }}
                   >
-                    {ch.icon ?? "#"}
+                    <ChannelIcon name={ch.icon} className="size-4" />
                   </span>
 
                   <div className="min-w-0 flex-1">

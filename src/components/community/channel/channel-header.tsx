@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ChannelIcon } from "@/components/community/channel-icon";
 import { CountText } from "@/components/ui/count-text";
 import { JoinChannelButton } from "@/components/community/channel/join-channel-button";
 import type { ChannelDetail, ChannelStats } from "@/types/community";
@@ -112,14 +113,17 @@ export function ChannelHeader({
             <div className="flex items-center gap-4">
               {channel.icon && (
                 <span
-                  className="flex size-14 items-center justify-center rounded-xl border text-3xl sm:size-16 sm:text-4xl"
+                  className="flex size-14 items-center justify-center rounded-xl border sm:size-16"
                   style={{
                     backgroundColor: `${channel.color}18`,
                     borderColor: `${channel.color}30`,
                     color: channel.color,
                   }}
                 >
-                  {channel.icon}
+                  <ChannelIcon
+                    name={channel.icon}
+                    className="size-7 sm:size-8"
+                  />
                 </span>
               )}
               <div>

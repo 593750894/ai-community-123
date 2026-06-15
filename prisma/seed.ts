@@ -127,19 +127,21 @@ const USERS = [
 
 // ─────────────────────────── 12 个频道 ───────────────────────────
 
+// icon: kebab-case key resolved by <ChannelIcon name=…/> →
+//   components/community/channel-icon.tsx
 const CHANNELS = [
-  { slug: "general", name: "综合交流", description: "自由讨论 AI 视频相关话题", icon: "💬", color: "#3b82f6" },
-  { slug: "ai-video-tools", name: "AI 视频工具讨论", description: "各类 AI 视频工具的使用心得和对比", icon: "🛠️", color: "#8b5cf6" },
-  { slug: "ai-comic", name: "AI 漫剧交流", description: "AI 漫剧创作经验分享", icon: "📖", color: "#f472b6" },
-  { slug: "ai-drama", name: "AI 短剧交流", description: "AI 短剧编导与制作", icon: "🎬", color: "#ef4444" },
-  { slug: "digital-human", name: "数字人/口播视频", description: "数字人形象与口播视频制作", icon: "🧑‍💻", color: "#06b6d4" },
-  { slug: "ecommerce", name: "电商视频", description: "电商广告与产品展示视频", icon: "🛒", color: "#f59e0b" },
-  { slug: "prompts-workflow", name: "提示词与工作流", description: "Prompt 技巧与 ComfyUI 工作流分享", icon: "✨", color: "#a78bfa" },
-  { slug: "collaboration", name: "项目合作", description: "发布和寻找项目合作机会", icon: "🤝", color: "#10b981" },
-  { slug: "hiring", name: "招募与接单", description: "招募团队成员或发布接单信息", icon: "📋", color: "#14b8a6" },
-  { slug: "industry-news", name: "行业资讯", description: "AI 视频行业最新动态和资讯", icon: "📰", color: "#6366f1" },
-  { slug: "showcase", name: "作品展示", description: "展示你的 AI 视频作品", icon: "🏆", color: "#22d3ee" },
-  { slug: "newbie", name: "新手提问", description: "新手踩坑、提问、互助", icon: "🌱", color: "#86efac" },
+  { slug: "general", name: "综合交流", description: "自由讨论 AI 视频相关话题", icon: "message-circle", color: "#3b82f6" },
+  { slug: "ai-video-tools", name: "AI 视频工具讨论", description: "各类 AI 视频工具的使用心得和对比", icon: "wrench", color: "#8b5cf6" },
+  { slug: "ai-comic", name: "AI 漫剧交流", description: "AI 漫剧创作经验分享", icon: "images", color: "#f472b6" },
+  { slug: "ai-drama", name: "AI 短剧交流", description: "AI 短剧编导与制作", icon: "clapperboard", color: "#ef4444" },
+  { slug: "digital-human", name: "数字人/口播视频", description: "数字人形象与口播视频制作", icon: "user-square", color: "#06b6d4" },
+  { slug: "ecommerce", name: "电商视频", description: "电商广告与产品展示视频", icon: "shopping-cart", color: "#f59e0b" },
+  { slug: "prompts-workflow", name: "提示词与工作流", description: "Prompt 技巧与 ComfyUI 工作流分享", icon: "wand-2", color: "#a78bfa" },
+  { slug: "collaboration", name: "项目合作", description: "发布和寻找项目合作机会", icon: "handshake", color: "#10b981" },
+  { slug: "hiring", name: "招募与接单", description: "招募团队成员或发布接单信息", icon: "clipboard-list", color: "#14b8a6" },
+  { slug: "industry-news", name: "行业资讯", description: "AI 视频行业最新动态和资讯", icon: "newspaper", color: "#6366f1" },
+  { slug: "showcase", name: "作品展示", description: "展示你的 AI 视频作品", icon: "trophy", color: "#22d3ee" },
+  { slug: "newbie", name: "新手提问", description: "新手踩坑、提问、互助", icon: "sprout", color: "#86efac" },
 ] as const;
 
 // ─────────────────────────── 15 个工具 ───────────────────────────

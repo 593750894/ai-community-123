@@ -102,8 +102,8 @@ export function CreateCollaborationForm({
                     : "border-border bg-card text-muted-foreground hover:bg-muted",
                 )}
               >
-                <div className="text-sm font-medium text-foreground/95">
-                  <span className="mr-1" aria-hidden>{meta.emoji}</span>
+                <div className="inline-flex items-center gap-1 text-sm font-medium text-foreground/95">
+                  <meta.icon className="size-3.5" aria-hidden />
                   {meta.label}
                 </div>
                 <div className="mt-0.5 text-[11px] opacity-80">{meta.desc}</div>

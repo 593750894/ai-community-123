@@ -22,6 +22,7 @@ import {
   Wrench,
 } from "lucide-react";
 
+import { ChannelIcon } from "@/components/community/channel-icon";
 import { cn } from "@/lib/utils";
 
 export type SidebarChannel = {
@@ -199,12 +200,13 @@ function ChannelLink({
           : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
       )}
     >
-      <span
-        aria-hidden
-        className="flex size-4 shrink-0 items-center justify-center text-[13px] leading-none"
-      >
-        {ch.icon ?? "🗂"}
-      </span>
+      <ChannelIcon
+        name={ch.icon}
+        className={cn(
+          "size-4 shrink-0",
+          active ? "text-primary" : "text-muted-foreground/80 group-hover:text-foreground",
+        )}
+      />
       <span className="truncate">{ch.name}</span>
     </Link>
   );

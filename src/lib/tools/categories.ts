@@ -1,3 +1,19 @@
+import {
+  Box,
+  Captions,
+  FileText,
+  Image as ImageIcon,
+  ImagePlus,
+  Film,
+  Mic,
+  Music,
+  Scissors,
+  UserSquare,
+  Wrench,
+  Workflow,
+  type LucideIcon,
+} from "lucide-react";
+
 import type { PillTagTint } from "@/components/ui/pill-tag";
 
 // 工具库 (Tool) 的 11 个标准分类。
@@ -29,7 +45,7 @@ export type ToolCategoryMeta = {
   value: ToolCategoryValue;
   label: string;
   desc: string;
-  emoji: string;
+  icon: LucideIcon;
   /** V2 PillTag tint (DESIGN.md §7 7-tint vocabulary). */
   tint: PillTagTint;
 };
@@ -39,77 +55,77 @@ export const TOOL_CATEGORY_META: Record<ToolCategoryValue, ToolCategoryMeta> = {
     value: "TEXT_TO_VIDEO",
     label: "文生视频",
     desc: "纯文字描述生成视频",
-    emoji: "📝",
+    icon: FileText,
     tint: "cyan",
   },
   IMAGE_TO_VIDEO: {
     value: "IMAGE_TO_VIDEO",
     label: "图生视频",
     desc: "参考图驱动的视频生成",
-    emoji: "🖼️",
+    icon: ImageIcon,
     tint: "blue",
   },
   VIDEO_TO_VIDEO: {
     value: "VIDEO_TO_VIDEO",
     label: "视频转视频",
     desc: "风格迁移 / 重绘 / 增强",
-    emoji: "🎞️",
+    icon: Film,
     tint: "blue",
   },
   DIGITAL_HUMAN: {
     value: "DIGITAL_HUMAN",
     label: "数字人",
     desc: "形象生成 + 口型 + 表情驱动",
-    emoji: "🧑‍💼",
+    icon: UserSquare,
     tint: "emerald",
   },
   VOICE: {
     value: "VOICE",
     label: "配音",
     desc: "TTS · 声音克隆 · 多语言",
-    emoji: "🎙️",
+    icon: Mic,
     tint: "violet",
   },
   SUBTITLE: {
     value: "SUBTITLE",
     label: "字幕",
     desc: "自动识别 / 翻译 / 时间轴",
-    emoji: "💬",
+    icon: Captions,
     tint: "emerald",
   },
   EDIT: {
     value: "EDIT",
     label: "剪辑",
     desc: "时间线 · 调色 · 转场",
-    emoji: "✂️",
+    icon: Scissors,
     tint: "rose",
   },
   WORKFLOW: {
     value: "WORKFLOW",
     label: "工作流",
     desc: "ComfyUI · 节点图 · 流水线",
-    emoji: "🧩",
+    icon: Workflow,
     tint: "cyan",
   },
   IMAGE_GEN: {
     value: "IMAGE_GEN",
     label: "图像生成",
     desc: "首尾帧 · 概念图 · 风格图",
-    emoji: "🎨",
+    icon: ImagePlus,
     tint: "violet",
   },
   THREE_D: {
     value: "THREE_D",
     label: "3D 生成",
     desc: "图片/文本 → 3D 模型",
-    emoji: "🧊",
+    icon: Box,
     tint: "violet",
   },
   MUSIC: {
     value: "MUSIC",
     label: "音乐音效",
     desc: "AI 编曲 / 配乐 / SFX",
-    emoji: "🎵",
+    icon: Music,
     tint: "amber",
   },
 };
@@ -124,7 +140,7 @@ export function toolCategoryMeta(category: string): ToolCategoryMeta {
       value: (category as ToolCategoryValue) ?? "WORKFLOW",
       label: category || "未分类",
       desc: "",
-      emoji: "🔧",
+      icon: Wrench,
       tint: "slate",
     }
   );

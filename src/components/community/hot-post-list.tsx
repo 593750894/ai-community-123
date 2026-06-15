@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Flame, Heart, MessageCircle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { ChannelIcon } from "@/components/community/channel-icon";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InlineError } from "@/components/ui/error-state";
 
@@ -96,9 +97,7 @@ export function HotPostList({
                         color: post.channel.color,
                       }}
                     >
-                      {post.channel.icon && (
-                        <span className="text-[10px]">{post.channel.icon}</span>
-                      )}
+                      <ChannelIcon name={post.channel.icon} className="size-2.5" />
                       {post.channel.name}
                     </Link>
                   )}

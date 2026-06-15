@@ -120,7 +120,7 @@ export default async function CollaborationDetailPage({
             <div className="space-y-3 p-5 sm:p-6">
               <div className="flex flex-wrap items-center gap-2">
                 <PillTag tint={meta.tint} icon={null} size="md">
-                  <span aria-hidden className="mr-0.5">{meta.emoji}</span>
+                  <meta.icon className="mr-0.5 size-3.5" aria-hidden />
                   {meta.label}
                 </PillTag>
                 <PillTag tint={COLLAB_STATUS_TINT[collab.status as CollabStatusValue]} size="md">
@@ -287,8 +287,8 @@ export default async function CollaborationDetailPage({
               合作类型
             </div>
             <div className={cn("rounded-lg border border-transparent p-3", pillTagTintClass(meta.tint))}>
-              <div className="text-sm font-semibold">
-                <span className="mr-1.5" aria-hidden>{meta.emoji}</span>
+              <div className="inline-flex items-center gap-1.5 text-sm font-semibold">
+                <meta.icon className="size-4" aria-hidden />
                 {meta.label}
               </div>
               <p className="mt-1 text-xs opacity-85">{meta.desc}</p>

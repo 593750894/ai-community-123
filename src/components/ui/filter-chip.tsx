@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { PillTagTint } from "@/components/ui/pill-tag";
@@ -7,7 +8,7 @@ import type { PillTagTint } from "@/components/ui/pill-tag";
 // render <PillTag> directly because the active background needs to live on a
 // clickable <Link>, not a nested <span>. So we compose the same tint tokens
 // inline. The DEFAULT_ICON convention from PillTag does not apply here — chip
-// labels are typically prefixed with an explicit emoji or count badge.
+// labels are typically prefixed with an explicit Lucide icon or count badge.
 const TINT_ACTIVE_CLASS: Record<PillTagTint, string> = {
   cyan: "bg-tag-cyan-bg text-tag-cyan-fg border-transparent",
   blue: "bg-tag-blue-bg text-tag-blue-fg border-transparent",
@@ -25,7 +26,7 @@ export function FilterChip({
   href,
   active,
   label,
-  emoji,
+  icon: Icon,
   count,
   tint,
   tone,
@@ -34,7 +35,7 @@ export function FilterChip({
   href: string;
   active: boolean;
   label: React.ReactNode;
-  emoji?: string;
+  icon?: LucideIcon;
   count?: number;
   /** V2 PillTag tint. Preferred. */
   tint?: PillTagTint;
@@ -59,7 +60,7 @@ export function FilterChip({
         className,
       )}
     >
-      {emoji && <span aria-hidden>{emoji}</span>}
+      {Icon && <Icon className="size-3.5 shrink-0" aria-hidden />}
       <span>{label}</span>
       {typeof count === "number" && (
         <span

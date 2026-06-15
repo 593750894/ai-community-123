@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ChevronRight, MessageSquare } from "lucide-react";
 
+import { ChannelIcon } from "@/components/community/channel-icon";
+
 export interface ChannelCardProps {
   slug: string;
   name: string;
@@ -29,10 +31,10 @@ export function ChannelCard({
       <div className="flex items-start justify-between">
         <div className="flex min-w-0 items-center gap-3">
           <span
-            className="flex size-9 shrink-0 items-center justify-center rounded-lg text-lg"
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg"
             style={{ backgroundColor: `${color}18`, color }}
           >
-            {icon}
+            <ChannelIcon name={icon} className="size-4" />
           </span>
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold leading-tight">
