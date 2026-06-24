@@ -262,6 +262,23 @@ enum ContentAppealStatus {
   CANCELED
 }
 
+// Stage 17.3：发布期关键词黑名单。BLOCK = 拒绝创建；WARN = 允许但落审计供 admin 复查。
+enum BlockedWordSeverity {
+  WARN
+  BLOCK
+}
+
+// Stage 17.3：关键词适用的内容类型；ALL 通配所有 surface。
+enum BlockedWordScope {
+  ALL
+  POST
+  WORK
+  COMMENT
+  COLLABORATION
+  MESSAGE
+  WORKFLOW_ITEM
+}
+
 // ═════════════════════════════════════════════════════════════════
 //                           User & Auth
 // ═════════════════════════════════════════════════════════════════
@@ -371,6 +388,9 @@ model User {
   // Stage 17.2：内容申诉
   contentAppealsAuthored ContentAppeal[] @relation("AppealAppellant")
   contentAppealsReviewed ContentAppeal[] @relation("AppealReviewer")
+
+  // Stage 17.3：admin 维护的关键词黑名单
+  blockedWordsCreated BlockedWord[] @relation("BlockedWordCreator")
 
   @@index([status])
   @@index([role])
@@ -896,6 +916,28 @@ model ContentAppeal {
   @@index([status, createdAt])
   @@index([targetType, targetId])
   @@map("content_appeals")
+}
+
+/// Stage 17.3：发布期关键词黑名单。admin 维护 pattern + severity + scope；
+/// 创建 post/work/comment/collab/message/workflow-item 时按 scope 过滤命中，
+/// BLOCK 严重度直接拒绝并返回命中关键词列表（前端可高亮），WARN 严重度允许通过但写审计。
+/// pattern 落库时统一 lowercase，命中比对按 lowercase substring（O(n*m)，词表规模 < 1k 即可接受）。
+model BlockedWord {
+  id          String              @id @default(cuid())
+  pattern     String              @unique // 已 lowercase；2-64 字符
+  severity    BlockedWordSeverity @default(BLOCK)
+  scope       BlockedWordScope    @default(ALL)
+  note        String?             // admin 内部备注
+  hitCount    Int                 @default(0) @map("hit_count") // BLOCK 命中次数（供 admin 视图排序 / 热词识别）
+  createdById String              @map("created_by_id")
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+
+  createdBy User @relation("BlockedWordCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([scope])
+  @@index([severity])
+  @@map("blocked_words")
 }
 
 /// 后台管理员操作审计；action 用大写下划线字符串（如 "DELETE_POST" / "BAN_USER"）

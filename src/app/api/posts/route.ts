@@ -5,6 +5,7 @@ import { ValidationError } from "@/lib/errors";
 import { success, created, error } from "@/lib/response";
 import { CreatePostSchema } from "@/lib/posts/schemas";
 import { resolveOrgAttribution } from "@/lib/organizations/content-attribution";
+import { assertNotBlocked } from "@/lib/content/blocked-words";
 import { parsePagination, paginatedResponse } from "@/lib/pagination";
 import { POST_TYPE_VALUES } from "@/lib/post-types";
 
@@ -77,6 +78,13 @@ export async function POST(request: Request) {
     if (!channel) {
       throw new ValidationError("频道不存在");
     }
+
+    // Stage 17.3：发布期关键词黑名单。
+    await assertNotBlocked(
+      { scope: "POST", actorId: user.id, source: "post:api-create" },
+      title,
+      content,
+    );
 
     const resolvedOrgId = await resolveOrgAttribution(user.id, organizationId);
 

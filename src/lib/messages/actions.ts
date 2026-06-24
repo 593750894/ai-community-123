@@ -15,6 +15,8 @@ import { buildMessagePreview, inferMessageType } from "@/lib/messages/preview";
 import { parseMentions } from "@/lib/messages/lifecycle";
 import { notifyMessage } from "@/lib/notifications/emit";
 import { publishMessageCreated } from "@/lib/realtime/events";
+import { assertNotBlocked } from "@/lib/content/blocked-words";
+import { ValidationError } from "@/lib/errors";
 
 export type SendMessageFormState = {
   ok?: boolean;
@@ -163,6 +165,25 @@ export async function sendMessageAction(
     return { ok: false, message: "你不是该会话的参与者" };
   }
   const participantIds = allParticipants.map((p) => p.userId);
+
+  // Stage 17.3：关键词黑名单。空 content 跳过（仅附件消息）。
+  if (content && content.length > 0) {
+    try {
+      await assertNotBlocked(
+        {
+          scope: "MESSAGE",
+          actorId: session.userId,
+          source: `message:send:conversationId=${conversationId}`,
+        },
+        content,
+      );
+    } catch (err) {
+      if (err instanceof ValidationError) {
+        return { ok: false, message: err.message };
+      }
+      throw err;
+    }
+  }
 
   const now = new Date();
   const [message] = await prisma.$transaction([

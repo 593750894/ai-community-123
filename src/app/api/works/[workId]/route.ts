@@ -5,6 +5,7 @@ import { NotFoundError, ForbiddenError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
 import { UpdateWorkSchema } from "@/lib/works/schemas";
 import { softDeleteWork } from "@/lib/content/soft-delete";
+import { assertNotBlocked } from "@/lib/content/blocked-words";
 
 export async function GET(
   _request: Request,
@@ -54,6 +55,14 @@ export async function PATCH(
     }
 
     const data = parsed.data;
+    // Stage 17.3：编辑路径同样过关键词黑名单。
+    if (data.title !== undefined || data.description !== undefined) {
+      await assertNotBlocked(
+        { scope: "WORK", actorId: user.id, source: `work:patch:${workId}` },
+        data.title,
+        data.description,
+      );
+    }
     const updated = await prisma.work.update({
       where: { id: workId },
       data,

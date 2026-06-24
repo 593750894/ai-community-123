@@ -8,7 +8,8 @@ import { getSession } from "@/lib/auth/session";
 import { requireActiveUserById, SuspendedError } from "@/lib/auth/suspension";
 import { CreatePostSchema } from "@/lib/posts/schemas";
 import { resolveOrgAttribution } from "@/lib/organizations/content-attribution";
-import { AppError } from "@/lib/errors";
+import { assertNotBlocked } from "@/lib/content/blocked-words";
+import { AppError, ValidationError } from "@/lib/errors";
 import type { PostType } from "@/generated/prisma/client";
 
 export type CreatePostFormState = {
@@ -85,6 +86,20 @@ export async function createPostAction(
         message: err.message,
         fieldErrors: { organizationId: [err.message] },
       };
+    }
+    throw err;
+  }
+
+  // Stage 17.3：发布期关键词黑名单（BLOCK 命中→ ValidationError）。
+  try {
+    await assertNotBlocked(
+      { scope: "POST", actorId: session.userId, source: "post:create" },
+      title,
+      content,
+    );
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      return { ok: false, message: err.message };
     }
     throw err;
   }

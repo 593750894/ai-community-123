@@ -6,6 +6,7 @@ import {
   assertOrgPostingPermission,
   resolveOrgAttribution,
 } from "@/lib/organizations/content-attribution";
+import { assertNotBlocked } from "@/lib/content/blocked-words";
 
 import {
   CreateWorkflowItemSchema,
@@ -30,6 +31,12 @@ export async function createWorkflowItem(
   sellerId: string,
 ): Promise<{ id: string }> {
   const data = CreateWorkflowItemSchema.parse(input);
+  // Stage 17.3：关键词黑名单。
+  await assertNotBlocked(
+    { scope: "WORKFLOW_ITEM", actorId: sellerId, source: "workflow-item:create" },
+    data.title,
+    data.description,
+  );
   const resolvedOrgId = await resolveOrgAttribution(sellerId, data.organizationId);
   const created = await prisma.workflowItem.create({
     data: {
@@ -64,6 +71,14 @@ export async function updateWorkflowItem(
   if (!existing) throw new NotFoundError("商品");
   if (existing.sellerId !== sellerId) {
     throw new ForbiddenError("只能编辑自己的商品");
+  }
+  // Stage 17.3：编辑路径同样过关键词黑名单。
+  if (data.title !== undefined || data.description !== undefined) {
+    await assertNotBlocked(
+      { scope: "WORKFLOW_ITEM", actorId: sellerId, source: `workflow-item:patch:${id}` },
+      data.title,
+      data.description,
+    );
   }
   // Stage 11.3：允许在编辑时切换企业归属（含「切回个人」= organizationId=null）。
   // 只有当请求里显式带了 organizationId 字段（非 undefined）才参与更新。

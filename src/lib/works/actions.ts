@@ -8,7 +8,8 @@ import { getSession } from "@/lib/auth/session";
 import { requireActiveUserById, SuspendedError } from "@/lib/auth/suspension";
 import { CreateWorkSchema } from "@/lib/works/schemas";
 import { resolveOrgAttribution } from "@/lib/organizations/content-attribution";
-import { AppError } from "@/lib/errors";
+import { assertNotBlocked } from "@/lib/content/blocked-words";
+import { AppError, ValidationError } from "@/lib/errors";
 import type { WorkCategory } from "@/generated/prisma/client";
 
 export type CreateWorkFormState = {
@@ -74,6 +75,20 @@ export async function createWorkAction(
         message: err.message,
         fieldErrors: { organizationId: [err.message] },
       };
+    }
+    throw err;
+  }
+
+  // Stage 17.3：关键词黑名单。
+  try {
+    await assertNotBlocked(
+      { scope: "WORK", actorId: session.userId, source: "work:create" },
+      title,
+      description,
+    );
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      return { ok: false, message: err.message };
     }
     throw err;
   }

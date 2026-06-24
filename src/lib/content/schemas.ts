@@ -54,6 +54,34 @@ export const SubmitAppealSchema = z.object({
 });
 export type SubmitAppealInput = z.infer<typeof SubmitAppealSchema>;
 
+// ────────────────── Stage 17.3 关键词黑名单 ──────────────────
+
+export const BLOCKED_WORD_SEVERITY_VALUES = ["WARN", "BLOCK"] as const;
+export const BLOCKED_WORD_SCOPE_VALUES = [
+  "ALL",
+  "POST",
+  "WORK",
+  "COMMENT",
+  "COLLABORATION",
+  "MESSAGE",
+  "WORKFLOW_ITEM",
+] as const;
+
+export const CreateBlockedWordSchema = z.object({
+  pattern: z.string().trim().min(2, "关键词至少 2 字").max(64, "关键词不超过 64 字"),
+  severity: z.enum(BLOCKED_WORD_SEVERITY_VALUES).default("BLOCK"),
+  scope: z.enum(BLOCKED_WORD_SCOPE_VALUES).default("ALL"),
+  note: z.string().trim().max(200, "备注不超过 200 字").optional().nullable(),
+});
+export type CreateBlockedWordInput = z.infer<typeof CreateBlockedWordSchema>;
+
+export const UpdateBlockedWordSchema = z.object({
+  severity: z.enum(BLOCKED_WORD_SEVERITY_VALUES).optional(),
+  scope: z.enum(BLOCKED_WORD_SCOPE_VALUES).optional(),
+  note: z.string().trim().max(200).optional().nullable(),
+});
+export type UpdateBlockedWordInput = z.infer<typeof UpdateBlockedWordSchema>;
+
 /** Admin 审核申诉。REJECT 必须带备注，APPROVE 备注可选。 */
 export const ReviewAppealSchema = z
   .object({

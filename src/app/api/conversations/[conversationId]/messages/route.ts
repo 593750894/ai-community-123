@@ -11,6 +11,7 @@ import {
 } from "@/lib/messages/preview";
 import { parseMentions } from "@/lib/messages/lifecycle";
 import { publishMessageCreated } from "@/lib/realtime/events";
+import { assertNotBlocked } from "@/lib/content/blocked-words";
 import {
   MESSAGE_ATTACHMENT_MAX_COUNT,
   MESSAGE_CONTENT_MAX,
@@ -119,6 +120,18 @@ export async function POST(
     const { content, attachments } = parsed.data;
     const type = inferMessageType(attachments);
     const preview = buildMessagePreview(content, attachments);
+
+    // Stage 17.3：关键词黑名单。空文本（纯附件消息）跳过。
+    if (content && content.length > 0) {
+      await assertNotBlocked(
+        {
+          scope: "MESSAGE",
+          actorId: user.id,
+          source: `message:api-send:conversationId=${conversationId}`,
+        },
+        content,
+      );
+    }
 
     const now = new Date();
 

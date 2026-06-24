@@ -7,6 +7,8 @@ import { getSession } from "@/lib/auth/session";
 import { requireActiveUserById, SuspendedError } from "@/lib/auth/suspension";
 import { CreateCommentSchema } from "@/lib/comments/schemas";
 import { notifyPostReply } from "@/lib/notifications/emit";
+import { assertNotBlocked } from "@/lib/content/blocked-words";
+import { ValidationError } from "@/lib/errors";
 
 export type CreateCommentFormState = {
   ok?: boolean;
@@ -77,6 +79,23 @@ export async function createCommentAction(
   }
   if (post.locked) {
     return { ok: false, message: "该帖子已被锁定，无法评论" };
+  }
+
+  // Stage 17.3：关键词黑名单。
+  try {
+    await assertNotBlocked(
+      {
+        scope: "COMMENT",
+        actorId: session.userId,
+        source: `comment:create:postId=${post.id}`,
+      },
+      parsed.data.content,
+    );
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      return { ok: false, message: err.message };
+    }
+    throw err;
   }
 
   const [comment] = await prisma.$transaction([

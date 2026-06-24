@@ -5,6 +5,7 @@ import {
   NotFoundError,
   ValidationError,
 } from "@/lib/errors";
+import { assertNotBlocked } from "@/lib/content/blocked-words";
 import {
   MESSAGE_EDIT_WINDOW_MS,
   MESSAGE_RECALL_WINDOW_MS,
@@ -105,6 +106,13 @@ export async function editMessage(
   if (age > MESSAGE_EDIT_WINDOW_MS) {
     throw new ForbiddenError(
       `仅允许在发送后 ${Math.round(MESSAGE_EDIT_WINDOW_MS / 60000)} 分钟内编辑`,
+    );
+  }
+  // Stage 17.3：编辑路径同样过关键词黑名单——防御「先发干净再编辑塞违禁词」绕过。
+  if (input.content && input.content.length > 0) {
+    await assertNotBlocked(
+      { scope: "MESSAGE", actorId: viewerId, source: `message:edit:${messageId}` },
+      input.content,
     );
   }
   const now = new Date();

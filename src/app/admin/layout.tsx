@@ -11,6 +11,7 @@ import {
   Receipt,
   RotateCcw,
   ScrollText,
+  ShieldAlert,
   Users,
   Wrench,
 } from "lucide-react";
@@ -90,6 +91,13 @@ const NAV: NavItem[] = [
     label: "内容申诉",
     icon: Gavel,
     badgeKey: "appeals",
+    adminOnly: true,
+  },
+  // Stage 17.3：发布期关键词黑名单。
+  {
+    href: "/admin/blocked-words",
+    label: "违禁词",
+    icon: ShieldAlert,
     adminOnly: true,
   },
   { href: "/admin/audit-logs", label: "操作审计", icon: ScrollText },

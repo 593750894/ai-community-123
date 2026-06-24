@@ -52,6 +52,12 @@ export type AuditAction =
   | "RESTORE_COMMENT"
   | "APPEAL_APPROVE"
   | "APPEAL_REJECT"
+  // Stage 17.3 新增（关键词黑名单 CRUD + 命中事件）
+  | "BLOCKED_WORD_CREATE"
+  | "BLOCKED_WORD_UPDATE"
+  | "BLOCKED_WORD_DELETE"
+  | "BLOCKED_WORD_BLOCK_HIT"
+  | "BLOCKED_WORD_WARN_HIT"
   | (string & {});
 
 /** Stage 9：audit-logs 页面下拉用的常用 action 列表（顺序即展示顺序）。 */
@@ -90,6 +96,11 @@ export const AUDIT_ACTIONS = [
   "RESTORE_COMMENT",
   "APPEAL_APPROVE",
   "APPEAL_REJECT",
+  "BLOCKED_WORD_CREATE",
+  "BLOCKED_WORD_UPDATE",
+  "BLOCKED_WORD_DELETE",
+  "BLOCKED_WORD_BLOCK_HIT",
+  "BLOCKED_WORD_WARN_HIT",
 ] as const satisfies readonly AuditAction[];
 
 export const AUDIT_ACTION_LABEL: Record<string, string> = {
@@ -127,6 +138,11 @@ export const AUDIT_ACTION_LABEL: Record<string, string> = {
   RESTORE_COMMENT: "恢复评论",
   APPEAL_APPROVE: "通过申诉",
   APPEAL_REJECT: "驳回申诉",
+  BLOCKED_WORD_CREATE: "新增违禁词",
+  BLOCKED_WORD_UPDATE: "编辑违禁词",
+  BLOCKED_WORD_DELETE: "删除违禁词",
+  BLOCKED_WORD_BLOCK_HIT: "违禁词命中（拒绝发布）",
+  BLOCKED_WORD_WARN_HIT: "违禁词命中（仅告警）",
 };
 
 export const AUDIT_TARGET_TYPES = [
@@ -142,6 +158,7 @@ export const AUDIT_TARGET_TYPES = [
   "Payout",
   "Organization",
   "ContentAppeal",
+  "BlockedWord",
 ] as const;
 
 export const AUDIT_TARGET_LABEL: Record<string, string> = {
@@ -157,6 +174,7 @@ export const AUDIT_TARGET_LABEL: Record<string, string> = {
   Payout: "结算单",
   Organization: "企业",
   ContentAppeal: "内容申诉",
+  BlockedWord: "违禁词",
 };
 
 export interface CreateAuditLogInput {

@@ -11,7 +11,8 @@ import {
   UpdateCollabStatusSchema,
 } from "@/lib/collaborations/schemas";
 import { resolveOrgAttribution } from "@/lib/organizations/content-attribution";
-import { AppError } from "@/lib/errors";
+import { assertNotBlocked } from "@/lib/content/blocked-words";
+import { AppError, ValidationError } from "@/lib/errors";
 import type {
   CollaborationCategory,
   CollaborationLocation,
@@ -96,6 +97,20 @@ export async function createCollaborationAction(
         message: err.message,
         fieldErrors: { organizationId: [err.message] },
       };
+    }
+    throw err;
+  }
+
+  // Stage 17.3：关键词黑名单。
+  try {
+    await assertNotBlocked(
+      { scope: "COLLABORATION", actorId: session.userId, source: "collab:create" },
+      title,
+      description,
+    );
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      return { ok: false, message: err.message };
     }
     throw err;
   }

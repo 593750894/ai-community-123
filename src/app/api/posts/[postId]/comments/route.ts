@@ -6,6 +6,7 @@ import { success, created, error } from "@/lib/response";
 import { CreateCommentBodySchema } from "@/lib/comments/schemas";
 import { parsePagination, paginatedResponse } from "@/lib/pagination";
 import { notifyPostReply } from "@/lib/notifications/emit";
+import { assertNotBlocked } from "@/lib/content/blocked-words";
 
 export async function GET(
   request: Request,
@@ -71,6 +72,16 @@ export async function POST(
     if (post.locked) {
       throw new ValidationError("该帖子已被锁定，无法评论");
     }
+
+    // Stage 17.3：关键词黑名单。
+    await assertNotBlocked(
+      {
+        scope: "COMMENT",
+        actorId: user.id,
+        source: `comment:api-create:postId=${postId}`,
+      },
+      parsed.data.content,
+    );
 
     const [comment] = await prisma.$transaction([
       prisma.comment.create({

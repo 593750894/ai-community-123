@@ -5,6 +5,7 @@ import { NotFoundError, ForbiddenError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
 import { UpdatePostSchema } from "@/lib/posts/schemas";
 import { softDeletePost } from "@/lib/content/soft-delete";
+import { assertNotBlocked } from "@/lib/content/blocked-words";
 
 export async function GET(
   _request: Request,
@@ -57,6 +58,15 @@ export async function PATCH(
     }
 
     const data = parsed.data;
+    // Stage 17.3：编辑路径同样过关键词黑名单——只检查请求里被改的字段，
+    // 防御「先发干净帖子再 PATCH 塞违禁词」绕过创建期检查。
+    if (data.title !== undefined || data.content !== undefined) {
+      await assertNotBlocked(
+        { scope: "POST", actorId: user.id, source: `post:patch:${postId}` },
+        data.title,
+        data.content,
+      );
+    }
     const updated = await prisma.post.update({
       where: { id: postId },
       data,
