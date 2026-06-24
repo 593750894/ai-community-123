@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     const type = url.searchParams.get("type") || undefined;
     const search = url.searchParams.get("search")?.trim() || undefined;
 
-    const where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = { deletedAt: null };
 
     if (channelId) where.channelId = channelId;
     if (type && (POST_TYPE_VALUES as readonly string[]).includes(type)) {

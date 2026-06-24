@@ -135,7 +135,10 @@ export async function searchAll(
   ] = await Promise.all([
     types.includes("post")
       ? prisma.post.findMany({
-          where: { OR: [{ title: contains }, { content: contains }] },
+          where: {
+            deletedAt: null,
+            OR: [{ title: contains }, { content: contains }],
+          },
           orderBy: { createdAt: "desc" },
           take: limit,
           select: {
@@ -155,13 +158,17 @@ export async function searchAll(
       : [],
     types.includes("post")
       ? prisma.post.count({
-          where: { OR: [{ title: contains }, { content: contains }] },
+          where: {
+            deletedAt: null,
+            OR: [{ title: contains }, { content: contains }],
+          },
         })
       : 0,
     types.includes("work")
       ? prisma.work.findMany({
           where: {
             isPublic: true,
+            deletedAt: null,
             OR: [{ title: contains }, { description: contains }],
           },
           orderBy: { createdAt: "desc" },
@@ -184,6 +191,7 @@ export async function searchAll(
       ? prisma.work.count({
           where: {
             isPublic: true,
+            deletedAt: null,
             OR: [{ title: contains }, { description: contains }],
           },
         })

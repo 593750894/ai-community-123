@@ -4,6 +4,7 @@ import { requireActiveUser } from "@/lib/auth/suspension";
 import { NotFoundError, ForbiddenError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
 import { UpdatePostSchema } from "@/lib/posts/schemas";
+import { softDeletePost } from "@/lib/content/soft-delete";
 
 export async function GET(
   _request: Request,
@@ -23,6 +24,8 @@ export async function GET(
       },
     });
     if (!post) throw new NotFoundError("帖子");
+    // Stage 17.2：软删除帖子对外不可见（仅作者/admin 通过页面路径可达）。
+    if (post.deletedAt) throw new NotFoundError("帖子");
     return success(post);
   } catch (err) {
     return error(err);
@@ -83,15 +86,27 @@ export async function DELETE(
 
     const post = await prisma.post.findUnique({
       where: { id: postId },
-      select: { authorId: true },
+      select: { authorId: true, deletedAt: true },
     });
     if (!post) throw new NotFoundError("帖子");
-    if (post.authorId !== user.id && user.role !== "ADMIN") {
+    const isOwner = post.authorId === user.id;
+    const isAdmin = user.role === "ADMIN";
+    if (!isOwner && !isAdmin) {
       throw new ForbiddenError();
     }
 
-    await prisma.post.delete({ where: { id: postId } });
-    return success(null, "删除成功");
+    // Stage 17.2：作者自删 → 仍为硬删除（用户主动选择，无申诉对象）。
+    // ADMIN 删除他人内容 → 软删除（落 deletedAt + 通知作者 + 提供申诉入口）。
+    if (isOwner) {
+      if (post.deletedAt) {
+        // 自己的内容已被下架，作者无法再硬删（避免恶意「下架后再删」绕过审计）。
+        throw new ForbiddenError("已被下架的内容请通过申诉恢复或联系管理员");
+      }
+      await prisma.post.delete({ where: { id: postId } });
+      return success(null, "删除成功");
+    }
+    await softDeletePost(postId, { actorId: user.id, source: "admin" });
+    return success(null, "已下架（已通知作者，可发起申诉）");
   } catch (err) {
     return error(err);
   }

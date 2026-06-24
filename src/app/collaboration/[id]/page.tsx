@@ -64,6 +64,7 @@ async function getMoreInCategory(category: string, excludeId: string) {
   return prisma.collaboration.findMany({
     where: {
       id: { not: excludeId },
+      deletedAt: null,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       category: category as any,
       status: "OPEN",
@@ -87,6 +88,12 @@ export default async function CollaborationDetailPage({
     getCurrentUser(),
   ]);
   if (!collab) notFound();
+  // Stage 17.2：已下架合作仅作者 / admin 可见。
+  if (collab.deletedAt) {
+    const viewerIsOwner = currentUser?.id === collab.authorId;
+    const viewerIsAdmin = currentUser?.role === "ADMIN";
+    if (!viewerIsOwner && !viewerIsAdmin) notFound();
+  }
 
   const meta = collabCategoryMeta(collab.category);
   const moreLikeThis = await getMoreInCategory(collab.category, collab.id);
@@ -115,6 +122,40 @@ export default async function CollaborationDetailPage({
 
       <div className="grid gap-6 px-6 py-6 sm:px-8 lg:grid-cols-[1fr_340px]">
         <main className="space-y-6">
+          {collab.deletedAt && (
+            <section
+              aria-label="内容已下架"
+              className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm"
+            >
+              <div className="text-[11px] uppercase tracking-wide text-destructive">
+                内容已下架
+              </div>
+              <p className="mt-1 text-foreground">
+                此合作需求已被审核者下架，公共渠道不可见。
+                {collab.deletionReason && (
+                  <>
+                    <br />
+                    下架原因：
+                    <span className="text-muted-foreground">
+                      {collab.deletionReason}
+                    </span>
+                  </>
+                )}
+              </p>
+              {isOwner && (
+                <p className="mt-2 text-xs">
+                  如认为该处理不当，可前往{" "}
+                  <Link
+                    href={`/me/appeals?targetType=COLLABORATION&targetId=${collab.id}`}
+                    className="text-primary hover:underline"
+                  >
+                    申诉中心
+                  </Link>{" "}
+                  发起复核申请。
+                </p>
+              )}
+            </section>
+          )}
           {/* 标题卡 */}
           <section className="surface-card overflow-hidden rounded-2xl border-primary/20">
             <div className="space-y-3 p-5 sm:p-6">

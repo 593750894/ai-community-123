@@ -55,7 +55,13 @@ export default async function ProfilePage({
       contact: true,
       isProfilePublic: true,
       createdAt: true,
-      _count: { select: { works: true, posts: true, collaborations: true } },
+      _count: {
+        select: {
+          works: { where: { deletedAt: null } },
+          posts: { where: { deletedAt: null } },
+          collaborations: { where: { deletedAt: null } },
+        },
+      },
     },
   });
 
@@ -103,7 +109,7 @@ export default async function ProfilePage({
   ]);
 
   const works = await prisma.work.findMany({
-    where: { authorId: userId, isPublic: true },
+    where: { authorId: userId, isPublic: true, deletedAt: null },
     orderBy: { createdAt: "desc" },
     take: 6,
     select: {

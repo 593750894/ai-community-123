@@ -48,7 +48,12 @@ const SYSTEM_DEDUP_WINDOW_MS = 5 * 60 * 1000;
 
 // Stage 9：用户可在 /settings/notifications 关闭通知类型；但 SYSTEM 永远直达
 // （admin 举报通知、强制下线提示等运维通道，不能被用户关掉）。
-const NON_GATEABLE_TYPES: Set<NotificationType> = new Set(["SYSTEM"]);
+// Stage 17.2：CONTENT_REMOVED 与 SYSTEM 同级——用户必须知道自己内容被下架，
+// 否则可能错过申诉窗口；APPEAL_APPROVED / APPEAL_REJECTED 仍可关。
+const NON_GATEABLE_TYPES: Set<NotificationType> = new Set([
+  "SYSTEM",
+  "CONTENT_REMOVED",
+]);
 
 export interface EmitNotificationInput {
   recipientId: string;
@@ -583,6 +588,99 @@ export async function notifyOrgVerificationRejected(args: {
     });
   } catch (err) {
     console.error("[notifications] notifyOrgVerificationRejected", err);
+  }
+}
+
+/**
+ * Stage 17.2：内容被 MOD/ADMIN 软删除 → 通知作者并附申诉入口。
+ * link 跳 /me/appeals?targetType=X&targetId=Y 让用户一键发起申诉。
+ */
+export async function notifyContentRemoved(args: {
+  recipientId: string;
+  targetType: "POST" | "WORK" | "COMMENT" | "COLLABORATION";
+  targetId: string;
+  titleSnippet: string;
+  reason: string | null;
+}) {
+  try {
+    const typeLabel = {
+      POST: "帖子",
+      WORK: "作品",
+      COMMENT: "评论",
+      COLLABORATION: "合作",
+    }[args.targetType];
+    await emitNotification({
+      recipientId: args.recipientId,
+      actorId: null,
+      type: "CONTENT_REMOVED",
+      title: `你的${typeLabel}已被下架`,
+      body: args.reason
+        ? `${args.titleSnippet} · 原因：${args.reason}`
+        : args.titleSnippet,
+      link: `/me/appeals?targetType=${args.targetType}&targetId=${args.targetId}`,
+      targetType: args.targetType,
+      targetId: args.targetId,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyContentRemoved", err);
+  }
+}
+
+/** Stage 17.2：申诉通过 → 通知申诉人，内容已恢复。 */
+export async function notifyAppealApproved(args: {
+  recipientId: string;
+  targetType: "POST" | "WORK" | "COMMENT" | "COLLABORATION";
+  targetId: string;
+  reviewNote?: string | null;
+}) {
+  try {
+    const typeLabel = {
+      POST: "帖子",
+      WORK: "作品",
+      COMMENT: "评论",
+      COLLABORATION: "合作",
+    }[args.targetType];
+    await emitNotification({
+      recipientId: args.recipientId,
+      actorId: null,
+      type: "APPEAL_APPROVED",
+      title: `你的${typeLabel}申诉已通过`,
+      body: args.reviewNote ?? `内容已恢复展示。`,
+      link: `/me/appeals`,
+      targetType: args.targetType,
+      targetId: args.targetId,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyAppealApproved", err);
+  }
+}
+
+/** Stage 17.2：申诉驳回 → 通知申诉人，附 review note。 */
+export async function notifyAppealRejected(args: {
+  recipientId: string;
+  targetType: "POST" | "WORK" | "COMMENT" | "COLLABORATION";
+  targetId: string;
+  reviewNote: string;
+}) {
+  try {
+    const typeLabel = {
+      POST: "帖子",
+      WORK: "作品",
+      COMMENT: "评论",
+      COLLABORATION: "合作",
+    }[args.targetType];
+    await emitNotification({
+      recipientId: args.recipientId,
+      actorId: null,
+      type: "APPEAL_REJECTED",
+      title: `你的${typeLabel}申诉未通过`,
+      body: args.reviewNote,
+      link: `/me/appeals`,
+      targetType: args.targetType,
+      targetId: args.targetId,
+    });
+  } catch (err) {
+    console.error("[notifications] notifyAppealRejected", err);
   }
 }
 

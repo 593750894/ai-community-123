@@ -42,14 +42,16 @@ export async function getMeDashboard(userId: string): Promise<MeDashboardData> {
     works,
     posts,
   ] = await Promise.all([
-    prisma.work.count({ where: { authorId: userId } }),
-    prisma.post.count({ where: { authorId: userId } }),
+    // Stage 17.2：dashboard 计数 / recent 列表只统计未被下架的内容；
+    // 下架内容通过 /me/appeals 入口（CONTENT_REMOVED 通知 link）让作者直接申诉。
+    prisma.work.count({ where: { authorId: userId, deletedAt: null } }),
+    prisma.post.count({ where: { authorId: userId, deletedAt: null } }),
     prisma.like.count({ where: { userId } }),
     prisma.bookmark.count({ where: { userId } }),
     prisma.follow.count({ where: { followingId: userId } }),
     prisma.follow.count({ where: { followerId: userId } }),
     prisma.work.findMany({
-      where: { authorId: userId },
+      where: { authorId: userId, deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: 4,
       include: {
@@ -62,7 +64,7 @@ export async function getMeDashboard(userId: string): Promise<MeDashboardData> {
       },
     }),
     prisma.post.findMany({
-      where: { authorId: userId },
+      where: { authorId: userId, deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: 4,
       include: {
@@ -114,9 +116,10 @@ export async function getMyWorks(args: {
   const pageSize = clampPageSize(args.pageSize);
   const skip = (page - 1) * pageSize;
 
+  // Stage 17.2：/me/works 仍展示**未下架的**作品，下架内容请在 /me/appeals 入口处理（避免双重 UI）。
   const [rows, total] = await Promise.all([
     prisma.work.findMany({
-      where: { authorId: args.userId },
+      where: { authorId: args.userId, deletedAt: null },
       orderBy: { createdAt: "desc" },
       skip,
       take: pageSize,
@@ -129,7 +132,7 @@ export async function getMyWorks(args: {
         },
       },
     }),
-    prisma.work.count({ where: { authorId: args.userId } }),
+    prisma.work.count({ where: { authorId: args.userId, deletedAt: null } }),
   ]);
 
   return {

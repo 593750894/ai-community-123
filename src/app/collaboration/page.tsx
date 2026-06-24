@@ -48,6 +48,7 @@ async function getCollaborations(
 ) {
   return prisma.collaboration.findMany({
     where: {
+      deletedAt: null,
       ...(category ? { category: category as CollaborationCategory } : {}),
       ...(status ? { status: status as CollaborationStatus } : {}),
     },
@@ -73,6 +74,7 @@ async function getCollaborations(
 async function getCategoryCounts(): Promise<Record<string, number>> {
   const rows = await prisma.collaboration.groupBy({
     by: ["category"],
+    where: { deletedAt: null },
     _count: { _all: true },
   });
   const result: Record<string, number> = {};
@@ -82,10 +84,13 @@ async function getCategoryCounts(): Promise<Record<string, number>> {
 
 async function getStats() {
   const [openCount, totalCount, weekCount] = await Promise.all([
-    prisma.collaboration.count({ where: { status: "OPEN" } }),
-    prisma.collaboration.count(),
+    prisma.collaboration.count({
+      where: { deletedAt: null, status: "OPEN" },
+    }),
+    prisma.collaboration.count({ where: { deletedAt: null } }),
     prisma.collaboration.count({
       where: {
+        deletedAt: null,
         createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
       },
     }),

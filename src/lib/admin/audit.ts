@@ -41,6 +41,17 @@ export type AuditAction =
   // Stage 11.2 新增
   | "ORG_VERIFICATION_APPROVE"
   | "ORG_VERIFICATION_REJECT"
+  // Stage 17.2 新增（软删除 + 申诉）
+  | "SOFT_DELETE_POST"
+  | "SOFT_DELETE_WORK"
+  | "SOFT_DELETE_COLLAB"
+  | "SOFT_DELETE_COMMENT"
+  | "RESTORE_POST"
+  | "RESTORE_WORK"
+  | "RESTORE_COLLAB"
+  | "RESTORE_COMMENT"
+  | "APPEAL_APPROVE"
+  | "APPEAL_REJECT"
   | (string & {});
 
 /** Stage 9：audit-logs 页面下拉用的常用 action 列表（顺序即展示顺序）。 */
@@ -69,6 +80,16 @@ export const AUDIT_ACTIONS = [
   "PAYOUT_MARK_PAID",
   "ORG_VERIFICATION_APPROVE",
   "ORG_VERIFICATION_REJECT",
+  "SOFT_DELETE_POST",
+  "SOFT_DELETE_WORK",
+  "SOFT_DELETE_COLLAB",
+  "SOFT_DELETE_COMMENT",
+  "RESTORE_POST",
+  "RESTORE_WORK",
+  "RESTORE_COLLAB",
+  "RESTORE_COMMENT",
+  "APPEAL_APPROVE",
+  "APPEAL_REJECT",
 ] as const satisfies readonly AuditAction[];
 
 export const AUDIT_ACTION_LABEL: Record<string, string> = {
@@ -96,6 +117,16 @@ export const AUDIT_ACTION_LABEL: Record<string, string> = {
   PAYOUT_MARK_PAID: "结算单标记打款",
   ORG_VERIFICATION_APPROVE: "通过企业认证",
   ORG_VERIFICATION_REJECT: "驳回企业认证",
+  SOFT_DELETE_POST: "下架帖子",
+  SOFT_DELETE_WORK: "下架作品",
+  SOFT_DELETE_COLLAB: "下架合作",
+  SOFT_DELETE_COMMENT: "下架评论",
+  RESTORE_POST: "恢复帖子",
+  RESTORE_WORK: "恢复作品",
+  RESTORE_COLLAB: "恢复合作",
+  RESTORE_COMMENT: "恢复评论",
+  APPEAL_APPROVE: "通过申诉",
+  APPEAL_REJECT: "驳回申诉",
 };
 
 export const AUDIT_TARGET_TYPES = [
@@ -110,6 +141,7 @@ export const AUDIT_TARGET_TYPES = [
   "Order",
   "Payout",
   "Organization",
+  "ContentAppeal",
 ] as const;
 
 export const AUDIT_TARGET_LABEL: Record<string, string> = {
@@ -124,6 +156,7 @@ export const AUDIT_TARGET_LABEL: Record<string, string> = {
   Order: "订单",
   Payout: "结算单",
   Organization: "企业",
+  ContentAppeal: "内容申诉",
 };
 
 export interface CreateAuditLogInput {

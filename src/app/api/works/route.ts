@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const authorId = url.searchParams.get("authorId") || undefined;
     const search = url.searchParams.get("search")?.trim() || undefined;
 
-    const where: Record<string, unknown> = { isPublic: true };
+    const where: Record<string, unknown> = { isPublic: true, deletedAt: null };
 
     if (category && (WORK_CATEGORY_VALUES as readonly string[]).includes(category)) {
       where.category = category;

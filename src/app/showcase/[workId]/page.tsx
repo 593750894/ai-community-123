@@ -21,7 +21,7 @@ import {
   BookmarkButton,
   LikeButton,
 } from "@/components/feed/interaction-buttons";
-import { getSession } from "@/lib/auth/session";
+import { getCurrentUser, getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db";
 import { loadInteractionState } from "@/lib/interactions/queries";
 import { cn, formatRelativeTime } from "@/lib/utils";
@@ -55,7 +55,12 @@ async function getWork(workId: string) {
 
 async function getMoreFromAuthor(authorId: string, excludeId: string) {
   const rows = await prisma.work.findMany({
-    where: { authorId, isPublic: true, id: { not: excludeId } },
+    where: {
+      authorId,
+      isPublic: true,
+      deletedAt: null,
+      id: { not: excludeId },
+    },
     orderBy: { createdAt: "desc" },
     include: {
       author: { select: { id: true, name: true } },
@@ -78,16 +83,24 @@ export default async function WorkDetailPage({
   params: Promise<{ workId: string }>;
 }) {
   const { workId } = await params;
-  const work = await getWork(workId);
+  const [work, viewer] = await Promise.all([getWork(workId), getCurrentUser()]);
   if (!work) notFound();
+  // Stage 17.2：被软删除的作品对非作者/非 admin 不可见。
+  if (work.deletedAt) {
+    const viewerIsOwner = viewer?.id === work.authorId;
+    const viewerIsAdmin = viewer?.role === "ADMIN";
+    if (!viewerIsOwner && !viewerIsAdmin) notFound();
+  }
 
   const meta = workCategoryMeta(work.category);
 
-  // 计数：曝光 + 1（轻量异步）
-  await prisma.work.update({
-    where: { id: work.id },
-    data: { views: { increment: 1 } },
-  });
+  // 计数：曝光 + 1（轻量异步）— 已软删除内容不计 view（避免给作者错觉热度）
+  if (!work.deletedAt) {
+    await prisma.work.update({
+      where: { id: work.id },
+      data: { views: { increment: 1 } },
+    });
+  }
 
   const [moreWorks, session] = await Promise.all([
     getMoreFromAuthor(work.authorId, work.id),
@@ -128,6 +141,40 @@ export default async function WorkDetailPage({
 
       <div className="grid gap-6 px-6 py-6 sm:px-8 lg:grid-cols-[1fr_320px]">
         <main className="space-y-6">
+          {work.deletedAt && (
+            <section
+              aria-label="内容已下架"
+              className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm"
+            >
+              <div className="text-[11px] uppercase tracking-wide text-destructive">
+                内容已下架
+              </div>
+              <p className="mt-1 text-foreground">
+                此作品已被审核者下架，公共渠道不可见。
+                {work.deletionReason && (
+                  <>
+                    <br />
+                    下架原因：
+                    <span className="text-muted-foreground">
+                      {work.deletionReason}
+                    </span>
+                  </>
+                )}
+              </p>
+              {viewer?.id === work.authorId && (
+                <p className="mt-2 text-xs">
+                  如认为该处理不当，可前往{" "}
+                  <Link
+                    href={`/me/appeals?targetType=WORK&targetId=${work.id}`}
+                    className="text-primary hover:underline"
+                  >
+                    申诉中心
+                  </Link>{" "}
+                  发起复核申请。
+                </p>
+              )}
+            </section>
+          )}
           {/* 视频播放区 */}
           <section className="surface-card overflow-hidden rounded-2xl border-primary/20">
             <div className={cn("relative w-full overflow-hidden bg-black", aspect)}>

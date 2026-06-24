@@ -52,9 +52,11 @@ export async function getCommunityStats(): Promise<CommunityStats> {
   const [channelCount, postCount, creatorCount, todayPostCount] =
     await Promise.all([
       prisma.channel.count(),
-      prisma.post.count(),
+      prisma.post.count({ where: { deletedAt: null } }),
       prisma.user.count(),
-      prisma.post.count({ where: { createdAt: { gte: todayStart } } }),
+      prisma.post.count({
+        where: { deletedAt: null, createdAt: { gte: todayStart } },
+      }),
     ]);
   return { channelCount, postCount, creatorCount, todayPostCount };
 }
@@ -64,8 +66,14 @@ export async function getHotChannels(limit = 6) {
     orderBy: { posts: { _count: "desc" } },
     take: limit,
     include: {
-      _count: { select: { posts: true, members: true } },
+      _count: {
+        select: {
+          posts: { where: { deletedAt: null } },
+          members: true,
+        },
+      },
       posts: {
+        where: { deletedAt: null },
         orderBy: { createdAt: "desc" },
         take: 1,
         select: {
@@ -81,6 +89,7 @@ export async function getHotChannels(limit = 6) {
 
 export async function getLatestPosts(limit = 8) {
   return prisma.post.findMany({
+    where: { deletedAt: null },
     orderBy: { createdAt: "desc" },
     take: limit,
     select: postSelect,
@@ -92,7 +101,7 @@ export async function getHotPosts(limit = 6, days = 7) {
   since.setDate(since.getDate() - days);
 
   const posts = await prisma.post.findMany({
-    where: { createdAt: { gte: since } },
+    where: { deletedAt: null, createdAt: { gte: since } },
     take: 50,
     select: postSelect,
   });
@@ -117,7 +126,12 @@ export async function getActiveCreators(limit = 6) {
       avatar: true,
       bio: true,
       industryRole: true,
-      _count: { select: { posts: true, works: true } },
+      _count: {
+        select: {
+          posts: { where: { deletedAt: null } },
+          works: { where: { deletedAt: null } },
+        },
+      },
     },
   });
 }
@@ -137,7 +151,7 @@ const DEFAULT_TAGS: TagOverview[] = [
 
 export async function getPopularTags(limit = 12): Promise<TagOverview[]> {
   const collabs = await prisma.collaboration.findMany({
-    where: { tags: { isEmpty: false } },
+    where: { deletedAt: null, tags: { isEmpty: false } },
     select: { tags: true },
   });
 
@@ -160,8 +174,14 @@ export async function getAllChannels(): Promise<ChannelOverview[]> {
   const rows = await prisma.channel.findMany({
     orderBy: { createdAt: "asc" },
     include: {
-      _count: { select: { posts: true, members: true } },
+      _count: {
+        select: {
+          posts: { where: { deletedAt: null } },
+          members: true,
+        },
+      },
       posts: {
+        where: { deletedAt: null },
         orderBy: { createdAt: "desc" },
         take: 1,
         select: {
@@ -276,7 +296,11 @@ export async function getChannelDetail(idOrSlug: string): Promise<ChannelDetail 
   if (!ch) return null;
 
   const todayPostCount = await prisma.post.count({
-    where: { channelId: ch.id, createdAt: { gte: todayStart } },
+    where: {
+      channelId: ch.id,
+      deletedAt: null,
+      createdAt: { gte: todayStart },
+    },
   });
 
   return {
@@ -326,7 +350,7 @@ export async function getChannelPosts(
 ): Promise<ChannelPostsResult> {
   const { type, sort = "latest", search, page = 1, limit = 10 } = opts;
 
-  const where: Record<string, unknown> = { channelId };
+  const where: Record<string, unknown> = { channelId, deletedAt: null };
   if (type) where.type = type as PostType;
   if (search) {
     where.OR = [
@@ -388,7 +412,7 @@ export async function getChannelHotPosts(
   since.setDate(since.getDate() - days);
 
   const posts = await prisma.post.findMany({
-    where: { channelId, createdAt: { gte: since } },
+    where: { channelId, deletedAt: null, createdAt: { gte: since } },
     take: 50,
     select: postSelect,
   });
@@ -414,7 +438,7 @@ export async function getChannelHotPostsLite(
   since.setDate(since.getDate() - days);
 
   const posts = await prisma.post.findMany({
-    where: { channelId, createdAt: { gte: since } },
+    where: { channelId, deletedAt: null, createdAt: { gte: since } },
     take: 50,
     select: {
       id: true,
@@ -449,14 +473,20 @@ export async function getChannelStats(channelId: string): Promise<ChannelStats> 
 
   const [postCount, todayPostCount, creatorCount, hotPostCount] =
     await Promise.all([
-      prisma.post.count({ where: { channelId } }),
-      prisma.post.count({ where: { channelId, createdAt: { gte: todayStart } } }),
+      prisma.post.count({ where: { channelId, deletedAt: null } }),
+      prisma.post.count({
+        where: { channelId, deletedAt: null, createdAt: { gte: todayStart } },
+      }),
       prisma.post
-        .groupBy({ by: ["authorId"], where: { channelId } })
+        .groupBy({
+          by: ["authorId"],
+          where: { channelId, deletedAt: null },
+        })
         .then((rows) => rows.length),
       prisma.post.count({
         where: {
           channelId,
+          deletedAt: null,
           createdAt: { gte: weekAgo },
           OR: [{ likeCount: { gte: 3 } }, { commentCount: { gte: 2 } }],
         },
@@ -491,8 +521,14 @@ export async function getRelatedChannels(
     orderBy: { posts: { _count: "desc" } },
     take: limit,
     include: {
-      _count: { select: { posts: true, members: true } },
+      _count: {
+        select: {
+          posts: { where: { deletedAt: null } },
+          members: true,
+        },
+      },
       posts: {
+        where: { deletedAt: null },
         orderBy: { createdAt: "desc" },
         take: 1,
         select: {

@@ -70,9 +70,9 @@ export async function createCommentAction(
 
   const post = await prisma.post.findUnique({
     where: { id: parsed.data.postId },
-    select: { id: true, locked: true, channelId: true },
+    select: { id: true, locked: true, channelId: true, deletedAt: true },
   });
-  if (!post) {
+  if (!post || post.deletedAt) {
     return { ok: false, message: "帖子不存在或已被删除" };
   }
   if (post.locked) {

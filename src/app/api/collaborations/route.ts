@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const cooperationType = url.searchParams.get("cooperationType") || url.searchParams.get("type") || undefined;
     const search = url.searchParams.get("search")?.trim() || undefined;
 
-    const where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = { deletedAt: null };
 
     if (status && (COLLAB_STATUS_VALUES as readonly string[]).includes(status)) {
       where.status = status;

@@ -138,6 +138,9 @@ enum NotificationType {
   ORG_MEMBER_REMOVED // 阶段 11.1：被企业移除
   ORG_VERIFICATION_APPROVED // 阶段 11.2：企业认证通过
   ORG_VERIFICATION_REJECTED // 阶段 11.2：企业认证驳回
+  CONTENT_REMOVED // 阶段 17.2：你的内容被审核者下架（含申诉入口）
+  APPEAL_APPROVED // 阶段 17.2：申诉通过，内容已恢复
+  APPEAL_REJECTED // 阶段 17.2：申诉被驳回（附驳回备注）
 }
 
 enum ReportTargetType {
@@ -243,6 +246,22 @@ enum OrgVerificationStatus {
   REJECTED
 }
 
+// Stage 17.2：内容申诉适用的实体（仅可被软删除的内容类型，跨度比 Report 窄）。
+enum ContentAppealTargetType {
+  POST
+  WORK
+  COMMENT
+  COLLABORATION
+}
+
+// Stage 17.2：申诉生命周期。
+enum ContentAppealStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELED
+}
+
 // ═════════════════════════════════════════════════════════════════
 //                           User & Auth
 // ═════════════════════════════════════════════════════════════════
@@ -343,6 +362,16 @@ model User {
   // Stage 16.5：付费下载 redeem 审计
   downloadGrants DownloadGrant[] @relation("DownloadGrantUser")
 
+  // Stage 17.2：软删除操作者反向关系（MOD/ADMIN 下架内容时填）
+  postsDeleted          Post[]          @relation("PostDeleter")
+  worksDeleted          Work[]          @relation("WorkDeleter")
+  commentsDeleted       Comment[]       @relation("CommentDeleter")
+  collaborationsDeleted Collaboration[] @relation("CollaborationDeleter")
+
+  // Stage 17.2：内容申诉
+  contentAppealsAuthored ContentAppeal[] @relation("AppealAppellant")
+  contentAppealsReviewed ContentAppeal[] @relation("AppealReviewer")
+
   @@index([status])
   @@index([role])
   @@index([status, suspendedUntil]) // Stage 17.5: cron 查询 SUSPENDED + 到期
@@ -407,12 +436,18 @@ model Post {
   bookmarkCount  Int      @default(0) @map("bookmark_count")
   pinned         Boolean  @default(false)
   locked         Boolean  @default(false)
+  // Stage 17.2：软删除。adminDelete / report resolution → 设置 deletedAt + deletedById；
+  // 公开读路径必须过滤 deletedAt IS NULL；作者本人 /me/* 仍可见以发起申诉。
+  deletedAt      DateTime? @map("deleted_at")
+  deletedById    String?   @map("deleted_by_id")
+  deletionReason String?   @map("deletion_reason")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
   channel      Channel       @relation(fields: [channelId], references: [id], onDelete: Cascade)
   author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
   organization Organization? @relation("OrgPosts", fields: [organizationId], references: [id], onDelete: SetNull)
+  deletedBy    User?         @relation("PostDeleter", fields: [deletedById], references: [id], onDelete: SetNull)
   comments     Comment[]
   likes        Like[]
   bookmarks    Bookmark[]
@@ -422,6 +457,7 @@ model Post {
   @@index([authorId])
   @@index([type])
   @@index([organizationId, createdAt])
+  @@index([deletedAt])
   @@map("posts")
 }
 
@@ -436,17 +472,23 @@ model Comment {
   parentId  String?  @map("parent_id")
   content   String
   likeCount Int      @default(0) @map("like_count")
+  // Stage 17.2：软删除
+  deletedAt      DateTime? @map("deleted_at")
+  deletedById    String?   @map("deleted_by_id")
+  deletionReason String?   @map("deletion_reason")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author  User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
-  replies Comment[] @relation("CommentReplies")
-  likes   Like[]
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies   Comment[] @relation("CommentReplies")
+  deletedBy User?     @relation("CommentDeleter", fields: [deletedById], references: [id], onDelete: SetNull)
+  likes     Like[]
 
   @@index([postId, createdAt])
   @@index([parentId])
+  @@index([deletedAt])
   @@map("comments")
 }
 
@@ -475,11 +517,16 @@ model Work {
   likeCount      Int          @default(0) @map("like_count")
   bookmarkCount  Int          @default(0) @map("bookmark_count")
   isPublic       Boolean      @default(true) @map("is_public")
+  // Stage 17.2：软删除（adminDelete / report）。isPublic=false 是作者自选私密；deletedAt 才是合规下架。
+  deletedAt      DateTime?    @map("deleted_at")
+  deletedById    String?      @map("deleted_by_id")
+  deletionReason String?      @map("deletion_reason")
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
 
   author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
   organization Organization? @relation("OrgWorks", fields: [organizationId], references: [id], onDelete: SetNull)
+  deletedBy    User?         @relation("WorkDeleter", fields: [deletedById], references: [id], onDelete: SetNull)
   likes        Like[]
   bookmarks    Bookmark[]
 
@@ -487,6 +534,7 @@ model Work {
   @@index([createdAt])
   @@index([category])
   @@index([organizationId, createdAt])
+  @@index([deletedAt])
   @@map("works")
 }
 
@@ -510,16 +558,22 @@ model Collaboration {
   contact        String?
   deadline       DateTime?
   tags           String[]
+  // Stage 17.2：软删除
+  deletedAt      DateTime?             @map("deleted_at")
+  deletedById    String?               @map("deleted_by_id")
+  deletionReason String?               @map("deletion_reason")
   createdAt      DateTime              @default(now()) @map("created_at")
   updatedAt      DateTime              @updatedAt @map("updated_at")
 
   author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
   organization Organization? @relation("OrgCollaborations", fields: [organizationId], references: [id], onDelete: SetNull)
+  deletedBy    User?         @relation("CollaborationDeleter", fields: [deletedById], references: [id], onDelete: SetNull)
 
   @@index([status, createdAt])
   @@index([category])
   @@index([type])
   @@index([organizationId, createdAt])
+  @@index([deletedAt])
   @@map("collaborations")
 }
 
@@ -817,6 +871,31 @@ model Report {
   @@index([targetType, targetId])
   @@index([assignedToId, status])
   @@map("reports")
+}
+
+/// Stage 17.2：内容申诉。作者对自己被软删除的 Post/Work/Comment/Collaboration 提出申诉。
+/// 多态 polymorphic：targetId 不走 FK（已删内容仍能引用）。
+/// 同一 (targetType, targetId) 在任意时点只允许一条 PENDING（部分唯一索引 raw SQL 实现）。
+model ContentAppeal {
+  id           String                  @id @default(cuid())
+  appellantId  String                  @map("appellant_id")
+  targetType   ContentAppealTargetType @map("target_type")
+  targetId     String                  @map("target_id")
+  reason       String // 10-1000 字
+  status       ContentAppealStatus     @default(PENDING)
+  reviewNote   String?                 @map("review_note") // admin 审核备注（REJECTED 必填）
+  reviewedById String?                 @map("reviewed_by_id")
+  reviewedAt   DateTime?               @map("reviewed_at")
+  createdAt    DateTime                @default(now()) @map("created_at")
+  updatedAt    DateTime                @updatedAt @map("updated_at")
+
+  appellant  User  @relation("AppealAppellant", fields: [appellantId], references: [id], onDelete: Cascade)
+  reviewedBy User? @relation("AppealReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([appellantId, createdAt])
+  @@index([status, createdAt])
+  @@index([targetType, targetId])
+  @@map("content_appeals")
 }
 
 /// 后台管理员操作审计；action 用大写下划线字符串（如 "DELETE_POST" / "BAN_USER"）

@@ -5,6 +5,7 @@ import {
   Coins,
   Film,
   Flag,
+  Gavel,
   LayoutDashboard,
   MessageSquare,
   Receipt,
@@ -29,7 +30,12 @@ type NavItem = {
   href: string;
   label: string;
   icon: typeof LayoutDashboard;
-  badgeKey?: "reports" | "myQueue" | "clawbacks" | "orgVerifications";
+  badgeKey?:
+    | "reports"
+    | "myQueue"
+    | "clawbacks"
+    | "orgVerifications"
+    | "appeals";
   /** 仅 ADMIN 可见（MOD 不渲染） */
   adminOnly?: boolean;
 };
@@ -78,6 +84,14 @@ const NAV: NavItem[] = [
     badgeKey: "orgVerifications",
     adminOnly: true,
   },
+  // Stage 17.2：内容申诉队列。
+  {
+    href: "/admin/appeals?status=PENDING",
+    label: "内容申诉",
+    icon: Gavel,
+    badgeKey: "appeals",
+    adminOnly: true,
+  },
   { href: "/admin/audit-logs", label: "操作审计", icon: ScrollText },
 ];
 
@@ -89,21 +103,31 @@ export default async function AdminLayout({
   const actor = await requireMod("/admin");
   const isAdminActor = actor.role === "ADMIN";
 
-  const [openReports, myQueue, pendingVerifications, pendingClawbacks] =
-    await Promise.all([
-      countOpenReports().catch(() => 0),
-      countMyAssignedReports(actor.id).catch(() => 0),
-      isAdminActor
-        ? prisma.organization
-            .count({ where: { verificationStatus: "PENDING" } })
-            .catch(() => 0)
-        : 0,
-      isAdminActor
-        ? prisma.clawbackRequest
-            .count({ where: { status: "PENDING" } })
-            .catch(() => 0)
-        : 0,
-    ]);
+  const [
+    openReports,
+    myQueue,
+    pendingVerifications,
+    pendingClawbacks,
+    pendingAppeals,
+  ] = await Promise.all([
+    countOpenReports().catch(() => 0),
+    countMyAssignedReports(actor.id).catch(() => 0),
+    isAdminActor
+      ? prisma.organization
+          .count({ where: { verificationStatus: "PENDING" } })
+          .catch(() => 0)
+      : 0,
+    isAdminActor
+      ? prisma.clawbackRequest
+          .count({ where: { status: "PENDING" } })
+          .catch(() => 0)
+      : 0,
+    isAdminActor
+      ? prisma.contentAppeal
+          .count({ where: { status: "PENDING" } })
+          .catch(() => 0)
+      : 0,
+  ]);
 
   const visibleNav = NAV.filter((item) => !item.adminOnly || isAdminActor);
 
@@ -121,7 +145,9 @@ export default async function AdminLayout({
                     ? pendingVerifications
                     : badgeKey === "clawbacks"
                       ? pendingClawbacks
-                      : 0;
+                      : badgeKey === "appeals"
+                        ? pendingAppeals
+                        : 0;
             const showBadge = badgeCount > 0;
             return (
               <Link

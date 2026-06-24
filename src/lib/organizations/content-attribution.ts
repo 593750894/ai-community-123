@@ -168,7 +168,7 @@ export async function listOrganizationFeed(
   const cap = Math.max(1, Math.min(100, limit));
   const [posts, works, collabs, items] = await Promise.all([
     prisma.post.findMany({
-      where: { organizationId },
+      where: { organizationId, deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: cap,
       select: {
@@ -182,7 +182,7 @@ export async function listOrganizationFeed(
       },
     }),
     prisma.work.findMany({
-      where: { organizationId, isPublic: true },
+      where: { organizationId, isPublic: true, deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: cap,
       select: {
@@ -196,7 +196,7 @@ export async function listOrganizationFeed(
       },
     }),
     prisma.collaboration.findMany({
-      where: { organizationId },
+      where: { organizationId, deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: cap,
       select: {
@@ -319,9 +319,11 @@ export async function revokeOrgAttributionForUser(
  */
 export async function getOrganizationContentCounts(organizationId: string) {
   const [posts, works, collaborations, workflowItems] = await Promise.all([
-    prisma.post.count({ where: { organizationId } }),
-    prisma.work.count({ where: { organizationId, isPublic: true } }),
-    prisma.collaboration.count({ where: { organizationId } }),
+    prisma.post.count({ where: { organizationId, deletedAt: null } }),
+    prisma.work.count({
+      where: { organizationId, isPublic: true, deletedAt: null },
+    }),
+    prisma.collaboration.count({ where: { organizationId, deletedAt: null } }),
     prisma.workflowItem.count({
       where: { organizationId, status: { in: ["PUBLISHED", "SOLD_OUT"] } },
     }),

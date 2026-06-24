@@ -4,6 +4,7 @@ import {
   Building2,
   Coins,
   Film,
+  Gavel,
   Heart,
   LayoutDashboard,
   Package,
@@ -26,6 +27,8 @@ const NAV = [
   { href: "/me/organizations", label: "我的企业", icon: Building2 },
   { href: "/me/likes", label: "点赞收藏", icon: Heart },
   { href: "/me/bookmarks", label: "稍后再看", icon: Bookmark },
+  // Stage 17.2：申诉中心（被下架内容的恢复申请）
+  { href: "/me/appeals", label: "我的申诉", icon: Gavel },
 ];
 
 export const dynamic = "force-dynamic";

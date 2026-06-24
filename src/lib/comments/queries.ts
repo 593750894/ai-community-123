@@ -52,7 +52,7 @@ export async function getCommentThread(
   postId: string,
 ): Promise<CommentThread> {
   const rows = await prisma.comment.findMany({
-    where: { postId },
+    where: { postId, deletedAt: null },
     orderBy: { createdAt: "asc" },
     select: {
       id: true,

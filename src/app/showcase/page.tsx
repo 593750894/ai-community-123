@@ -24,6 +24,7 @@ async function getWorks(category?: WorkCategoryValue) {
   return prisma.work.findMany({
     where: {
       isPublic: true,
+      deletedAt: null,
       ...(category ? { category: category as WorkCategory } : {}),
     },
     orderBy: { createdAt: "desc" },
@@ -42,7 +43,7 @@ async function getWorks(category?: WorkCategoryValue) {
 async function getCategoryCounts(): Promise<Record<string, number>> {
   const rows = await prisma.work.groupBy({
     by: ["category"],
-    where: { isPublic: true },
+    where: { isPublic: true, deletedAt: null },
     _count: { _all: true },
   });
   const result: Record<string, number> = {};

@@ -69,7 +69,7 @@ export async function getRecommendedWorks(
   const since = new Date(Date.now() - RECOMMEND_WINDOW_DAYS * 24 * 60 * 60 * 1000);
 
   let pool = await prisma.work.findMany({
-    where: { isPublic: true, createdAt: { gte: since } },
+    where: { isPublic: true, deletedAt: null, createdAt: { gte: since } },
     orderBy: { createdAt: "desc" },
     take: SCAN_LIMIT,
     select: WORK_BASE_SELECT,
@@ -77,7 +77,7 @@ export async function getRecommendedWorks(
 
   if (pool.length === 0) {
     pool = await prisma.work.findMany({
-      where: { isPublic: true },
+      where: { isPublic: true, deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: SCAN_LIMIT,
       select: WORK_BASE_SELECT,
@@ -102,7 +102,7 @@ export async function getLatestWorks(
   limit: number = DEFAULT_LIMIT,
 ): Promise<FeedWorkRow[]> {
   return prisma.work.findMany({
-    where: { isPublic: true },
+    where: { isPublic: true, deletedAt: null },
     orderBy: { createdAt: "desc" },
     take: limit,
     select: WORK_BASE_SELECT,
@@ -115,7 +115,7 @@ export async function getWorksByCategory(
   limit: number = DEFAULT_LIMIT,
 ): Promise<FeedWorkRow[]> {
   return prisma.work.findMany({
-    where: { isPublic: true, category },
+    where: { isPublic: true, deletedAt: null, category },
     orderBy: { createdAt: "desc" },
     take: limit,
     select: WORK_BASE_SELECT,
@@ -128,7 +128,7 @@ export async function getWorksByModel(
   limit: number = DEFAULT_LIMIT,
 ): Promise<FeedWorkRow[]> {
   return prisma.work.findMany({
-    where: { isPublic: true, model },
+    where: { isPublic: true, deletedAt: null, model },
     orderBy: { createdAt: "desc" },
     take: limit,
     select: WORK_BASE_SELECT,

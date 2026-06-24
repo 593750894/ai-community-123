@@ -18,11 +18,11 @@ export async function GET(
 
     const post = await prisma.post.findUnique({
       where: { id: postId },
-      select: { id: true },
+      select: { id: true, deletedAt: true },
     });
-    if (!post) throw new NotFoundError("帖子");
+    if (!post || post.deletedAt) throw new NotFoundError("帖子");
 
-    const where = { postId };
+    const where = { postId, deletedAt: null };
 
     const [items, total] = await Promise.all([
       prisma.comment.findMany({
@@ -65,9 +65,9 @@ export async function POST(
 
     const post = await prisma.post.findUnique({
       where: { id: postId },
-      select: { id: true, locked: true },
+      select: { id: true, locked: true, deletedAt: true },
     });
-    if (!post) throw new NotFoundError("帖子");
+    if (!post || post.deletedAt) throw new NotFoundError("帖子");
     if (post.locked) {
       throw new ValidationError("该帖子已被锁定，无法评论");
     }

@@ -25,9 +25,9 @@ export async function POST(request: Request) {
     if (targetType === "COMMENT") {
       const comment = await prisma.comment.findUnique({
         where: { id: targetId },
-        select: { id: true },
+        select: { id: true, deletedAt: true },
       });
-      if (!comment) throw new NotFoundError("评论");
+      if (!comment || comment.deletedAt) throw new NotFoundError("评论");
 
       const existing = await prisma.like.findUnique({
         where: { userId_commentId: { userId: user.id, commentId: targetId } },
@@ -60,9 +60,9 @@ export async function POST(request: Request) {
     if (targetType === "POST") {
       const post = await prisma.post.findUnique({
         where: { id: targetId },
-        select: { id: true },
+        select: { id: true, deletedAt: true },
       });
-      if (!post) throw new NotFoundError("帖子");
+      if (!post || post.deletedAt) throw new NotFoundError("帖子");
 
       const existing = await prisma.like.findUnique({
         where: { userId_postId: { userId: user.id, postId: targetId } },
@@ -95,9 +95,9 @@ export async function POST(request: Request) {
     // targetType === "WORK"
     const work = await prisma.work.findUnique({
       where: { id: targetId },
-      select: { id: true },
+      select: { id: true, deletedAt: true },
     });
-    if (!work) throw new NotFoundError("作品");
+    if (!work || work.deletedAt) throw new NotFoundError("作品");
 
     const existing = await prisma.like.findUnique({
       where: { userId_workId: { userId: user.id, workId: targetId } },

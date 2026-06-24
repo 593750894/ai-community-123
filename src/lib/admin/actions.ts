@@ -6,6 +6,13 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
 import { createAuditLog } from "@/lib/admin/audit";
 import {
+  softDeletePost,
+  softDeleteWork,
+  softDeleteCollaboration,
+  softDeleteComment,
+} from "@/lib/content/soft-delete";
+import { ConflictError } from "@/lib/errors";
+import {
   COLLAB_STATUS_VALUES,
   type CollabStatusValue,
 } from "@/lib/collaborations/categories";
@@ -20,64 +27,37 @@ import {
 // 所有 action 都先 requireAdmin —— 普通用户即使猜到表单地址也会被踢去登录。
 // 每一次成功的变更都写入 AuditLog（IP / UA 走 getClientMeta）。
 
+/**
+ * Stage 17.2：admin 下架帖子改为软删除（写 deletedAt + 通知作者 + 审计）。
+ * 内容仍保留在 DB；作者可在 /me/appeals 申诉。
+ * 重复下架（已是 deletedAt 状态）被 softDeletePost 抛 ConflictError，这里吞掉转 no-op
+ *   保留旧 form action 「点了就 revalidate」的语义。
+ */
 export async function adminDeletePost(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const id = formData.get("id");
+  const reason = (formData.get("reason") ?? "").toString().trim() || null;
   if (typeof id !== "string" || !id) return;
-  const snapshot = await prisma.post
-    .findUnique({
-      where: { id },
-      select: { title: true, authorId: true, channelId: true },
-    })
-    .catch(() => null);
-  const deleted = await prisma.post
-    .delete({ where: { id } })
-    .then(() => true)
-    .catch(() => false);
-  if (deleted) {
-    await createAuditLog({
-      adminId: admin.id,
-      action: "DELETE_POST",
-      targetType: "Post",
-      targetId: id,
-      metadata: snapshot
-        ? {
-            title: snapshot.title,
-            authorId: snapshot.authorId,
-            channelId: snapshot.channelId,
-          }
-        : null,
-    });
+  try {
+    await softDeletePost(id, { actorId: admin.id, reason, source: "admin" });
+  } catch (err) {
+    if (!(err instanceof ConflictError)) throw err;
   }
   revalidatePath("/admin/posts");
   revalidatePath("/admin");
   revalidatePath("/community");
 }
 
+/** Stage 17.2：admin 下架作品改为软删除（参考 adminDeletePost）。 */
 export async function adminDeleteWork(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const id = formData.get("id");
+  const reason = (formData.get("reason") ?? "").toString().trim() || null;
   if (typeof id !== "string" || !id) return;
-  const snapshot = await prisma.work
-    .findUnique({
-      where: { id },
-      select: { title: true, authorId: true },
-    })
-    .catch(() => null);
-  const deleted = await prisma.work
-    .delete({ where: { id } })
-    .then(() => true)
-    .catch(() => false);
-  if (deleted) {
-    await createAuditLog({
-      adminId: admin.id,
-      action: "DELETE_WORK",
-      targetType: "Work",
-      targetId: id,
-      metadata: snapshot
-        ? { title: snapshot.title, authorId: snapshot.authorId }
-        : null,
-    });
+  try {
+    await softDeleteWork(id, { actorId: admin.id, reason, source: "admin" });
+  } catch (err) {
+    if (!(err instanceof ConflictError)) throw err;
   }
   revalidatePath("/admin/works");
   revalidatePath("/admin");
@@ -117,34 +97,20 @@ export async function adminUpdateCollabStatus(formData: FormData): Promise<void>
   revalidatePath(`/collaboration/${id}`);
 }
 
+/** Stage 17.2：admin 下架合作改为软删除（参考 adminDeletePost）。 */
 export async function adminDeleteCollab(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const id = formData.get("id");
+  const reason = (formData.get("reason") ?? "").toString().trim() || null;
   if (typeof id !== "string" || !id) return;
-  const snapshot = await prisma.collaboration
-    .findUnique({
-      where: { id },
-      select: { title: true, authorId: true, status: true },
-    })
-    .catch(() => null);
-  const deleted = await prisma.collaboration
-    .delete({ where: { id } })
-    .then(() => true)
-    .catch(() => false);
-  if (deleted) {
-    await createAuditLog({
-      adminId: admin.id,
-      action: "DELETE_COLLAB",
-      targetType: "Collaboration",
-      targetId: id,
-      metadata: snapshot
-        ? {
-            title: snapshot.title,
-            authorId: snapshot.authorId,
-            statusBefore: snapshot.status,
-          }
-        : null,
+  try {
+    await softDeleteCollaboration(id, {
+      actorId: admin.id,
+      reason,
+      source: "admin",
     });
+  } catch (err) {
+    if (!(err instanceof ConflictError)) throw err;
   }
   revalidatePath("/admin/collaborations");
   revalidatePath("/admin");
@@ -176,46 +142,22 @@ export async function adminDeleteTool(formData: FormData): Promise<void> {
   revalidatePath("/tools");
 }
 
-/** Admin 删除评论（评论详情页 / 帖子页 admin 视角）。 */
+/** Stage 17.2：admin 下架评论改为软删除。
+ *  软删除时 post.commentCount 在 softDeleteComment 内部 tx 一并 decrement。 */
 export async function adminDeleteComment(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const id = formData.get("id");
+  const reason = (formData.get("reason") ?? "").toString().trim() || null;
   if (typeof id !== "string" || !id) return;
   const snapshot = await prisma.comment
-    .findUnique({
-      where: { id },
-      select: {
-        postId: true,
-        authorId: true,
-        parentId: true,
-        content: true,
-      },
-    })
+    .findUnique({ where: { id }, select: { postId: true } })
     .catch(() => null);
-  if (!snapshot) return;
-  const ok = await prisma
-    .$transaction([
-      prisma.comment.delete({ where: { id } }),
-      prisma.post.update({
-        where: { id: snapshot.postId },
-        data: { commentCount: { decrement: 1 } },
-      }),
-    ])
-    .then(() => true)
-    .catch(() => false);
-  if (ok) {
-    await createAuditLog({
-      adminId: admin.id,
-      action: "DELETE_COMMENT",
-      targetType: "Comment",
-      targetId: id,
-      metadata: {
-        postId: snapshot.postId,
-        authorId: snapshot.authorId,
-        parentId: snapshot.parentId,
-        contentSnippet: snapshot.content.slice(0, 120),
-      },
-    });
+  try {
+    await softDeleteComment(id, { actorId: admin.id, reason, source: "admin" });
+  } catch (err) {
+    if (!(err instanceof ConflictError)) throw err;
+  }
+  if (snapshot?.postId) {
     revalidatePath(`/post/${snapshot.postId}`);
   }
 }

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { getCurrentUser, getSession, type CurrentUser } from "@/lib/auth/session";
 import { requireActiveUser as enforceActive } from "@/lib/auth/suspension";
-import { UnauthorizedError } from "@/lib/errors";
+import { ForbiddenError, UnauthorizedError } from "@/lib/errors";
 
 export async function requireUser(redirectTo: string): Promise<CurrentUser> {
   const user = await getCurrentUser();
@@ -69,6 +69,16 @@ export function isModOrAdmin(role: string | undefined): boolean {
 export async function requireAuth(): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) throw new UnauthorizedError();
+  return user;
+}
+
+/**
+ * Stage 17.2：API-context admin 守卫。`requireAdmin` 用 `redirect()` 适配 server-component；
+ * API 路由需要 throw → error() 映射成 401/403 而不是 307 → 500。
+ */
+export async function requireAdminApi(): Promise<CurrentUser> {
+  const user = await requireAuth();
+  if (user.role !== "ADMIN") throw new ForbiddenError();
   return user;
 }
 

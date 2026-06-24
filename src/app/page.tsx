@@ -367,7 +367,7 @@ async function FollowingFeed({ userId }: { userId: string | null }) {
   }
 
   const rows = await prisma.post.findMany({
-    where: { authorId: { in: followingIds } },
+    where: { authorId: { in: followingIds }, deletedAt: null },
     orderBy: { createdAt: "desc" },
     take: 30,
     include: {

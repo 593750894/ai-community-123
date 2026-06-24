@@ -4,6 +4,7 @@ import { requireActiveUser } from "@/lib/auth/suspension";
 import { NotFoundError, ForbiddenError, ValidationError } from "@/lib/errors";
 import { success, error } from "@/lib/response";
 import { UpdateWorkSchema } from "@/lib/works/schemas";
+import { softDeleteWork } from "@/lib/content/soft-delete";
 
 export async function GET(
   _request: Request,
@@ -20,6 +21,8 @@ export async function GET(
       },
     });
     if (!work) throw new NotFoundError("作品");
+    // Stage 17.2：软删除作品对外不可见。
+    if (work.deletedAt) throw new NotFoundError("作品");
     return success(work);
   } catch (err) {
     return error(err);
@@ -77,15 +80,25 @@ export async function DELETE(
 
     const work = await prisma.work.findUnique({
       where: { id: workId },
-      select: { authorId: true },
+      select: { authorId: true, deletedAt: true },
     });
     if (!work) throw new NotFoundError("作品");
-    if (work.authorId !== user.id && user.role !== "ADMIN") {
+    const isOwner = work.authorId === user.id;
+    const isAdmin = user.role === "ADMIN";
+    if (!isOwner && !isAdmin) {
       throw new ForbiddenError();
     }
 
-    await prisma.work.delete({ where: { id: workId } });
-    return success(null, "删除成功");
+    // Stage 17.2：作者自删→硬删除；ADMIN 删除他人→软删除。
+    if (isOwner) {
+      if (work.deletedAt) {
+        throw new ForbiddenError("已被下架的内容请通过申诉恢复或联系管理员");
+      }
+      await prisma.work.delete({ where: { id: workId } });
+      return success(null, "删除成功");
+    }
+    await softDeleteWork(workId, { actorId: user.id, source: "admin" });
+    return success(null, "已下架（已通知作者，可发起申诉）");
   } catch (err) {
     return error(err);
   }

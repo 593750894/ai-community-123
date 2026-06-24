@@ -55,6 +55,9 @@ async function getPost(postId: string) {
       organization: {
         select: { id: true, slug: true, name: true, logo: true, isVerified: true },
       },
+      deletedBy: {
+        select: { id: true, name: true, username: true },
+      },
     },
   });
 }
@@ -70,6 +73,12 @@ export default async function PostDetailPage({
     getCurrentUser(),
   ]);
   if (!post) notFound();
+  // Stage 17.2：被软删除的帖子对非作者/非 admin 不可见（保留作者本人路径，便于 /me/appeals 上下文）
+  if (post.deletedAt) {
+    const viewerIsOwner = currentUser?.id === post.authorId;
+    const viewerIsAdminLocal = currentUser?.role === "ADMIN";
+    if (!viewerIsOwner && !viewerIsAdminLocal) notFound();
+  }
 
   const thread = await getCommentThread(post.id);
   const commentIds = collectCommentIds(thread);
@@ -105,6 +114,48 @@ export default async function PostDetailPage({
 
       <div className="grid gap-6 px-6 py-6 sm:px-8 lg:grid-cols-[1fr_280px]">
         <main className="space-y-6">
+          {post.deletedAt && (
+            <section
+              aria-label="内容已下架"
+              className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm"
+            >
+              <div className="text-[11px] uppercase tracking-wide text-destructive">
+                内容已下架
+              </div>
+              <p className="mt-1 text-foreground">
+                此帖子已被
+                {post.deletedBy
+                  ? `审核者 ${post.deletedBy.name}（@${post.deletedBy.username}）`
+                  : "审核者"}
+                于{" "}
+                <span className="tabular-nums">
+                  {formatRelativeTime(post.deletedAt)}
+                </span>{" "}
+                下架，公共渠道不可见。
+                {post.deletionReason && (
+                  <>
+                    <br />
+                    下架原因：
+                    <span className="text-muted-foreground">
+                      {post.deletionReason}
+                    </span>
+                  </>
+                )}
+              </p>
+              {viewerId === post.authorId && (
+                <p className="mt-2 text-xs">
+                  如认为该处理不当，可前往{" "}
+                  <Link
+                    href={`/me/appeals?targetType=POST&targetId=${post.id}`}
+                    className="text-primary hover:underline"
+                  >
+                    申诉中心
+                  </Link>{" "}
+                  发起复核申请。
+                </p>
+              )}
+            </section>
+          )}
           {viewerIsAdmin && (
             <section
               aria-label="管理员操作"

@@ -1,4 +1,4 @@
-import { prisma, Prisma } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import {
   ConflictError,
   ForbiddenError,
@@ -8,6 +8,10 @@ import {
 import { AppError } from "@/lib/errors";
 import { createAuditLog } from "@/lib/admin/audit";
 import { notifyAdminsOfReport } from "@/lib/notifications/emit-report";
+import {
+  softDeleteContentByTarget,
+} from "@/lib/content/soft-delete";
+import type { ContentTargetType } from "@/lib/content/schemas";
 
 import type {
   CreateReportInput,
@@ -154,9 +158,12 @@ export async function createReport(
   return { id: report.id, status: "PENDING" };
 }
 
-/** 处理举报：RESOLVED / DISMISSED + 可选删除目标。
- *  原子性：deleteTarget + status update 一起走事务，任何一步失败都回滚。
- *  AuditLog 不在事务里（落不上不阻塞主流程）。
+/** 处理举报：RESOLVED / DISMISSED + 可选下架目标（Stage 17.2 改为软删除）。
+ *
+ *  软删除不再需要跨表事务——softDeleteContentByTarget 是 single-row update + tx within，
+ *  和 report.update 独立。先软删除再更新 report，任一失败都不会让 report 错误地标 RESOLVED。
+ *
+ *  AuditLog + 通知 fire-and-forget，落不上不阻塞主流程。
  */
 export async function adminResolveReport(
   reportId: string,
@@ -180,34 +187,46 @@ export async function adminResolveReport(
   const targetType = report.targetType as ReportTargetTypeValue;
   let extraMeta: Record<string, unknown> = {};
 
-  await prisma.$transaction(
-    async (tx) => {
-      if (payload.status === "RESOLVED" && payload.deleteTarget) {
-        const result = await deleteReportTargetInTx(tx, {
-          targetType,
-          targetId: report.targetId,
-        });
-        extraMeta = {
-          deletedTarget: result.deleted,
-          deleteAction: result.action,
-        };
-      }
-      await tx.report.update({
-        where: { id: reportId },
-        data: {
-          status: payload.status,
-          resolvedById: adminId,
-          resolvedAt: new Date(),
-          resolution: payload.resolution ?? null,
-          // Stage 17.1：结案时清空认领信息，便于 /admin/reports 列表的「我处理的」
-          // 只统计 REVIEWING 中的活跃 case。
-          assignedToId: null,
-          assignedAt: null,
+  // Stage 17.2：先执行软删除（report 路径只对 4 个内容类型生效；其它如 USER/TOOL/MESSAGE 跳过）。
+  if (payload.status === "RESOLVED" && payload.deleteTarget) {
+    const contentType = reportTargetToContentTarget(targetType);
+    if (contentType) {
+      const result = await softDeleteContentByTarget(
+        contentType,
+        report.targetId,
+        {
+          actorId: adminId,
+          reason: payload.resolution ?? null,
+          source: "report",
         },
-      });
+      );
+      extraMeta = {
+        deletedTarget: result.ok,
+        deleteAction: result.action,
+      };
+    } else {
+      // USER / TOOL / MESSAGE 暂不接软删除（USER 走禁言/封禁；TOOL/MESSAGE 走单独路径）。
+      extraMeta = { deletedTarget: false, deleteAction: null };
+    }
+  }
+
+  // 再更新 report 状态——拿到下架结果后再 finalize，避免 report 标 RESOLVED 但下架失败的悬挂态。
+  const { count } = await prisma.report.updateMany({
+    where: {
+      id: reportId,
+      status: { in: ["PENDING", "REVIEWING"] },
     },
-    { timeout: 15_000 },
-  );
+    data: {
+      status: payload.status,
+      resolvedById: adminId,
+      resolvedAt: new Date(),
+      resolution: payload.resolution ?? null,
+      // Stage 17.1：结案时清空认领信息。
+      assignedToId: null,
+      assignedAt: null,
+    },
+  });
+  if (count === 0) throw new ConflictError("该举报状态已变更");
 
   // 1) 主 AuditLog（举报本身的处理结果）
   await createAuditLog({
@@ -222,81 +241,27 @@ export async function adminResolveReport(
       ...extraMeta,
     },
   });
-  // 2) 删除目标的 AuditLog（便于在 /admin/audit-logs 上按 targetType=Post 等检索）
-  if (extraMeta.deletedTarget && extraMeta.deleteAction) {
-    await createAuditLog({
-      adminId,
-      action: String(extraMeta.deleteAction),
-      targetType: targetTypeToAuditLabel(targetType),
-      targetId: report.targetId,
-      metadata: { reportId, source: "report" },
-    });
-  }
+  // 2) 下架目标的 AuditLog 已在 softDeleteContentByTarget 内部落，无需重复写。
 }
 
-function targetTypeToAuditLabel(t: ReportTargetTypeValue): string {
+/** 将 ReportTargetType 映射到可软删除的 ContentTargetType；不支持的返回 null。 */
+function reportTargetToContentTarget(
+  t: ReportTargetTypeValue,
+): ContentTargetType | null {
   switch (t) {
-    case "POST": return "Post";
-    case "WORK": return "Work";
-    case "COLLABORATION": return "Collaboration";
-    case "COMMENT": return "Comment";
-    case "TOOL": return "Tool";
-    case "USER": return "User";
-    case "MESSAGE": return "Message";
-    default: return t;
+    case "POST":
+      return "POST";
+    case "WORK":
+      return "WORK";
+    case "COMMENT":
+      return "COMMENT";
+    case "COLLABORATION":
+      return "COLLABORATION";
+    default:
+      return null;
   }
 }
 
-/** 事务内执行删除。switch 与 adminDeleteReportTarget 同形，但不落 audit（外层落）。 */
-async function deleteReportTargetInTx(
-  tx: Prisma.TransactionClient,
-  args: { targetType: ReportTargetTypeValue; targetId: string },
-): Promise<{ deleted: boolean; action: string | null }> {
-  const { targetType, targetId } = args;
-  switch (targetType) {
-    case "POST": {
-      const post = await tx.post.findUnique({ where: { id: targetId }, select: { id: true } });
-      if (!post) return { deleted: false, action: null };
-      await tx.post.delete({ where: { id: targetId } });
-      return { deleted: true, action: "DELETE_POST" };
-    }
-    case "WORK": {
-      const work = await tx.work.findUnique({ where: { id: targetId }, select: { id: true } });
-      if (!work) return { deleted: false, action: null };
-      await tx.work.delete({ where: { id: targetId } });
-      return { deleted: true, action: "DELETE_WORK" };
-    }
-    case "COLLABORATION": {
-      const collab = await tx.collaboration.findUnique({ where: { id: targetId }, select: { id: true } });
-      if (!collab) return { deleted: false, action: null };
-      await tx.collaboration.delete({ where: { id: targetId } });
-      return { deleted: true, action: "DELETE_COLLAB" };
-    }
-    case "COMMENT": {
-      const c = await tx.comment.findUnique({
-        where: { id: targetId },
-        select: { id: true, postId: true },
-      });
-      if (!c) return { deleted: false, action: null };
-      await tx.comment.delete({ where: { id: targetId } });
-      await tx.post.update({
-        where: { id: c.postId },
-        data: { commentCount: { decrement: 1 } },
-      });
-      return { deleted: true, action: "DELETE_COMMENT" };
-    }
-    case "TOOL": {
-      const t = await tx.tool.findUnique({ where: { id: targetId }, select: { id: true } });
-      if (!t) return { deleted: false, action: null };
-      await tx.tool.delete({ where: { id: targetId } });
-      return { deleted: true, action: "DELETE_TOOL" };
-    }
-    case "USER":
-    case "MESSAGE":
-    default:
-      return { deleted: false, action: null };
-  }
-}
 
 /**
  * Stage 17.1：审核员认领举报。PENDING → REVIEWING + assignedToId=modId。

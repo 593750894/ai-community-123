@@ -61,9 +61,9 @@ export async function togglePostLike(postId: string): Promise<InteractionResult>
 
   const post = await prisma.post.findUnique({
     where: { id: postId },
-    select: { id: true, channelId: true },
+    select: { id: true, channelId: true, deletedAt: true },
   });
-  if (!post) {
+  if (!post || post.deletedAt) {
     return { ok: false, active: false, count: 0, message: "帖子不存在或已被删除" };
   }
 
@@ -136,9 +136,9 @@ export async function toggleWorkLike(workId: string): Promise<InteractionResult>
 
   const work = await prisma.work.findUnique({
     where: { id: workId },
-    select: { id: true },
+    select: { id: true, deletedAt: true },
   });
-  if (!work) {
+  if (!work || work.deletedAt) {
     return { ok: false, active: false, count: 0, message: "作品不存在或已被删除" };
   }
 
@@ -215,9 +215,9 @@ export async function toggleCommentLike(
 
   const comment = await prisma.comment.findUnique({
     where: { id: commentId },
-    select: { id: true, postId: true, authorId: true },
+    select: { id: true, postId: true, authorId: true, deletedAt: true },
   });
-  if (!comment) {
+  if (!comment || comment.deletedAt) {
     return { ok: false, active: false, count: 0, message: "评论不存在或已被删除" };
   }
 
@@ -291,9 +291,9 @@ export async function togglePostBookmark(
 
   const post = await prisma.post.findUnique({
     where: { id: postId },
-    select: { id: true, channelId: true },
+    select: { id: true, channelId: true, deletedAt: true },
   });
-  if (!post) {
+  if (!post || post.deletedAt) {
     return { ok: false, active: false, count: 0, message: "帖子不存在或已被删除" };
   }
 
@@ -342,9 +342,9 @@ export async function toggleWorkBookmark(
 
   const work = await prisma.work.findUnique({
     where: { id: workId },
-    select: { id: true },
+    select: { id: true, deletedAt: true },
   });
-  if (!work) {
+  if (!work || work.deletedAt) {
     return { ok: false, active: false, count: 0, message: "作品不存在或已被删除" };
   }
 

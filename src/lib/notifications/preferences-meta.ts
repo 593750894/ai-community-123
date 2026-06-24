@@ -25,10 +25,16 @@ export const NOTIFICATION_TYPES = [
   "ORG_MEMBER_REMOVED",
   "ORG_VERIFICATION_APPROVED",
   "ORG_VERIFICATION_REJECTED",
+  "CONTENT_REMOVED",
+  "APPEAL_APPROVED",
+  "APPEAL_REJECTED",
   "SYSTEM",
 ] as const satisfies readonly NotificationType[];
 
-export type GateableNotificationType = Exclude<NotificationType, "SYSTEM">;
+export type GateableNotificationType = Exclude<
+  NotificationType,
+  "SYSTEM" | "CONTENT_REMOVED"
+>;
 
 export const NOTIFICATION_TYPE_LABEL: Record<NotificationType, string> = {
   POST_REPLY: "有人评论了我的帖子",
@@ -52,6 +58,9 @@ export const NOTIFICATION_TYPE_LABEL: Record<NotificationType, string> = {
   ORG_MEMBER_REMOVED: "我被企业移除成员资格",
   ORG_VERIFICATION_APPROVED: "我的企业认证通过",
   ORG_VERIFICATION_REJECTED: "我的企业认证被驳回",
+  CONTENT_REMOVED: "我的内容被审核者下架",
+  APPEAL_APPROVED: "我的申诉通过",
+  APPEAL_REJECTED: "我的申诉被驳回",
   SYSTEM: "系统 / 管理员通知",
 };
 
@@ -77,12 +86,15 @@ export const NOTIFICATION_TYPE_DESCRIPTION: Record<NotificationType, string> = {
   ORG_MEMBER_REMOVED: "你被企业移除时提醒。",
   ORG_VERIFICATION_APPROVED: "你提交的企业认证通过时提醒。",
   ORG_VERIFICATION_REJECTED: "企业认证被驳回时提醒（含驳回原因）。",
+  CONTENT_REMOVED: "你的内容被审核者下架时提醒（含申诉入口），无法关闭。",
+  APPEAL_APPROVED: "你提交的申诉通过、内容恢复时提醒。",
+  APPEAL_REJECTED: "你提交的申诉被驳回时提醒（含驳回备注）。",
   SYSTEM: "举报处理、强制下线等运维通知，无法关闭。",
 };
 
-/** SYSTEM 不能关；UI 端禁用 toggle，并在服务端忽略对应的 upsert。 */
+/** SYSTEM 与 CONTENT_REMOVED 不能关；UI 端禁用 toggle，并在服务端忽略对应的 upsert。 */
 export function isGateable(t: NotificationType): t is GateableNotificationType {
-  return t !== "SYSTEM";
+  return t !== "SYSTEM" && t !== "CONTENT_REMOVED";
 }
 
 export type PreferenceMap = Record<NotificationType, boolean>;
