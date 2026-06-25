@@ -31,6 +31,10 @@ function uniqueSlug(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+// e2e 流（创建 → 邀请 → 接受 → 角色 → 移除 / 拒绝路径）单次跑 8-10 次 dev-server
+// 首请求 cold compile，默认 30s 超时会在 dev 模式下偶发失败；放大到 90s。
+test.describe.configure({ timeout: 90_000 });
+
 test.describe("Stage 11.1 · Organizations", () => {
   // ─────────────────────── RBAC + page renders ───────────────────────
 
@@ -45,7 +49,8 @@ test.describe("Stage 11.1 · Organizations", () => {
   test("/me/organizations 匿名 → /auth/login (next 携带)", async ({ page }) => {
     await page.goto("/me/organizations", { waitUntil: "domcontentloaded" });
     expect(page.url()).toMatch(/\/auth\/login/);
-    expect(decodeURIComponent(page.url())).toContain("next=/me/organizations");
+    // /me/* 子路径统一由 /me layout 兜底，next 携带 "/me"（不细化到子路径）。
+    expect(decodeURIComponent(page.url())).toContain("next=/me");
   });
 
   test("/me/organizations 登录后 200 + 邀请收件箱链接可见", async ({ page }) => {
@@ -143,10 +148,10 @@ test.describe("Stage 11.1 · Organizations", () => {
       `/api/me/organizations/${orgId}/invites`,
       {
         headers: { cookie: ownerCookie },
-        data: { inviteeUsername: "creator", role: "MEMBER" },
+        data: { inviteeUsername: "ai_creator", role: "MEMBER" },
       },
     );
-    // creator 的 username 是 "creator"（来自 seed）→ 自邀请会被业务层拒绝
+    // creator 自己的 username = "ai_creator"（来自 seed）→ 自邀请会被业务层拒绝
     expect([400, 409]).toContain(selfInvite.status());
 
     // 3) 邀请不存在的用户 → 404
@@ -164,7 +169,7 @@ test.describe("Stage 11.1 · Organizations", () => {
       `/api/me/organizations/${orgId}/invites`,
       {
         headers: { cookie: ownerCookie },
-        data: { inviteeUsername: "client", role: "MEMBER" },
+        data: { inviteeUsername: "ecom_client", role: "MEMBER" },
       },
     );
     expect(inviteResp.status()).toBe(201);
@@ -177,7 +182,7 @@ test.describe("Stage 11.1 · Organizations", () => {
       `/api/me/organizations/${orgId}/invites`,
       {
         headers: { cookie: ownerCookie },
-        data: { inviteeUsername: "client", role: "MEMBER" },
+        data: { inviteeUsername: "ecom_client", role: "MEMBER" },
       },
     );
     expect(dup.status()).toBe(409);
@@ -218,7 +223,7 @@ test.describe("Stage 11.1 · Organizations", () => {
     expect(members.status()).toBe(200);
     const membersJson = await members.json();
     const clientMember = membersJson.data.items.find(
-      (m: { user: { username: string } }) => m.user.username === "client",
+      (m: { user: { username: string } }) => m.user.username === "ecom_client",
     );
     expect(clientMember).toBeTruthy();
     expect(clientMember.role).toBe("MEMBER");
@@ -310,7 +315,7 @@ test.describe("Stage 11.1 · Organizations", () => {
       `/api/me/organizations/${orgId}/invites`,
       {
         headers: { cookie: ownerCookie },
-        data: { inviteeUsername: "client", role: "MEMBER" },
+        data: { inviteeUsername: "ecom_client", role: "MEMBER" },
       },
     );
     expect(inv.status()).toBe(201);
@@ -347,7 +352,7 @@ test.describe("Stage 11.1 · Organizations", () => {
     );
     const membersJson = await members.json();
     const hasClient = membersJson.data.items.some(
-      (m: { user: { username: string } }) => m.user.username === "client",
+      (m: { user: { username: string } }) => m.user.username === "ecom_client",
     );
     expect(hasClient).toBe(false);
 
