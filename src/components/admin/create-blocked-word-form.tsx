@@ -26,6 +26,8 @@ const SCOPE_LABEL: Record<(typeof BLOCKED_WORD_SCOPE_VALUES)[number], string> = 
   COLLABORATION: "合作",
   MESSAGE: "私信 / 群消息",
   WORKFLOW_ITEM: "工作流商品",
+  USER: "个人主页（昵称 / 简介）",
+  ORGANIZATION: "企业（名称 / 简介）",
 };
 
 export function CreateBlockedWordForm() {

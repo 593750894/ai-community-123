@@ -269,6 +269,7 @@ enum BlockedWordSeverity {
 }
 
 // Stage 17.3：关键词适用的内容类型；ALL 通配所有 surface。
+// Stage 18.0：追加 USER（个人主页 name/bio）+ ORGANIZATION（企业 name/description）。
 enum BlockedWordScope {
   ALL
   POST
@@ -277,6 +278,8 @@ enum BlockedWordScope {
   COLLABORATION
   MESSAGE
   WORKFLOW_ITEM
+  USER
+  ORGANIZATION
 }
 
 // ═════════════════════════════════════════════════════════════════

@@ -8,13 +8,13 @@ import {
   notifyOrgMemberRemoved,
 } from "@/lib/notifications/emit";
 import { revokeOrgAttributionForUser } from "@/lib/organizations/content-attribution";
+import { assertNotBlocked } from "@/lib/content/blocked-words";
 import {
-  CreateOrganizationSchema,
   InviteMemberSchema,
   UpdateMemberRoleSchema,
-  UpdateOrganizationSchema,
   type CreateOrganizationInput,
   type InviteMemberInput,
+  type UpdateOrganizationInput,
 } from "./schemas";
 
 // Stage 11.1：企业创建 / 编辑 / 成员管理 / 邀请。所有调用方需先校验登录态。
@@ -24,19 +24,32 @@ export async function createOrganization(args: {
   ownerId: string;
   input: CreateOrganizationInput;
 }) {
-  const parsed = CreateOrganizationSchema.parse(args.input);
+  const input = args.input;
+  // Stage 18.0：企业 name / description 同样过关键词黑名单（含 slug 防恶意品牌占用）。
+  // Caller (route + server-action) 已 safeParse；这里直接使用，避免双重 parse 让
+  // Zod 4 的 `.optional().or("").transform(null)` 链对已转 null 的字段二次拒绝。
+  await assertNotBlocked(
+    {
+      scope: "ORGANIZATION",
+      actorId: args.ownerId,
+      source: "organization:create",
+    },
+    input.name,
+    input.description,
+    input.slug,
+  );
   try {
     return await prisma.$transaction(async (tx) => {
       const org = await tx.organization.create({
         data: {
-          slug: parsed.slug,
-          name: parsed.name,
-          description: parsed.description,
-          logo: parsed.logo,
-          website: parsed.website,
-          industry: parsed.industry ?? null,
-          size: parsed.size ?? null,
-          contactEmail: parsed.contactEmail,
+          slug: input.slug,
+          name: input.name,
+          description: input.description,
+          logo: input.logo,
+          website: input.website,
+          industry: input.industry ?? null,
+          size: input.size ?? null,
+          contactEmail: input.contactEmail,
           ownerId: args.ownerId,
         },
         select: { id: true, slug: true, name: true },
@@ -62,20 +75,32 @@ export async function createOrganization(args: {
 export async function updateOrganization(args: {
   organizationId: string;
   actorId: string;
-  input: Record<string, unknown>;
+  input: UpdateOrganizationInput;
 }) {
-  const parsed = UpdateOrganizationSchema.parse(args.input);
+  const input = args.input;
   await assertOrgRole(args.organizationId, args.actorId, ["OWNER", "ADMIN"]);
+  // Stage 18.0：编辑路径同样过关键词黑名单（仅检请求里被改的字段）。
+  if (input.name !== undefined || input.description !== undefined) {
+    await assertNotBlocked(
+      {
+        scope: "ORGANIZATION",
+        actorId: args.actorId,
+        source: `organization:patch:${args.organizationId}`,
+      },
+      input.name,
+      input.description,
+    );
+  }
   return prisma.organization.update({
     where: { id: args.organizationId },
     data: {
-      ...(parsed.name !== undefined ? { name: parsed.name } : {}),
-      ...(parsed.description !== undefined ? { description: parsed.description } : {}),
-      ...(parsed.logo !== undefined ? { logo: parsed.logo } : {}),
-      ...(parsed.website !== undefined ? { website: parsed.website } : {}),
-      ...(parsed.industry !== undefined ? { industry: parsed.industry } : {}),
-      ...(parsed.size !== undefined ? { size: parsed.size } : {}),
-      ...(parsed.contactEmail !== undefined ? { contactEmail: parsed.contactEmail } : {}),
+      ...(input.name !== undefined ? { name: input.name } : {}),
+      ...(input.description !== undefined ? { description: input.description } : {}),
+      ...(input.logo !== undefined ? { logo: input.logo } : {}),
+      ...(input.website !== undefined ? { website: input.website } : {}),
+      ...(input.industry !== undefined ? { industry: input.industry } : {}),
+      ...(input.size !== undefined ? { size: input.size } : {}),
+      ...(input.contactEmail !== undefined ? { contactEmail: input.contactEmail } : {}),
     },
     select: { id: true, slug: true },
   });
@@ -103,7 +128,8 @@ export async function inviteMember(args: {
   actorId: string;
   input: InviteMemberInput;
 }) {
-  const parsed = InviteMemberSchema.parse(args.input);
+  // Caller 已 safeParse；不再二次 parse —— Zod 4 对已 transform 过的 null 值会拒绝。
+  const input = args.input;
   await assertOrgRole(args.organizationId, args.actorId, ["OWNER", "ADMIN"]);
 
   const org = await prisma.organization.findUnique({
@@ -113,7 +139,7 @@ export async function inviteMember(args: {
   if (!org) throw new NotFoundError("企业");
 
   const invitee = await prisma.user.findUnique({
-    where: { username: parsed.inviteeUsername },
+    where: { username: input.inviteeUsername },
     select: { id: true, status: true },
   });
   if (!invitee) throw new NotFoundError("用户");
@@ -148,8 +174,8 @@ export async function inviteMember(args: {
         organizationId: org.id,
         inviterId: args.actorId,
         inviteeId: invitee.id,
-        role: parsed.role,
-        message: parsed.message,
+        role: input.role,
+        message: input.message,
       },
       select: { id: true },
     });

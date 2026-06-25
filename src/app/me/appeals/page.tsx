@@ -239,6 +239,13 @@ function SubmitContextPanel({
       </Notice>
     );
   }
+  if (ctx.state === "denied-retry-limit") {
+    return (
+      <Notice tone="warning">
+        该 {CONTENT_TARGET_LABEL[targetType]} 申诉已多次被驳回，不能再次发起申诉。如有异议请联系管理员。
+      </Notice>
+    );
+  }
   if (!ctx.target) return null;
   return (
     <SubmitAppealForm

@@ -39,6 +39,9 @@ import type {
  * 审核者：ADMIN（不允许 MOD 审核申诉——避免「同一个 MOD 下架 + 自己审申诉」的角色冲突）。
  */
 
+/** Stage 18.0：同一 target 累计 REJECTED 上限；达到后业务层拒绝再发起。 */
+export const MAX_APPEAL_RETRY = 3;
+
 export interface AppealTargetSnapshot {
   authorId: string;
   titleSnippet: string;
@@ -160,6 +163,21 @@ export async function submitAppeal(
     // 既然 PENDING 在全局唯一，理论上 appellantId 必然 = 当前作者；
     // 只为安全起见还是统一拒绝。
     throw new ConflictError("已有进行中的申诉，请等待审核结果");
+  }
+
+  // Stage 18.0：同一 (targetType, targetId) 最多接受 MAX_APPEAL_RETRY 次 REJECTED，
+  // 防止用户刷申诉骚扰审核员；APPROVED / CANCELED 不计数。
+  const rejectedCount = await prisma.contentAppeal.count({
+    where: {
+      targetType: input.targetType,
+      targetId: input.targetId,
+      status: "REJECTED",
+    },
+  });
+  if (rejectedCount >= MAX_APPEAL_RETRY) {
+    throw new ConflictError(
+      `该内容的申诉已被驳回 ${rejectedCount} 次，达到最大重试次数 ${MAX_APPEAL_RETRY}，如有异议请联系管理员`,
+    );
   }
 
   try {
@@ -562,12 +580,14 @@ export async function listAdminAppeals(args: ListAppealsArgs): Promise<{
 
 /**
  * 给作者 UI 用：判断指定目标当前是否「可申诉」（已下架 + 作者 + 无 PENDING 申诉）。
- * 返回 'can-appeal' / 'pending' / 'rejected-but-can-retry' / 'no-content' / 'not-owner' / 'restored'
+ * 返回 'can-appeal' / 'pending' / 'rejected-but-can-retry' / 'denied-retry-limit'
+ *      / 'no-content' / 'not-owner' / 'restored'
  */
 export type AppealEligibility =
   | "can-appeal"
   | "pending"
   | "rejected-but-can-retry"
+  | "denied-retry-limit"
   | "restored"
   | "no-content"
   | "not-owner";
@@ -667,14 +687,23 @@ async function computeAppealState(
   target: AppealTargetSnapshot;
   appealId: string | null;
 }> {
-  const latest = await prisma.contentAppeal.findFirst({
-    where: { targetType, targetId },
-    orderBy: { createdAt: "desc" },
-    select: { id: true, status: true },
-  });
+  const [latest, rejectedCount] = await Promise.all([
+    prisma.contentAppeal.findFirst({
+      where: { targetType, targetId },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, status: true },
+    }),
+    prisma.contentAppeal.count({
+      where: { targetType, targetId, status: "REJECTED" },
+    }),
+  ]);
   if (!latest) return { state: "can-appeal", target, appealId: null };
   if (latest.status === "PENDING")
     return { state: "pending", target, appealId: latest.id };
+  // Stage 18.0：累计 REJECTED 达到上限后，前端直接展示「次数用尽」而非渲染表单。
+  if (rejectedCount >= MAX_APPEAL_RETRY) {
+    return { state: "denied-retry-limit", target, appealId: latest.id };
+  }
   if (latest.status === "REJECTED")
     return { state: "rejected-but-can-retry", target, appealId: latest.id };
   // CANCELED 也可重新申诉

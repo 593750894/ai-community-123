@@ -483,3 +483,157 @@ function fireAndForgetNotify(fn: () => Promise<unknown>) {
 export const SOFT_DELETE_OMIT_WHERE: Prisma.PostWhereInput = {
   deletedAt: null,
 };
+
+// ────────────────────── Stage 18.0 hard-cleanup cron ──────────────────────
+
+/**
+ * Stage 18.0：超过 cleanupAfterMs 的 soft-deleted 内容物理删除（DB 行真删）。
+ *
+ * 资格：
+ *   - deletedAt 非空且早于 cutoff
+ *   - 同 (targetType, targetId) 在 content_appeals 表里没有 PENDING 申诉
+ *     —— 哪怕用户已超期才提交申诉（理论上 7 天后才发），也要等 admin 处理完才能清；
+ *     这是合规面：用户上诉中的内容不可消失。
+ *
+ * 顺序：分批扫描 → 逐条 prisma.delete()。失败的行跳过下一轮再试。
+ * Comment 软删除时已 decrement commentCount；本函数硬删时不再回写（commentCount 不再受影响，
+ * 因为软删时已扣过）。
+ *
+ * 不写 AuditLog：硬清理是 cron 例行垃圾回收，规模可能大，避免日志爆炸。
+ * 如需追溯：每条记录在 SOFT_DELETE 时已有审计，硬清理只是物理回收。
+ */
+export interface HardCleanupResult {
+  posts: number;
+  works: number;
+  comments: number;
+  collaborations: number;
+}
+
+const DEFAULT_CLEANUP_AFTER_MS = 30 * 24 * 60 * 60 * 1000; // 30 天
+
+export async function hardCleanupSoftDeleted(args?: {
+  cleanupAfterMs?: number;
+  perBatchLimit?: number;
+}): Promise<HardCleanupResult> {
+  const cleanupAfterMs = args?.cleanupAfterMs ?? DEFAULT_CLEANUP_AFTER_MS;
+  const limit = Math.max(1, Math.min(args?.perBatchLimit ?? 200, 1000));
+  const cutoff = new Date(Date.now() - cleanupAfterMs);
+
+  const [posts, works, comments, collabs] = await Promise.all([
+    cleanupKind("POST", cutoff, limit),
+    cleanupKind("WORK", cutoff, limit),
+    cleanupKind("COMMENT", cutoff, limit),
+    cleanupKind("COLLABORATION", cutoff, limit),
+  ]);
+
+  return {
+    posts,
+    works,
+    comments,
+    collaborations: collabs,
+  };
+}
+
+async function cleanupKind(
+  kind: ContentTargetType,
+  cutoff: Date,
+  limit: number,
+): Promise<number> {
+  // 1) 找候选 id（cap by limit）
+  const candidates = await listCleanupCandidates(kind, cutoff, limit);
+  if (candidates.length === 0) return 0;
+
+  // 2) 找 PENDING 申诉的 id 集合，从候选里剔除
+  const pendingAppealed = await prisma.contentAppeal.findMany({
+    where: {
+      targetType: kind,
+      targetId: { in: candidates },
+      status: "PENDING",
+    },
+    select: { targetId: true },
+  });
+  const blocked = new Set(pendingAppealed.map((a) => a.targetId));
+  const toDelete = candidates.filter((id) => !blocked.has(id));
+  if (toDelete.length === 0) return 0;
+
+  // 3) 逐条 delete（容错：单行失败不阻塞整批）
+  let deleted = 0;
+  for (const id of toDelete) {
+    try {
+      await hardDeleteOne(kind, id);
+      deleted += 1;
+    } catch (err) {
+      console.error(`[hard-cleanup] failed for ${kind}:${id}`, err);
+    }
+  }
+  return deleted;
+}
+
+async function listCleanupCandidates(
+  kind: ContentTargetType,
+  cutoff: Date,
+  limit: number,
+): Promise<string[]> {
+  const where = {
+    deletedAt: { lt: cutoff, not: null },
+  } as const;
+  switch (kind) {
+    case "POST": {
+      const rows = await prisma.post.findMany({
+        where,
+        select: { id: true },
+        take: limit,
+        orderBy: { deletedAt: "asc" },
+      });
+      return rows.map((r) => r.id);
+    }
+    case "WORK": {
+      const rows = await prisma.work.findMany({
+        where,
+        select: { id: true },
+        take: limit,
+        orderBy: { deletedAt: "asc" },
+      });
+      return rows.map((r) => r.id);
+    }
+    case "COMMENT": {
+      const rows = await prisma.comment.findMany({
+        where,
+        select: { id: true },
+        take: limit,
+        orderBy: { deletedAt: "asc" },
+      });
+      return rows.map((r) => r.id);
+    }
+    case "COLLABORATION": {
+      const rows = await prisma.collaboration.findMany({
+        where,
+        select: { id: true },
+        take: limit,
+        orderBy: { deletedAt: "asc" },
+      });
+      return rows.map((r) => r.id);
+    }
+  }
+}
+
+async function hardDeleteOne(
+  kind: ContentTargetType,
+  id: string,
+): Promise<void> {
+  switch (kind) {
+    case "POST":
+      await prisma.post.delete({ where: { id } });
+      return;
+    case "WORK":
+      await prisma.work.delete({ where: { id } });
+      return;
+    case "COMMENT":
+      // 软删时已 decrement commentCount，硬删不再回写。
+      await prisma.comment.delete({ where: { id } });
+      return;
+    case "COLLABORATION":
+      await prisma.collaboration.delete({ where: { id } });
+      return;
+  }
+}

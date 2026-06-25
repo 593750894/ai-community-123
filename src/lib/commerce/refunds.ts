@@ -7,7 +7,7 @@ import {
   ValidationError,
 } from "@/lib/errors";
 import { createAuditLog } from "@/lib/admin/audit";
-import { notifyOrderRefunded } from "@/lib/notifications/emit";
+import { emitNotification, notifyOrderRefunded } from "@/lib/notifications/emit";
 import { getProviderForMethod } from "@/lib/payments/registry";
 
 import { formatPrice } from "./schemas";
@@ -327,4 +327,96 @@ export async function refundOrder(
     refundCentsTotal: newTotal,
     fullyRefunded,
   };
+}
+
+// ────────────────────────── Stage 18.0 reconcile cron ──────────────────────────
+
+/**
+ * Stage 18.0：扫描 PENDING > olderThanMs 的 Refund 行，给所有 ADMIN 推 SYSTEM 通知
+ * 让 ops 手动到 PSP 核对一次，并决定 mark FAILED 还是 SUCCESS。
+ *
+ * 为何不自动改状态：provider 接口当前没有 queryRefund(idempotencyKey)；如果盲 mark FAILED，
+ * 实际已扣款的退款会被误判为「未发起」，导致 admin 再发起一次 → 双重退款。
+ * 通知触达 + 人工裁定是 MVP 安全做法；下一版 provider 增加 queryRefund 后可改自动收敛。
+ *
+ * 同一 Refund 24h 内只推一次通知，防止 cron 每小时刷屏。
+ */
+export interface ReconcileStalePendingRefundsResult {
+  scanned: number;
+  notified: number;
+}
+
+const STALE_REFUND_NOTIFY_DEDUP_MS = 24 * 60 * 60 * 1000;
+
+export async function reconcileStalePendingRefunds(args?: {
+  olderThanMs?: number;
+  limit?: number;
+}): Promise<ReconcileStalePendingRefundsResult> {
+  const olderThanMs = args?.olderThanMs ?? 60 * 60 * 1000; // 默认 1h
+  const limit = Math.max(1, Math.min(args?.limit ?? 200, 1000));
+  const cutoff = new Date(Date.now() - olderThanMs);
+
+  const stale = await prisma.refund.findMany({
+    where: {
+      status: "PENDING",
+      createdAt: { lt: cutoff },
+    },
+    orderBy: { createdAt: "asc" },
+    take: limit,
+    include: {
+      order: {
+        select: { orderNo: true, amountCents: true, currency: true },
+      },
+    },
+  });
+  if (stale.length === 0) return { scanned: 0, notified: 0 };
+
+  const admins = await prisma.user.findMany({
+    where: { role: "ADMIN", status: "ACTIVE" },
+    select: { id: true },
+  });
+  if (admins.length === 0) return { scanned: stale.length, notified: 0 };
+
+  const dedupSince = new Date(Date.now() - STALE_REFUND_NOTIFY_DEDUP_MS);
+  let notified = 0;
+
+  for (const r of stale) {
+    const ageMinutes = Math.round(
+      (Date.now() - r.createdAt.getTime()) / 60000,
+    );
+    // 24h dedup：检测任意一个 admin 是否在窗口内已收到过同 Refund 的通知。
+    // 假设：所有 admin 同一 cron 同步推送；一个有就视为「这轮已发」整体跳过。
+    const existing = await prisma.notification.findFirst({
+      where: {
+        actorId: null,
+        type: "SYSTEM",
+        targetType: "Refund",
+        targetId: r.id,
+        createdAt: { gte: dedupSince },
+      },
+      select: { id: true },
+    });
+    if (existing) continue;
+
+    const title = `退款卡在 PENDING ${ageMinutes} 分钟，请人工核对`;
+    const body = `订单 ${r.order.orderNo} 退款 ${formatPrice(r.amountCents, r.order.currency)}（refund=${r.id.slice(0, 10)}…）。请到 PSP 后台确认本次退款最终状态，再到 admin/orders 手动标 SUCCESS/FAILED。`;
+    const link = `/admin/orders/${r.order.orderNo}`;
+    await Promise.all(
+      admins.map((admin) =>
+        emitNotification({
+          recipientId: admin.id,
+          actorId: null,
+          type: "SYSTEM",
+          title,
+          body,
+          link,
+          targetType: "Refund",
+          targetId: r.id,
+        }),
+      ),
+    );
+    notified += 1;
+  }
+
+  return { scanned: stale.length, notified };
 }

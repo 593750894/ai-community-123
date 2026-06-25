@@ -336,6 +336,8 @@ export const BLOCKED_WORD_SCOPES: readonly BlockedWordScope[] = [
   "COLLABORATION",
   "MESSAGE",
   "WORKFLOW_ITEM",
+  "USER",
+  "ORGANIZATION",
 ] as const;
 
 export const BLOCKED_WORD_SCOPE_LABEL: Record<BlockedWordScope, string> = {
@@ -346,4 +348,6 @@ export const BLOCKED_WORD_SCOPE_LABEL: Record<BlockedWordScope, string> = {
   COLLABORATION: "合作",
   MESSAGE: "私信 / 群消息",
   WORKFLOW_ITEM: "工作流商品",
+  USER: "个人主页（昵称 / 简介）",
+  ORGANIZATION: "企业（名称 / 简介）",
 };

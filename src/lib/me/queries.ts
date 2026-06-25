@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { prisma, Prisma } from "@/lib/db";
 import type { Work } from "@/components/feed/work-card";
 import type { PostCardData } from "@/components/feed/post-card";
 import type { WorkCategoryValue } from "@/lib/work-categories";
@@ -169,12 +169,19 @@ export async function getMyLikes(args: {
   const pageSize = clampPageSize(args.pageSize);
   const skip = (page - 1) * pageSize;
 
+  // Stage 18.0：过滤指向已下架内容的 like/bookmark 行——通过 OR 的两侧 (post/work) 都过 deletedAt = null
+  // 关系条件实现；通过 Prisma 关系过滤 like→post / like→work，没有命中条件的 OR 分支被 SQL 优化掉。
+  const where: Prisma.LikeWhereInput = {
+    userId: args.userId,
+    OR: [
+      { post: { is: { deletedAt: null } } },
+      { work: { is: { deletedAt: null } } },
+    ],
+  };
+
   const [rows, total] = await Promise.all([
     prisma.like.findMany({
-      where: {
-        userId: args.userId,
-        OR: [{ postId: { not: null } }, { workId: { not: null } }],
-      },
+      where,
       orderBy: { createdAt: "desc" },
       skip,
       take: pageSize,
@@ -228,19 +235,15 @@ export async function getMyLikes(args: {
         },
       },
     }),
-    prisma.like.count({
-      where: {
-        userId: args.userId,
-        OR: [{ postId: { not: null } }, { workId: { not: null } }],
-      },
-    }),
+    prisma.like.count({ where }),
   ]);
 
   const items: MyEngagementItem[] = [];
   for (const r of rows) {
-    if (r.post) {
+    // 排除 commentLike（无 post/work），同时排除已被软删的目标。
+    if (r.post && !r.post.deletedAt) {
       items.push({ kind: "post", engagedAt: r.createdAt, post: toPostCard(r.post) });
-    } else if (r.work) {
+    } else if (r.work && !r.work.deletedAt) {
       items.push({ kind: "work", engagedAt: r.createdAt, work: toWorkCard(r.work) });
     }
   }
@@ -267,9 +270,18 @@ export async function getMyBookmarks(args: {
   const pageSize = clampPageSize(args.pageSize);
   const skip = (page - 1) * pageSize;
 
+  // Stage 18.0：同 getMyLikes，过滤指向已下架内容的 bookmark 行。
+  const where: Prisma.BookmarkWhereInput = {
+    userId: args.userId,
+    OR: [
+      { post: { is: { deletedAt: null } } },
+      { work: { is: { deletedAt: null } } },
+    ],
+  };
+
   const [rows, total] = await Promise.all([
     prisma.bookmark.findMany({
-      where: { userId: args.userId },
+      where,
       orderBy: { createdAt: "desc" },
       skip,
       take: pageSize,
@@ -323,14 +335,14 @@ export async function getMyBookmarks(args: {
         },
       },
     }),
-    prisma.bookmark.count({ where: { userId: args.userId } }),
+    prisma.bookmark.count({ where }),
   ]);
 
   const items: MyEngagementItem[] = [];
   for (const r of rows) {
-    if (r.post) {
+    if (r.post && !r.post.deletedAt) {
       items.push({ kind: "post", engagedAt: r.createdAt, post: toPostCard(r.post) });
-    } else if (r.work) {
+    } else if (r.work && !r.work.deletedAt) {
       items.push({ kind: "work", engagedAt: r.createdAt, work: toWorkCard(r.work) });
     }
   }

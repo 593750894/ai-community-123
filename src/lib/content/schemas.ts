@@ -65,6 +65,8 @@ export const BLOCKED_WORD_SCOPE_VALUES = [
   "COLLABORATION",
   "MESSAGE",
   "WORKFLOW_ITEM",
+  "USER",
+  "ORGANIZATION",
 ] as const;
 
 export const CreateBlockedWordSchema = z.object({
